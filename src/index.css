@@ -1,1 +1,129 @@
 @import "tailwindcss";
+
+/* 
+  Тема: Тёмная графитовая с мятно-бирюзовым акцентом — 
+  создаёт ощущение спокойной концентрации, подходит для трекера привычек.
+*/
+
+/* Dark theme (default) */
+:root,
+[data-theme="dark"] {
+  --bg-primary: #1a1d23;
+  --card-bg: #22262e;
+  --hover: #2a2f38;
+  --border: #2f3540;
+  --accent: #3dd9b0;
+  --accent-hover: #35c49e;
+  --text-primary: #f0f2f5;
+  --text-secondary: #a0a8b8;
+  --text-muted: #5c6578;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg-primary: #f5f6f8;
+  --card-bg: #ffffff;
+  --hover: #ecedf0;
+  --border: #e0e2e7;
+  --accent: #6366f1;
+  --accent-hover: #5558e6;
+  --text-primary: #1a1d23;
+  --text-secondary: #5c6578;
+  --text-muted: #9ca3b0;
+}
+
+/* Ocean theme */
+[data-theme="ocean"] {
+  --bg-primary: #0f172a;
+  --card-bg: #1e293b;
+  --hover: #273549;
+  --border: #334155;
+  --accent: #f59e0b;
+  --accent-hover: #d97706;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* Input time styling */
+input[type="time"] {
+  color-scheme: dark;
+}
+[data-theme="light"] input[type="time"] {
+  color-scheme: light;
+}
+
+/* Range input */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--hover);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* Number input without spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
