@@ -3,13 +3,17 @@ import { Clock, Sparkles, Music, Timer } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { t, formatDate } from '../utils/i18n';
 
-export function Header() {
+interface HeaderProps {
+  onToolsClick?: (tool: 'lofi' | 'pomodoro') => void;
+}
+
+export function Header({ onToolsClick }: HeaderProps) {
   const { state } = useApp();
   const lang = state.settings.language;
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 60000);
+    const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -20,12 +24,9 @@ export function Header() {
 
   const dateStr = formatDate(time, lang);
 
-  // Check if tools are active
-  const lofiActive = state.toolsState?.lofiPlaying || false;
-  const pomodoroActive = state.toolsState?.pomodoroRunning || false;
+  const lofiPlaying = state.toolsState?.lofiPlaying || false;
+  const pomodoroRunning = state.toolsState?.pomodoroRunning || false;
   const pomodoroTimeLeft = state.toolsState?.pomodoroTimeLeft || 0;
-  const pomodoroIsBreak = state.toolsState?.pomodoroIsBreak || false;
-
   const pomodoroMinutes = Math.floor(pomodoroTimeLeft / 60);
   const pomodoroSeconds = pomodoroTimeLeft % 60;
 
@@ -39,22 +40,32 @@ export function Header() {
           </div>
           <p className="text-xs text-[var(--text-secondary)] capitalize">{dateStr}</p>
         </div>
+        
         <div className="flex items-center gap-2">
-          {/* Tools indicator — integrated in header */}
-          {lofiActive && (
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/30">
-              <Music size={12} className="text-[var(--accent)]" />
-              <span className="text-[10px] font-medium text-[var(--accent)]">Lo-fi</span>
-            </div>
+          {/* Lo-fi indicator */}
+          {lofiPlaying && (
+            <button
+              onClick={() => onToolsClick?.('lofi')}
+              className="flex items-center gap-1.5 bg-[var(--card-bg)] border border-[var(--accent)]/30 rounded-full px-3 py-1.5 hover:bg-[var(--hover)] transition-colors"
+            >
+              <Music size={14} className="text-[var(--accent)]" />
+              <span className="text-sm font-medium text-[var(--text-primary)]">Lo-fi</span>
+            </button>
           )}
-          {pomodoroActive && (
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/30">
-              <Timer size={12} className="text-[var(--accent)]" />
-              <span className="text-[10px] font-medium text-[var(--accent)]">
-                {String(pomodoroMinutes).padStart(2, '0')}:{String(pomodoroSeconds).padStart(2, '0')}
+
+          {/* Pomodoro indicator */}
+          {pomodoroRunning && (
+            <button
+              onClick={() => onToolsClick?.('pomodoro')}
+              className="flex items-center gap-1.5 bg-[var(--card-bg)] border border-[var(--accent)]/30 rounded-full px-3 py-1.5 hover:bg-[var(--hover)] transition-colors"
+            >
+              <Timer size={14} className="text-[var(--accent)]" />
+              <span className="text-sm font-medium text-[var(--text-primary)]">
+                {pomodoroMinutes}:{String(pomodoroSeconds).padStart(2, '0')}
               </span>
-            </div>
+            </button>
           )}
+
           {/* Time badge */}
           <div className="flex items-center gap-1.5 bg-[var(--card-bg)] border border-[var(--border)] rounded-full px-3 py-1.5">
             <Clock size={14} className="text-[var(--text-secondary)]" />

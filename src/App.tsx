@@ -101,9 +101,14 @@ function AppContent() {
     }
   };
 
+  const handleToolsClick = (tool: 'lofi' | 'pomodoro') => {
+    setActiveTab('menu');
+    setMenuSection('tools');
+  };
+
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
-      <Header />
+      <Header onToolsClick={handleToolsClick} />
       <main className="max-w-[420px] mx-auto px-4 pt-20 pb-20">
         {renderContent()}
       </main>
