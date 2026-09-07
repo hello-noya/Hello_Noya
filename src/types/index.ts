@@ -50,7 +50,7 @@ export interface Goal {
 
 export interface AppSettings {
   language: 'ru' | 'en';
-  theme: 'dark' | 'light' | 'ocean';
+  theme: 'pink' | 'lavender' | 'mint';
 }
 
 export interface Stats {
@@ -58,6 +58,15 @@ export interface Stats {
   bestStreak: number;
   tasksToday: number;
   goalsAchieved: number;
+}
+
+export interface ToolsState {
+  lofiPlaying: boolean;
+  pomodoroRunning: boolean;
+  pomodoroTimeLeft: number;
+  pomodoroIsBreak: boolean;
+  pomodoroFocusDuration: number;
+  pomodoroBreakDuration: number;
 }
 
 export interface AppState {
@@ -68,4 +77,5 @@ export interface AppState {
   goals: Goal[];
   settings: AppSettings;
   stats: Stats;
+  toolsState: ToolsState;
 }

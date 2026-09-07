@@ -12,11 +12,14 @@ interface TodayScreenProps {
 }
 
 export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
-  const { state, toggleHabitCompletion, addTask, toggleTaskCompletion, deleteTask } = useApp();
+  const { state, toggleHabitCompletion, addTask, updateTask, toggleTaskCompletion, deleteTask } = useApp();
   const lang = state.settings.language;
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [newTaskText, setNewTaskText] = useState('');
   const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editTaskText, setEditTaskText] = useState('');
+  const [editTaskTime, setEditTaskTime] = useState('');
 
   const today = new Date();
   const selectedISO = selectedDate.toISOString().split('T')[0];
@@ -162,7 +165,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </h3>
         </div>
 
-        <div className="space-y-2">
+          <div className="space-y-2">
           {dayTasks.map((task) => (
             <div key={task.id} className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
               <button
@@ -175,9 +178,16 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               >
                 {task.completed && <Check size={12} />}
               </button>
-              <span className={`flex-1 text-sm ${task.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
+              <button
+                onClick={() => {
+                  setEditingTask(task);
+                  setEditTaskText(task.text);
+                  setEditTaskTime(task.time);
+                }}
+                className={`flex-1 text-left text-sm ${task.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}
+              >
                 {task.text}
-              </span>
+              </button>
               {task.time && <span className="text-xs text-[var(--text-muted)]">{task.time}</span>}
               <button
                 onClick={() => setDeleteTaskId(task.id)}
@@ -187,7 +197,6 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               </button>
             </div>
           ))}
-
           {/* Add task input */}
           <div className="flex items-center gap-2 p-2 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
             <input
@@ -217,6 +226,55 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         }}
         onCancel={() => setDeleteTaskId(null)}
       />
+
+      {/* Edit task modal */}
+      {editingTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setEditingTask(null)} />
+          <div className="relative bg-[var(--card-bg)] rounded-2xl p-5 max-w-sm w-full shadow-xl animate-scale-in">
+            <h3 className="text-base font-semibold text-[var(--text-primary)] mb-4">Редактировать задачу</h3>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">Название</label>
+                <input
+                  type="text"
+                  value={editTaskText}
+                  onChange={(e) => setEditTaskText(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">Время</label>
+                <input
+                  type="time"
+                  value={editTaskTime}
+                  onChange={(e) => setEditTaskTime(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-5">
+              <button
+                onClick={() => setEditingTask(null)}
+                className="flex-1 py-2.5 rounded-xl bg-[var(--hover)] text-[var(--text-secondary)] text-sm font-medium"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={() => {
+                  updateTask({ ...editingTask, text: editTaskText, time: editTaskTime });
+                  setEditingTask(null);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

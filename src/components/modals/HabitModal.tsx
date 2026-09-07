@@ -20,6 +20,7 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('💪');
   const [startTime, setStartTime] = useState('');
+  const [durationEnabled, setDurationEnabled] = useState(true);
   const [durationMode, setDurationMode] = useState<'auto' | 'manual'>('auto');
   const [duration, setDuration] = useState(60);
   const [days, setDays] = useState<DayOfWeek[]>([1, 2, 3, 4, 5]);
@@ -49,10 +50,11 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
 
   const handleSave = () => {
     if (!name.trim()) return;
+    const finalDuration = durationEnabled ? duration : 0;
     if (habit) {
-      updateHabit({ ...habit, name, icon, startTime, durationMode, duration, days });
+      updateHabit({ ...habit, name, icon, startTime, durationMode, duration: finalDuration, days });
     } else {
-      addHabit(createHabit({ name, icon, startTime, durationMode, duration, days }));
+      addHabit(createHabit({ name, icon, startTime, durationMode, duration: finalDuration, days }));
     }
     showToast(t('saved', lang));
     onClose();
@@ -108,35 +110,47 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm text-[var(--text-secondary)]">{t('duration', lang)}</label>
-              <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--hover)]">
-                <button
-                  onClick={() => setDurationMode('auto')}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-                    durationMode === 'auto' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
-                  }`}
-                >
-                  {t('auto', lang)}
-                </button>
-                <button
-                  onClick={() => setDurationMode('manual')}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-                    durationMode === 'manual' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
-                  }`}
-                >
-                  {t('manual', lang)}
-                </button>
-              </div>
+              <button
+                onClick={() => setDurationEnabled(!durationEnabled)}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                  durationEnabled ? 'bg-[var(--accent)] text-white' : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                }`}
+              >
+                {durationEnabled ? 'ВКЛ' : 'ВЫКЛ'}
+              </button>
             </div>
-            {durationMode === 'auto' ? (
-              <p className="text-xs text-[var(--text-muted)]">{t('defaultDuration', lang, { min: 60 })}</p>
-            ) : (
-              <input
-                type="number"
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
-                min={1}
-                className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-              />
+            {durationEnabled && (
+              <>
+                <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--hover)] mb-2">
+                  <button
+                    onClick={() => setDurationMode('auto')}
+                    className={`flex-1 px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                      durationMode === 'auto' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
+                    }`}
+                  >
+                    {t('auto', lang)}
+                  </button>
+                  <button
+                    onClick={() => setDurationMode('manual')}
+                    className={`flex-1 px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                      durationMode === 'manual' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
+                    }`}
+                  >
+                    {t('manual', lang)}
+                  </button>
+                </div>
+                {durationMode === 'auto' ? (
+                  <p className="text-xs text-[var(--text-muted)]">{t('defaultDuration', lang, { min: 60 })}</p>
+                ) : (
+                  <input
+                    type="number"
+                    value={duration}
+                    onChange={(e) => setDuration(Number(e.target.value))}
+                    min={1}
+                    className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                  />
+                )}
+              </>
             )}
           </div>
 

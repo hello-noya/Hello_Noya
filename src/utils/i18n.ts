@@ -5,8 +5,8 @@ type Dict = Record<string, Record<string, string>>;
 const dict: Dict = {
   ru: {
     // Splash
-    appName: 'Ритм',
-    appSlogan: 'Твой путь к порядку',
+    appName: 'Bloom',
+    appSlogan: 'Расцветай каждый день',
     // Onboarding
     welcome: 'Давай знакомиться',
     yourName: 'Как тебя зовут?',
@@ -58,9 +58,10 @@ const dict: Dict = {
     // Settings
     language: 'Язык',
     theme: 'Тема',
-    themeDark: 'Тёмная',
-    themeLight: 'Светлая',
-    themeOcean: 'Океан',
+    themePink: 'Розовый',
+    themeLavender: 'Лавандовый',
+    themeMint: 'Мятный',
+    logoutAccount: 'Выйти из аккаунта',
     logout: 'Выйти',
     logoutConfirm: 'Все данные будут удалены. Продолжить?',
     yes: 'Да',
@@ -117,8 +118,8 @@ const dict: Dict = {
     step: 'шаг',
   },
   en: {
-    appName: 'Rhythm',
-    appSlogan: 'Your path to order',
+    appName: 'Bloom',
+    appSlogan: 'Bloom every day',
     welcome: "Let's get acquainted",
     yourName: "What's your name?",
     namePlaceholder: 'Enter your name',
@@ -162,9 +163,10 @@ const dict: Dict = {
     goalsReached: 'goals reached',
     language: 'Language',
     theme: 'Theme',
-    themeDark: 'Dark',
-    themeLight: 'Light',
-    themeOcean: 'Ocean',
+    themePink: 'Pink',
+    themeLavender: 'Lavender',
+    themeMint: 'Mint',
+    logoutAccount: 'Log out',
     logout: 'Log out',
     logoutConfirm: 'All data will be deleted. Continue?',
     yes: 'Yes',

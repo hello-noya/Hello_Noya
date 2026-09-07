@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, LogOut } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { PROFILE_ICONS } from '../../utils/storage';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 interface ProfileScreenProps {
   onBack: () => void;
 }
 
 export function ProfileScreen({ onBack }: ProfileScreenProps) {
-  const { state, updateProfile, showToast } = useApp();
+  const { state, updateProfile, showToast, resetAll } = useApp();
   const lang = state.settings.language;
   const profile = state.profile;
 
   const [name, setName] = useState(profile?.name || '');
   const [motto, setMotto] = useState(profile?.motto || '');
   const [icon, setIcon] = useState(profile?.icon || '✨');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleSave = () => {
     updateProfile({ name, motto, icon });
@@ -101,6 +103,25 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
           </div>
         </div>
       </div>
+
+      {/* Logout button */}
+      <button
+        onClick={() => setShowLogoutConfirm(true)}
+        className="w-full py-3 rounded-xl bg-red-500/10 text-red-400 font-medium flex items-center justify-center gap-2 transition-all hover:bg-red-500/20"
+      >
+        <LogOut size={18} />
+        {t('logoutAccount', lang)}
+      </button>
+
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        message={t('logoutConfirm', lang)}
+        onConfirm={() => {
+          resetAll();
+          window.location.reload();
+        }}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </div>
   );
 }

@@ -26,8 +26,16 @@ export function getDefaultState(): AppState {
     tasks: [],
     events: [],
     goals: [],
-    settings: { language: 'ru', theme: 'dark' },
+    settings: { language: 'ru', theme: 'pink' },
     stats: { habitsCompleted: 0, bestStreak: 0, tasksToday: 0, goalsAchieved: 0 },
+    toolsState: {
+      lofiPlaying: false,
+      pomodoroRunning: false,
+      pomodoroTimeLeft: 25 * 60,
+      pomodoroIsBreak: false,
+      pomodoroFocusDuration: 25,
+      pomodoroBreakDuration: 5,
+    },
   };
 }
 
@@ -134,6 +142,6 @@ export function calculateStats(state: AppState): Stats {
   return { habitsCompleted, bestStreak, tasksToday, goalsAchieved };
 }
 
-export const PROFILE_ICONS = ['❤️', '⭐', '☁️', '👑', '🎵', '🌸', '🌙', '✨', '💬', '💧', '🔥', '🌿', '🎯', '🦋', '🍀', '💎'];
+export const PROFILE_ICONS = ['🌸', '💮', '🌺', '🌷', '🌹', '🌼', '🌻', '🪷', '💐', '🌿', '🍀', '🌱', '🦋', '🐝', '🐞', '🌈', '⭐', '✨', '💫', '🌟', '💖', '💗', '💓', '💝', '🎀', '🎊', '🎉', '🎈', '☁️', '🌙', '☀️', '🌊'];
 
-export const HABIT_ICONS = ['💪', '📖', '🧘', '🏃', '💧', '🍎', '😴', '📝', '🎨', '🎵', '🧠', '🌅', '🚶', '🧹', '💊', '🙏'];
+export const HABIT_ICONS = ['🌸', '💮', '🌺', '🌷', '🌹', '🌼', '🌻', '🪷', '💐', '🌿', '🍀', '🌱', '🦋', '🐝', '🐞', '🌈', '⭐', '✨', '💫', '🌟', '💖', '💗', '💓', '💝', '🎀', '🎊', '🎉', '🎈', '☁️', '🌙', '☀️', '🌊', '💪', '📖', '🧘', '🏃', '💧', '🍎', '😴', '📝', '🎨', '🎵', '🧠', '🌅', '🚶', '💊', '🙏', '📚'];

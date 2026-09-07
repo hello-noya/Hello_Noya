@@ -14,10 +14,10 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
   const theme = state.settings.theme;
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const themes: { id: 'dark' | 'light' | 'ocean'; label: string }[] = [
-    { id: 'dark', label: t('themeDark', lang) },
-    { id: 'light', label: t('themeLight', lang) },
-    { id: 'ocean', label: t('themeOcean', lang) },
+  const themes: { id: 'pink' | 'lavender' | 'mint'; label: string }[] = [
+    { id: 'pink', label: t('themePink', lang) },
+    { id: 'lavender', label: t('themeLavender', lang) },
+    { id: 'mint', label: t('themeMint', lang) },
   ];
 
   return (

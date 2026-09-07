@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { AppState, Profile, Habit, Task, ScheduleEvent, Goal, AppSettings } from '../types';
+import { AppState, Profile, Habit, Task, ScheduleEvent, Goal, AppSettings, ToolsState } from '../types';
 import { loadState, saveState, clearState, createProfile, calculateStats, getDefaultState } from '../utils/storage';
 
 interface AppContextType {
@@ -24,6 +24,7 @@ interface AppContextType {
   incrementGoal: (id: string) => void;
   decrementGoal: (id: string) => void;
   resetAll: () => void;
+  updateToolsState: (updates: Partial<ToolsState>) => void;
   toast: string | null;
   showToast: (msg: string) => void;
 }
@@ -194,6 +195,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(getDefaultState());
   }, []);
 
+  const updateToolsState = useCallback((updates: Partial<ToolsState>) => {
+    setState(prev => ({
+      ...prev,
+      toolsState: { ...prev.toolsState, ...updates },
+    }));
+  }, []);
+
   return (
     <AppContext.Provider value={{
       state, setProfile, updateProfile, updateSettings,
@@ -201,7 +209,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       addTask, updateTask, deleteTask, toggleTaskCompletion,
       addEvent, updateEvent, deleteEvent,
       addGoal, updateGoal, deleteGoal, incrementGoal, decrementGoal,
-      resetAll, toast, showToast,
+      resetAll, updateToolsState, toast, showToast,
     }}>
       {children}
     </AppContext.Provider>

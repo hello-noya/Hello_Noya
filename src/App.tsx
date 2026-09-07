@@ -100,6 +100,9 @@ function AppContent() {
     }
   };
 
+  // Show floating indicator if lo-fi or pomodoro is active
+  const showToolsIndicator = state.toolsState.lofiPlaying || state.toolsState.pomodoroRunning;
+
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
       <Header />
@@ -107,6 +110,22 @@ function AppContent() {
         {renderContent()}
       </main>
       <TabBar activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setMenuSection(null); }} />
+
+      {/* Floating tools indicator */}
+      {showToolsIndicator && menuSection !== 'tools' && (
+        <button
+          onClick={() => setMenuSection('tools')}
+          className="fixed bottom-20 right-4 z-30 flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--accent)] text-white shadow-lg hover:opacity-90 transition-opacity animate-fade-in"
+        >
+          {state.toolsState.lofiPlaying && <span className="text-xs">🎵</span>}
+          {state.toolsState.pomodoroRunning && <span className="text-xs">⏱️</span>}
+          <span className="text-xs font-medium">
+            {state.toolsState.lofiPlaying && 'Lo-fi'}
+            {state.toolsState.lofiPlaying && state.toolsState.pomodoroRunning && ' · '}
+            {state.toolsState.pomodoroRunning && `${Math.floor(state.toolsState.pomodoroTimeLeft / 60)}:${String(state.toolsState.pomodoroTimeLeft % 60).padStart(2, '0')}`}
+          </span>
+        </button>
+      )}
 
       {/* Modals */}
       <HabitModal

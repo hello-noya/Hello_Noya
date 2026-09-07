@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2 } from 'lucide-react';
+import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2, Power } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 
@@ -27,21 +27,109 @@ export function ToolsScreen({ onBack }: ToolsScreenProps) {
 }
 
 function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
-  const [playing, setPlaying] = useState(false);
+  const { state, updateToolsState } = useApp();
   const [volume, setVolume] = useState(70);
   const [progress, setProgress] = useState(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const oscillatorsRef = useRef<OscillatorNode[]>([]);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const intervalRef = useRef<number | null>(null);
 
+  const isPlaying = state.toolsState.lofiPlaying;
+
+  // Generate relaxing lo-fi sound using Web Audio API
+  const startAudio = () => {
+    if (audioContextRef.current) return;
+    
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioContextRef.current = ctx;
+    
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = volume / 100 * 0.3;
+    masterGain.connect(ctx.destination);
+    gainNodeRef.current = masterGain;
+
+    // Create multiple oscillators for ambient sound
+    const frequencies = [220, 277.18, 329.63, 440]; // A3, C#4, E4, A4
+    frequencies.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const oscGain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      oscGain.gain.value = 0.1 / frequencies.length;
+      
+      // Add slight detune for warmth
+      osc.detune.value = (i - 2) * 5;
+      
+      osc.connect(oscGain);
+      oscGain.connect(masterGain);
+      osc.start();
+      oscillatorsRef.current.push(osc);
+    });
+
+    // Add noise for texture
+    const bufferSize = 2 * ctx.sampleRate;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+    
+    const whiteNoise = ctx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.loop = true;
+    
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.value = 0.02;
+    
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'lowpass';
+    noiseFilter.frequency.value = 400;
+    
+    whiteNoise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+    whiteNoise.start();
+  };
+
+  const stopAudio = () => {
+    oscillatorsRef.current.forEach(osc => {
+      try { osc.stop(); } catch (e) {}
+    });
+    oscillatorsRef.current = [];
+    
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    gainNodeRef.current = null;
+  };
+
   useEffect(() => {
-    if (playing) {
+    if (isPlaying) {
+      startAudio();
       intervalRef.current = window.setInterval(() => {
         setProgress(p => (p + 0.5) % 100);
       }, 200);
     } else {
+      stopAudio();
       if (intervalRef.current) clearInterval(intervalRef.current);
     }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [playing]);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.value = volume / 100 * 0.3;
+    }
+  }, [volume]);
+
+  const togglePlay = () => {
+    updateToolsState({ lofiPlaying: !isPlaying });
+  };
 
   return (
     <div className="p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
@@ -52,17 +140,17 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
 
       <div className="flex items-center gap-4 mb-4">
         <button
-          onClick={() => setPlaying(!playing)}
+          onClick={togglePlay}
           className="w-14 h-14 rounded-full bg-[var(--accent)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
         >
-          {playing ? <Pause size={24} /> : <Play size={24} className="ml-0.5" />}
+          {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-0.5" />}
         </button>
         <div className="flex-1">
           <p className="text-sm font-medium text-[var(--text-primary)]">
-            {playing ? 'Lo-fi Chill Beats' : '—'}
+            {isPlaying ? 'Lo-fi Chill Beats' : '—'}
           </p>
           <p className="text-xs text-[var(--text-muted)]">
-            {t('nowPlaying', lang)}: {playing ? 'Lo-fi Chill Beats' : '—'}
+            {t('nowPlaying', lang)}: {isPlaying ? 'Lo-fi Chill Beats' : '—'}
           </p>
           {/* Progress */}
           <div className="h-1 rounded-full bg-[var(--hover)] mt-2 overflow-hidden">
@@ -89,12 +177,10 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
 }
 
 function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
-  const [focusDuration, setFocusDuration] = useState(25);
-  const [breakDuration, setBreakDuration] = useState(5);
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
-  const [running, setRunning] = useState(false);
-  const [isBreak, setIsBreak] = useState(false);
+  const { state, updateToolsState } = useApp();
   const intervalRef = useRef<number | null>(null);
+
+  const { pomodoroRunning: running, pomodoroTimeLeft: timeLeft, pomodoroIsBreak: isBreak, pomodoroFocusDuration: focusDuration, pomodoroBreakDuration: breakDuration } = state.toolsState;
 
   const totalSeconds = isBreak ? breakDuration * 60 : focusDuration * 60;
   const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100;
@@ -102,31 +188,38 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
   useEffect(() => {
     if (running && timeLeft > 0) {
       intervalRef.current = window.setInterval(() => {
-        setTimeLeft(t => {
-          if (t <= 1) {
-            // Switch phase
-            if (!isBreak) {
-              setIsBreak(true);
-              return breakDuration * 60;
-            } else {
-              setIsBreak(false);
-              setRunning(false);
-              return focusDuration * 60;
-            }
-          }
-          return t - 1;
-        });
+        updateToolsState({ pomodoroTimeLeft: timeLeft - 1 });
       }, 1000);
+    } else if (running && timeLeft === 0) {
+      // Switch phase
+      if (!isBreak) {
+        updateToolsState({ 
+          pomodoroIsBreak: true, 
+          pomodoroTimeLeft: breakDuration * 60 
+        });
+      } else {
+        updateToolsState({ 
+          pomodoroIsBreak: false, 
+          pomodoroRunning: false,
+          pomodoroTimeLeft: focusDuration * 60 
+        });
+      }
     } else {
       if (intervalRef.current) clearInterval(intervalRef.current);
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [running, isBreak, focusDuration, breakDuration]);
+  }, [running, timeLeft, isBreak, focusDuration, breakDuration]);
 
   const handleReset = () => {
-    setRunning(false);
-    setIsBreak(false);
-    setTimeLeft(focusDuration * 60);
+    updateToolsState({ 
+      pomodoroRunning: false, 
+      pomodoroIsBreak: false, 
+      pomodoroTimeLeft: focusDuration * 60 
+    });
+  };
+
+  const toggleRunning = () => {
+    updateToolsState({ pomodoroRunning: !running });
   };
 
   const minutes = Math.floor(timeLeft / 60);
@@ -157,7 +250,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
       {/* Controls */}
       <div className="flex items-center justify-center gap-3 mb-4">
         <button
-          onClick={() => setRunning(!running)}
+          onClick={toggleRunning}
           className="px-6 py-2.5 rounded-xl bg-[var(--accent)] text-white font-medium hover:opacity-90 transition-opacity"
         >
           {running ? t('pause', lang) : t('start2', lang)}
@@ -176,12 +269,20 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
           <span className="text-sm text-[var(--text-secondary)]">{t('focus', lang)}</span>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => { setFocusDuration(d => Math.max(5, d - 5)); if (!running && !isBreak) setTimeLeft(Math.max(5, focusDuration - 5) * 60); }}
+              onClick={() => {
+                const newDuration = Math.max(5, focusDuration - 5);
+                updateToolsState({ pomodoroFocusDuration: newDuration });
+                if (!running && !isBreak) updateToolsState({ pomodoroTimeLeft: newDuration * 60 });
+              }}
               className="w-7 h-7 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)]"
             >−</button>
             <span className="text-sm font-medium text-[var(--text-primary)] w-12 text-center">{focusDuration} {t('minutes', lang)}</span>
             <button
-              onClick={() => { setFocusDuration(d => Math.min(60, d + 5)); if (!running && !isBreak) setTimeLeft(Math.min(60, focusDuration + 5) * 60); }}
+              onClick={() => {
+                const newDuration = Math.min(60, focusDuration + 5);
+                updateToolsState({ pomodoroFocusDuration: newDuration });
+                if (!running && !isBreak) updateToolsState({ pomodoroTimeLeft: newDuration * 60 });
+              }}
               className="w-7 h-7 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)]"
             >+</button>
           </div>
@@ -190,12 +291,20 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
           <span className="text-sm text-[var(--text-secondary)]">{t('break', lang)}</span>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => { setBreakDuration(d => Math.max(1, d - 1)); if (!running && isBreak) setTimeLeft(Math.max(1, breakDuration - 1) * 60); }}
+              onClick={() => {
+                const newDuration = Math.max(1, breakDuration - 1);
+                updateToolsState({ pomodoroBreakDuration: newDuration });
+                if (!running && isBreak) updateToolsState({ pomodoroTimeLeft: newDuration * 60 });
+              }}
               className="w-7 h-7 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)]"
             >−</button>
             <span className="text-sm font-medium text-[var(--text-primary)] w-12 text-center">{breakDuration} {t('minutes', lang)}</span>
             <button
-              onClick={() => { setBreakDuration(d => Math.min(30, d + 1)); if (!running && isBreak) setTimeLeft(Math.min(30, breakDuration + 1) * 60); }}
+              onClick={() => {
+                const newDuration = Math.min(30, breakDuration + 1);
+                updateToolsState({ pomodoroBreakDuration: newDuration });
+                if (!running && isBreak) updateToolsState({ pomodoroTimeLeft: newDuration * 60 });
+              }}
               className="w-7 h-7 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)]"
             >+</button>
           </div>

@@ -1,48 +1,51 @@
 @import "tailwindcss";
 
 /* 
-  Тема: Тёмная графитовая с мятно-бирюзовым акцентом — 
-  создаёт ощущение спокойной концентрации, подходит для трекера привычек.
+  K-pop стиль: три пастельные темы — розовый, лавандовый и мятный.
+  Создают уютную, мечтательную атмосферу в стиле корейской поп-культуры.
 */
 
-/* Dark theme (default) */
+/* Pink theme (default) — нежно-розовый */
 :root,
-[data-theme="dark"] {
-  --bg-primary: #1a1d23;
-  --card-bg: #22262e;
-  --hover: #2a2f38;
-  --border: #2f3540;
-  --accent: #3dd9b0;
-  --accent-hover: #35c49e;
-  --text-primary: #f0f2f5;
-  --text-secondary: #a0a8b8;
-  --text-muted: #5c6578;
-}
-
-/* Light theme */
-[data-theme="light"] {
-  --bg-primary: #f5f6f8;
+[data-theme="pink"] {
+  --bg-primary: #fff5f7;
+  --bg-secondary: #ffeef2;
   --card-bg: #ffffff;
-  --hover: #ecedf0;
-  --border: #e0e2e7;
-  --accent: #6366f1;
-  --accent-hover: #5558e6;
-  --text-primary: #1a1d23;
-  --text-secondary: #5c6578;
-  --text-muted: #9ca3b0;
+  --hover: #ffe4ea;
+  --border: #ffd1d9;
+  --accent: #ff6b9d;
+  --accent-hover: #ff4f8a;
+  --text-primary: #4a2c3d;
+  --text-secondary: #7a5568;
+  --text-muted: #a8899a;
 }
 
-/* Ocean theme */
-[data-theme="ocean"] {
-  --bg-primary: #0f172a;
-  --card-bg: #1e293b;
-  --hover: #273549;
-  --border: #334155;
-  --accent: #f59e0b;
-  --accent-hover: #d97706;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #475569;
+/* Lavender theme — нежно-фиолетовый */
+[data-theme="lavender"] {
+  --bg-primary: #f8f5ff;
+  --bg-secondary: #f0ebff;
+  --card-bg: #ffffff;
+  --hover: #e8e0ff;
+  --border: #d4c8f5;
+  --accent: #a78bfa;
+  --accent-hover: #8b6ff0;
+  --text-primary: #3d2c5e;
+  --text-secondary: #6b5599;
+  --text-muted: #9a8bb5;
+}
+
+/* Mint theme — свежий мятный */
+[data-theme="mint"] {
+  --bg-primary: #f0fdfa;
+  --bg-secondary: #e6fffa;
+  --card-bg: #ffffff;
+  --hover: #ccfbf1;
+  --border: #a7f3d0;
+  --accent: #2dd4bf;
+  --accent-hover: #14b8a6;
+  --text-primary: #134e4a;
+  --text-secondary: #2d7a73;
+  --text-muted: #5fa8a0;
 }
 
 /* Base styles */
@@ -74,9 +77,6 @@ body {
 
 /* Input time styling */
 input[type="time"] {
-  color-scheme: dark;
-}
-[data-theme="light"] input[type="time"] {
   color-scheme: light;
 }
 
@@ -110,6 +110,31 @@ input[type="range"]::-webkit-slider-thumb {
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(15deg); opacity: 0.7; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
@@ -118,9 +143,29 @@ input[type="range"]::-webkit-slider-thumb {
   animation: scale-in 0.2s ease-out;
 }
 
-/* Number input without spinners */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Number input arrows hidden */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
