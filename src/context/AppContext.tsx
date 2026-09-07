@@ -45,7 +45,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setProfile = useCallback((profile: Profile) => {
-    setState(prev => ({ ...prev, profile }));
+    setState(prev => ({ ...prev, profile: profile }));
   }, []);
 
   const updateProfile = useCallback((updates: Partial<Profile>) => {

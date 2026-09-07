@@ -6,7 +6,21 @@ const STORAGE_KEY = 'rhythm_app_data';
 export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Ensure toolsState exists for backward compatibility
+      if (!parsed.toolsState) {
+        parsed.toolsState = {
+          lofiPlaying: false,
+          pomodoroRunning: false,
+          pomodoroTimeLeft: 25 * 60,
+          pomodoroIsBreak: false,
+          pomodoroFocusDuration: 25,
+          pomodoroBreakDuration: 5,
+        };
+      }
+      return parsed;
+    }
   } catch { /* ignore */ }
   return getDefaultState();
 }

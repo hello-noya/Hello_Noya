@@ -19,13 +19,13 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const handleSocialLogin = (provider: string) => {
     const profile = createProfile('Пользователь', '', '🌸');
     setProfile(profile);
-    onComplete();
+    setTimeout(() => onComplete(), 100);
   };
 
   const handleGuestLogin = () => {
     const profile = createProfile('Гость', '', '✨');
     setProfile(profile);
-    onComplete();
+    setTimeout(() => onComplete(), 100);
   };
 
   const handleStartRegistration = () => {
@@ -41,7 +41,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const handleStart = () => {
     const profile = createProfile(name || 'Гость', motto, selectedIcon);
     setProfile(profile);
-    onComplete();
+    setTimeout(() => onComplete(), 100);
   };
 
   return (
