@@ -6,6 +6,7 @@ import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Habit, DayOfWeek } from '../../types';
 import { createHabit, HABIT_ICONS } from '../../utils/storage';
+import { HabitIcons, renderIcon } from '../../utils/icons';
 
 interface HabitModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
   const lang = state.settings.language;
 
   const [name, setName] = useState('');
-  const [icon, setIcon] = useState('💪');
+  const [icon, setIcon] = useState('water');
   const [startTime, setStartTime] = useState('');
   const [durationEnabled, setDurationEnabled] = useState(true);
   const [durationMode, setDurationMode] = useState<'auto' | 'manual'>('auto');
@@ -36,7 +37,7 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
       setDays(habit.days);
     } else {
       setName('');
-      setIcon('💪');
+      setIcon('water');
       setStartTime('');
       setDurationMode('auto');
       setDuration(60);
@@ -177,18 +178,19 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
           {/* Icon */}
           <div>
             <label className="text-sm text-[var(--text-secondary)] mb-2 block">{t('icon', lang)}</label>
-            <div className="grid grid-cols-8 gap-2">
-              {HABIT_ICONS.map((ic) => (
+            <div className="grid grid-cols-6 gap-2">
+              {HABIT_ICONS.map((iconKey) => (
                 <button
-                  key={ic}
-                  onClick={() => setIcon(ic)}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-lg transition-all ${
-                    icon === ic
+                  key={iconKey}
+                  onClick={() => setIcon(iconKey)}
+                  className={`aspect-square rounded-xl flex items-center justify-center transition-all ${
+                    icon === iconKey
                       ? 'bg-[var(--accent)]/20 border-2 border-[var(--accent)]'
-                      : 'bg-[var(--hover)] hover:bg-[var(--accent)]/10'
+                      : 'bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)]/50'
                   }`}
+                  title={t(`icon_${iconKey}`, lang)}
                 >
-                  {ic}
+                  {renderIcon(iconKey, 20, icon === iconKey ? 'var(--accent)' : 'var(--text-secondary)')}
                 </button>
               ))}
             </div>

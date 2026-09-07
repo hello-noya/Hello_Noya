@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { PROFILE_ICONS } from '../../utils/storage';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { renderIcon } from '../../utils/icons';
 
 interface ProfileScreenProps {
   onBack: () => void;
@@ -16,7 +17,7 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
 
   const [name, setName] = useState(profile?.name || '');
   const [motto, setMotto] = useState(profile?.motto || '');
-  const [icon, setIcon] = useState(profile?.icon || '✨');
+  const [icon, setIcon] = useState(profile?.icon || 'star');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleSave = () => {
@@ -56,18 +57,19 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
 
         <div>
           <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('iconLabel', lang)}</label>
-          <div className="grid grid-cols-4 gap-2">
-            {PROFILE_ICONS.map((ic) => (
+          <div className="grid grid-cols-6 gap-2">
+            {PROFILE_ICONS.map((iconKey) => (
               <button
-                key={ic}
-                onClick={() => setIcon(ic)}
-                className={`aspect-square rounded-xl flex items-center justify-center text-xl transition-all ${
-                  icon === ic
+                key={iconKey}
+                onClick={() => setIcon(iconKey)}
+                className={`aspect-square rounded-xl flex items-center justify-center transition-all ${
+                  icon === iconKey
                     ? 'bg-[var(--accent)]/20 border-2 border-[var(--accent)]'
                     : 'bg-[var(--card-bg)] border border-[var(--border)] hover:border-[var(--accent)]/50'
                 }`}
+                title={t(`icon_${iconKey}`, lang)}
               >
-                {ic}
+                {renderIcon(iconKey, 20, icon === iconKey ? 'var(--accent)' : 'var(--text-secondary)')}
               </button>
             ))}
           </div>

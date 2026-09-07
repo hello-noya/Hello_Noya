@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { createProfile } from '../../utils/storage';
 import { PROFILE_ICONS } from '../../utils/storage';
 import { t } from '../../utils/i18n';
+import { renderIcon } from '../../utils/icons';
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -14,16 +15,16 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const [step, setStep] = useState(0); // 0 = welcome, 1 = name, 2 = icon
   const [name, setName] = useState('');
   const [motto, setMotto] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState('🌸');
+  const [selectedIcon, setSelectedIcon] = useState('star');
 
   const handleSocialLogin = (provider: string) => {
-    const profile = createProfile('Пользователь', '', '🌸');
+    const profile = createProfile('Пользователь', '', 'star');
     setProfile(profile);
     setTimeout(() => onComplete(), 100);
   };
 
   const handleGuestLogin = () => {
-    const profile = createProfile('Гость', '', '✨');
+    const profile = createProfile('Гость', '', 'sparkles');
     setProfile(profile);
     setTimeout(() => onComplete(), 100);
   };
@@ -167,18 +168,19 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
             <h2 className="text-xl font-bold text-[var(--text-primary)] text-center mb-6">{t('chooseIcon', 'ru')}</h2>
             
-            <div className="grid grid-cols-5 gap-2.5 mb-8 max-h-[300px] overflow-y-auto p-1">
-              {PROFILE_ICONS.map((icon) => (
+            <div className="grid grid-cols-6 gap-2 mb-8">
+              {PROFILE_ICONS.map((iconKey) => (
                 <button
-                  key={icon}
-                  onClick={() => setSelectedIcon(icon)}
-                  className={`w-full aspect-square rounded-xl flex items-center justify-center text-xl transition-all ${
-                    selectedIcon === icon
+                  key={iconKey}
+                  onClick={() => setSelectedIcon(iconKey)}
+                  className={`w-full aspect-square rounded-xl flex items-center justify-center transition-all ${
+                    selectedIcon === iconKey
                       ? 'bg-[var(--accent)]/20 border-2 border-[var(--accent)] scale-105'
                       : 'bg-[var(--card-bg)] border border-[var(--border)] hover:border-[var(--accent)]/50'
                   }`}
+                  title={t(`icon_${iconKey}`, 'ru')}
                 >
-                  {icon}
+                  {renderIcon(iconKey, 20, selectedIcon === iconKey ? 'var(--accent)' : 'var(--text-secondary)')}
                 </button>
               ))}
             </div>

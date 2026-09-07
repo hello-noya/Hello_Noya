@@ -60,7 +60,7 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-[var(--text-primary)]">{t('scheduleTitle', lang)}</h2>
+        <h2 className="text-base font-semibold text-[var(--text-primary)]">{t('schedule', lang)}</h2>
         <button
           onClick={onAddEvent}
           className="text-xs font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"

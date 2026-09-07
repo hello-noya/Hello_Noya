@@ -156,6 +156,7 @@ export function calculateStats(state: AppState): Stats {
   return { habitsCompleted, bestStreak, tasksToday, goalsAchieved };
 }
 
-export const PROFILE_ICONS = ['🌸', '💮', '🌺', '🌷', '🌹', '🌼', '🌻', '🪷', '💐', '🌿', '🍀', '🌱', '🦋', '🐝', '🐞', '🌈', '⭐', '✨', '💫', '🌟', '💖', '💗', '💓', '💝', '🎀', '🎊', '🎉', '🎈', '☁️', '🌙', '☀️', '🌊'];
+// SVG-иконки вместо эмодзи
+export const PROFILE_ICONS = ['star', 'crown', 'flame', 'diamond', 'rocket', 'heart', 'leaf', 'zap', 'sun', 'moon', 'trophy', 'sparkles'];
 
-export const HABIT_ICONS = ['🌸', '💮', '🌺', '🌷', '🌹', '🌼', '🌻', '🪷', '💐', '🌿', '🍀', '🌱', '🦋', '🐝', '🐞', '🌈', '⭐', '✨', '💫', '🌟', '💖', '💗', '💓', '💝', '🎀', '🎊', '🎉', '🎈', '☁️', '🌙', '☀️', '🌊', '💪', '📖', '🧘', '🏃', '💧', '🍎', '😴', '📝', '🎨', '🎵', '🧠', '🌅', '🚶', '💊', '🙏', '📚'];
+export const HABIT_ICONS = ['water', 'book', 'run', 'yoga', 'sleep', 'apple', 'pencil', 'brain', 'music', 'gym', 'walk', 'meditate', 'target', 'clock', 'coffee', 'laptop', 'pill', 'stretch'];

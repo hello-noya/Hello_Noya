@@ -116,7 +116,7 @@ function AppContent() {
       {showToolsIndicator && menuSection !== 'tools' && (
         <button
           onClick={() => setMenuSection('tools')}
-          className="fixed bottom-20 right-4 z-30 flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--accent)] text-white shadow-lg hover:opacity-90 transition-opacity animate-fade-in"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--accent)] text-white shadow-lg hover:opacity-90 transition-opacity animate-fade-in"
         >
           {state.toolsState?.lofiPlaying && <span className="text-xs">🎵</span>}
           {state.toolsState?.pomodoroRunning && <span className="text-xs">⏱️</span>}

@@ -5,6 +5,7 @@ import { t } from '../../utils/i18n';
 import { getDayOfWeek } from '../../utils/storage';
 import { Habit, Task, DayOfWeek } from '../../types';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { renderIcon } from '../../utils/icons';
 
 interface TodayScreenProps {
   onEditHabit: (habit: Habit) => void;
@@ -126,8 +127,8 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                   onClick={() => onEditHabit(habit)}
                   className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)]/30 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-lg">
-                    {habit.icon}
+                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+                    {renderIcon(habit.icon, 20, 'var(--accent)')}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>

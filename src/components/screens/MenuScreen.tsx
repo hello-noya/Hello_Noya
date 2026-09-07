@@ -2,6 +2,7 @@ import React from 'react';
 import { User, ListChecks, Settings, Wrench, ChevronRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
+import { renderIcon } from '../../utils/icons';
 
 type MenuSection = 'profile' | 'manage' | 'settings' | 'tools';
 
@@ -25,8 +26,8 @@ export function MenuScreen({ onNavigate }: MenuScreenProps) {
       {/* Profile card */}
       {state.profile && (
         <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] mb-4 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 flex items-center justify-center text-2xl">
-            {state.profile.icon}
+          <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+            {renderIcon(state.profile.icon, 24, 'var(--accent)')}
           </div>
           <div>
             <p className="font-semibold text-[var(--text-primary)]">{state.profile.name}</p>
