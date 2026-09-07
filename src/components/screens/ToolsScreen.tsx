@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
+import { lofiAudio } from '../../utils/lofiAudio';
 
 interface ToolsScreenProps {
   onBack: () => void;
@@ -28,169 +29,19 @@ export function ToolsScreen({ onBack }: ToolsScreenProps) {
 
 function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
   const { state, updateToolsState } = useApp();
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const nodesRef = useRef<{ gains: GainNode[]; oscillators: OscillatorNode[]; noise?: AudioBufferSourceNode; noiseGain?: GainNode; filter?: BiquadFilterNode }>({ gains: [], oscillators: [] });
-  const intervalRef = useRef<number | null>(null);
   const [progress, setProgress] = React.useState(0);
 
   const isPlaying = state.toolsState?.lofiPlaying || false;
-  const volume = 70;
 
-  // Lo-fi music generator — мягкие аккорды + лёгкий шум
-  const startAudio = useCallback(() => {
-    if (audioCtxRef.current) return;
-
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx = new AudioCtx();
-    audioCtxRef.current = ctx;
-
-    const masterGain = ctx.createGain();
-    masterGain.gain.value = (volume / 100) * 0.3;
-    masterGain.connect(ctx.destination);
-
-    // Мягкие аккорды для учёбы — Cmaj7, Fmaj7, Am7, G7
-    const chords = [
-      [261.63, 329.63, 392.00, 493.88], // Cmaj7
-      [349.23, 440.00, 523.25, 659.25], // Fmaj7
-      [220.00, 261.63, 329.63, 392.00], // Am7
-      [196.00, 246.94, 293.66, 349.23], // G7
-    ];
-
-    const gains: GainNode[] = [];
-    const oscillators: OscillatorNode[] = [];
-
-    chords.forEach((chord, chordIdx) => {
-      chord.forEach((freq) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-
-        // Мягкое вибрато
-        const lfo = ctx.createOscillator();
-        const lfoGain = ctx.createGain();
-        lfo.frequency.value = 0.3 + Math.random() * 0.2;
-        lfoGain.gain.value = 1.5;
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc.frequency);
-        lfo.start();
-
-        // Огибающая — плавное появление/затухание
-        gain.gain.value = 0;
-        const startTime = ctx.currentTime + chordIdx * 4;
-        gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(0.08, startTime + 1);
-        gain.gain.linearRampToValueAtTime(0.08, startTime + 3);
-        gain.gain.linearRampToValueAtTime(0, startTime + 4);
-
-        osc.connect(gain);
-        gain.connect(masterGain);
-        osc.start(startTime);
-
-        oscillators.push(osc);
-        gains.push(gain);
-      });
-    });
-
-    // Лёгкий шум для атмосферы (vinyl crackle)
-    const bufferSize = ctx.sampleRate * 2;
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * 0.02;
-    }
-
-    const noise = ctx.createBufferSource();
-    noise.buffer = noiseBuffer;
-    noise.loop = true;
-
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.value = 800;
-
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.value = 0.15;
-
-    noise.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(masterGain);
-    noise.start();
-
-    nodesRef.current = { gains, oscillators, noise, noiseGain, filter: noiseFilter };
-
-    // Циклическое повторение аккордов каждые 16 секунд
-    const scheduleChords = () => {
-      if (!audioCtxRef.current) return;
-      const ctx = audioCtxRef.current;
-      const now = ctx.currentTime;
-
-      chords.forEach((chord, chordIdx) => {
-        chord.forEach((freq) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.value = freq;
-
-          const lfo = ctx.createOscillator();
-          const lfoGain = ctx.createGain();
-          lfo.frequency.value = 0.3 + Math.random() * 0.2;
-          lfoGain.gain.value = 1.5;
-          lfo.connect(lfoGain);
-          lfoGain.connect(osc.frequency);
-          lfo.start();
-
-          const startTime = now + chordIdx * 4;
-          gain.gain.setValueAtTime(0, startTime);
-          gain.gain.linearRampToValueAtTime(0.08, startTime + 1);
-          gain.gain.linearRampToValueAtTime(0.08, startTime + 3);
-          gain.gain.linearRampToValueAtTime(0, startTime + 4);
-
-          osc.connect(gain);
-          gain.connect(masterGain);
-          osc.start(startTime);
-          osc.stop(startTime + 4);
-        });
-      });
-    };
-
-    intervalRef.current = window.setInterval(scheduleChords, 16000);
-  }, [volume]);
-
-  const stopAudio = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    nodesRef.current.oscillators.forEach(osc => {
-      try { osc.stop(); } catch {}
-    });
-    if (nodesRef.current.noise) {
-      try { nodesRef.current.noise.stop(); } catch {}
-    }
-    if (audioCtxRef.current) {
-      audioCtxRef.current.close();
-      audioCtxRef.current = null;
-    }
-    nodesRef.current = { gains: [], oscillators: [] };
-  }, []);
-
+  // Управление аудио через глобальный модуль
   useEffect(() => {
     if (isPlaying) {
-      startAudio();
+      lofiAudio.start((p) => setProgress(p));
     } else {
-      stopAudio();
+      lofiAudio.stop();
+      setProgress(0);
     }
-    return () => stopAudio();
-  }, [isPlaying]);
-
-  // Progress animation
-  useEffect(() => {
-    if (isPlaying) {
-      const interval = setInterval(() => {
-        setProgress(p => (p + 0.5) % 100);
-      }, 200);
-      return () => clearInterval(interval);
-    }
+    // НЕ останавливаем при unmount — музыка играет глобально
   }, [isPlaying]);
 
   const togglePlay = () => {
@@ -227,9 +78,9 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
       <div className="flex items-center gap-2">
         <Volume2 size={14} className="text-[var(--text-muted)]" />
         <div className="flex-1 h-1.5 rounded-full bg-[var(--hover)] relative">
-          <div className="h-full bg-[var(--accent)] rounded-full" style={{ width: `${volume}%` }} />
+          <div className="h-full bg-[var(--accent)] rounded-full" style={{ width: '70%' }} />
         </div>
-        <span className="text-xs text-[var(--text-muted)] w-8 text-right">{volume}%</span>
+        <span className="text-xs text-[var(--text-muted)] w-8 text-right">70%</span>
       </div>
     </div>
   );
@@ -251,7 +102,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
   const totalSeconds = isBreak ? breakDuration * 60 : focusDuration * 60;
   const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100;
 
-  // Timer logic — исправленный
+  // Timer logic
   useEffect(() => {
     if (running && timeLeft > 0) {
       intervalRef.current = window.setInterval(() => {
@@ -292,7 +143,6 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
 
   const handleToggle = () => {
     if (!running && timeLeft === 0) {
-      // Если время вышло — сброс
       const newTime = isBreak ? breakDuration * 60 : focusDuration * 60;
       setTimeLeft(newTime);
       updateToolsState({ pomodoroTimeLeft: newTime, pomodoroRunning: true });

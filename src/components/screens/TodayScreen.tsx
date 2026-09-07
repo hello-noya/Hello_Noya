@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, Target, ListTodo } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { getDayOfWeek } from '../../utils/storage';
@@ -104,14 +104,16 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
       {/* Habits section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-[var(--text-primary)]">
+          <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
+            <Target size={18} className="text-[var(--accent)]" />
             {t('habits', lang)} <span className="text-[var(--text-muted)] font-normal">({completedHabits.length}/{dayHabits.length})</span>
           </h3>
           <button
             onClick={onAddHabit}
-            className="text-xs font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
           >
-            {t('addHabit', lang)}
+            <Plus size={14} />
+            <span>{t('addHabit', lang).replace('+ ', '')}</span>
           </button>
         </div>
 
@@ -161,7 +163,8 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
       {/* Tasks section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-[var(--text-primary)]">
+          <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
+            <ListTodo size={18} className="text-[var(--accent)]" />
             {t('tasks', lang)} <span className="text-[var(--text-muted)] font-normal">({completedTasks.length}/{dayTasks.length})</span>
           </h3>
         </div>
@@ -192,9 +195,9 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               {task.time && <span className="text-xs text-[var(--text-muted)]">{task.time}</span>}
               <button
                 onClick={() => setDeleteTaskId(task.id)}
-                className="text-[var(--text-muted)] hover:text-red-400 transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors"
               >
-                <span className="text-lg">×</span>
+                <span className="text-xl">×</span>
               </button>
             </div>
           ))}
