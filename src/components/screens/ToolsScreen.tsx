@@ -31,14 +31,24 @@ export function ToolsScreen({ onBack }: ToolsScreenProps) {
 function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
   const { state, updateToolsState } = useApp();
   const [volume, setVolume] = useState(focusSounds.getVolume() * 100);
+  const [trackName, setTrackName] = useState('');
 
   const isPlaying = state.toolsState?.lofiPlaying || false;
 
   useEffect(() => {
     if (isPlaying) {
       focusSounds.play();
+      setTrackName(focusSounds.getCurrentTrackName());
+      
+      // Обновляем название трека каждые 10 секунд
+      const interval = setInterval(() => {
+        setTrackName(focusSounds.getCurrentTrackName());
+      }, 10000);
+      
+      return () => clearInterval(interval);
     } else {
       focusSounds.pause();
+      setTrackName('');
     }
   }, [isPlaying]);
 
@@ -68,10 +78,10 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
         </button>
         <div className="flex-1">
           <p className="text-base font-semibold text-[var(--text-primary)]">
-            {isPlaying ? '✨ Seoul Nights' : (lang === 'ru' ? 'Lo-fi Music' : 'Lo-fi Music')}
+            {isPlaying ? `✨ ${trackName}` : (lang === 'ru' ? 'Lo-fi Music' : 'Lo-fi Music')}
           </p>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            {isPlaying ? (lang === 'ru' ? 'Расслабляющие биты для учёбы' : 'Relaxing beats for studying') : (lang === 'ru' ? 'Нажми чтобы включить' : 'Tap to play')}
+            {isPlaying ? (lang === 'ru' ? 'Расслабляющая мелодия для учёбы' : 'Relaxing melody for studying') : (lang === 'ru' ? 'Нажми чтобы включить' : 'Tap to play')}
           </p>
         </div>
       </div>

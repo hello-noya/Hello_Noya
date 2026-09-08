@@ -1,4 +1,69 @@
-// Lo-fi звуки для фокуса
+// Lo-fi мелодии для фокуса - несколько треков с разными аккордами и мелодиями
+
+interface Track {
+  name: string;
+  chords: number[][];
+  melody: number[];
+  tempo: number;
+}
+
+const TRACKS: Track[] = [
+  {
+    name: 'Seoul Nights',
+    chords: [
+      [261.63, 329.63, 392.00], // C
+      [293.66, 349.23, 440.00], // Dm
+      [349.23, 440.00, 523.25], // F
+      [392.00, 493.88, 587.33], // G
+    ],
+    melody: [523.25, 587.33, 659.25, 587.33, 523.25, 493.88, 440.00, 493.88],
+    tempo: 70,
+  },
+  {
+    name: 'Cherry Blossom',
+    chords: [
+      [220.00, 261.63, 329.63], // Am
+      [174.61, 220.00, 261.63], // Em
+      [261.63, 329.63, 392.00], // C
+      [196.00, 246.94, 293.66], // G
+    ],
+    melody: [659.25, 698.46, 783.99, 698.46, 659.25, 587.33, 523.25, 587.33],
+    tempo: 65,
+  },
+  {
+    name: 'Midnight Study',
+    chords: [
+      [293.66, 349.23, 440.00], // Dm
+      [261.63, 329.63, 392.00], // C
+      [349.23, 440.00, 523.25], // F
+      [392.00, 493.88, 587.33], // G
+    ],
+    melody: [587.33, 659.25, 698.46, 783.99, 698.46, 659.25, 587.33, 523.25],
+    tempo: 75,
+  },
+  {
+    name: 'Rainy Day',
+    chords: [
+      [349.23, 440.00, 523.25], // F
+      [293.66, 349.23, 440.00], // Dm
+      [261.63, 329.63, 392.00], // C
+      [196.00, 246.94, 293.66], // G
+    ],
+    melody: [523.25, 587.33, 659.25, 698.46, 659.25, 587.33, 523.25, 493.88],
+    tempo: 60,
+  },
+  {
+    name: 'Morning Coffee',
+    chords: [
+      [261.63, 329.63, 392.00], // C
+      [349.23, 440.00, 523.25], // F
+      [293.66, 349.23, 440.00], // Dm
+      [392.00, 493.88, 587.33], // G
+    ],
+    melody: [493.88, 523.25, 587.33, 659.25, 587.33, 523.25, 493.88, 440.00],
+    tempo: 80,
+  },
+];
 
 class FocusSoundsManager {
   private audioCtx: AudioContext | null = null;
@@ -8,6 +73,7 @@ class FocusSoundsManager {
   private oscillators: OscillatorNode[] = [];
   private gains: GainNode[] = [];
   private scheduleTimeout: number | null = null;
+  private currentTrackIndex: number = 0;
 
   private initAudioContext(): void {
     if (this.audioCtx) return;
@@ -33,71 +99,71 @@ class FocusSoundsManager {
     }
   }
 
-  private playLofi(): void {
+  private playTrack(track: Track): void {
     if (!this.audioCtx || !this.masterGain) return;
 
-    // Корейские lo-fi аккорды - более сложные и атмосферные
-    const chordProgressions = [
-      // Прогрессия 1: I - V - vi - IV (популярная в K-pop)
-      [
-        [261.63, 329.63, 392.00, 493.88], // Cmaj7
-        [392.00, 493.88, 587.33, 739.99], // Gmaj7
-        [440.00, 523.25, 659.25, 783.99], // Am7
-        [349.23, 440.00, 523.25, 659.25], // Fmaj7
-      ],
-      // Прогрессия 2: vi - IV - I - V (эмоциональная)
-      [
-        [440.00, 523.25, 659.25, 783.99], // Am7
-        [349.23, 440.00, 523.25, 659.25], // Fmaj7
-        [261.63, 329.63, 392.00, 493.88], // Cmaj7
-        [392.00, 493.88, 587.33, 739.99], // Gmaj7
-      ],
-    ];
+    const ctx = this.audioCtx;
+    const now = ctx.currentTime;
+    const beatDuration = 60 / track.tempo;
 
-    const playChordSequence = () => {
-      if (!this.isPlaying || !this.audioCtx || !this.masterGain) return;
+    // Воспроизводим аккорды
+    track.chords.forEach((chord, chordIdx) => {
+      const startTime = now + chordIdx * beatDuration * 4;
 
-      const ctx = this.audioCtx;
-      const now = ctx.currentTime;
-      
-      // Выбираем случайную прогрессию
-      const progression = chordProgressions[Math.floor(Math.random() * chordProgressions.length)];
+      chord.forEach((freq, noteIdx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = noteIdx === 0 ? 'sine' : 'triangle';
+        osc.frequency.value = freq;
 
-      progression.forEach((chord, chordIdx) => {
-        const startTime = now + chordIdx * 4;
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.03, startTime + 0.5);
+        gain.gain.setValueAtTime(0.03, startTime + beatDuration * 3.5);
+        gain.gain.linearRampToValueAtTime(0, startTime + beatDuration * 4);
 
-        chord.forEach((freq, noteIdx) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          
-          // Используем треугольную волну для более мягкого звука
-          osc.type = noteIdx === 0 ? 'sine' : 'triangle';
-          osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(this.masterGain!);
+        osc.start(startTime);
+        osc.stop(startTime + beatDuration * 4);
 
-          // Более плавная огибающая
-          gain.gain.setValueAtTime(0, startTime);
-          gain.gain.linearRampToValueAtTime(0.04, startTime + 1);
-          gain.gain.setValueAtTime(0.04, startTime + 3);
-          gain.gain.linearRampToValueAtTime(0, startTime + 4);
-
-          osc.connect(gain);
-          gain.connect(this.masterGain!);
-          osc.start(startTime);
-          osc.stop(startTime + 4);
-
-          this.oscillators.push(osc);
-          this.gains.push(gain);
-        });
+        this.oscillators.push(osc);
+        this.gains.push(gain);
       });
+    });
 
-      this.scheduleTimeout = window.setTimeout(() => {
-        if (this.isPlaying) {
-          playChordSequence();
-        }
-      }, 16000);
-    };
+    // Воспроизводим мелодию
+    track.melody.forEach((freq, noteIdx) => {
+      const startTime = now + noteIdx * beatDuration;
 
-    playChordSequence();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.05, startTime + 0.1);
+      gain.gain.setValueAtTime(0.05, startTime + beatDuration * 0.8);
+      gain.gain.linearRampToValueAtTime(0, startTime + beatDuration);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain!);
+      osc.start(startTime);
+      osc.stop(startTime + beatDuration);
+
+      this.oscillators.push(osc);
+      this.gains.push(gain);
+    });
+
+    // Планируем следующий трек
+    const trackDuration = track.chords.length * beatDuration * 4 * 1000;
+    this.scheduleTimeout = window.setTimeout(() => {
+      if (this.isPlaying) {
+        this.currentTrackIndex = (this.currentTrackIndex + 1) % TRACKS.length;
+        this.playTrack(TRACKS[this.currentTrackIndex]);
+      }
+    }, trackDuration);
   }
 
   public play(): void {
@@ -109,7 +175,8 @@ class FocusSoundsManager {
 
     this.stopAllSounds();
     this.isPlaying = true;
-    this.playLofi();
+    this.currentTrackIndex = Math.floor(Math.random() * TRACKS.length);
+    this.playTrack(TRACKS[this.currentTrackIndex]);
   }
 
   public pause(): void {
@@ -126,6 +193,10 @@ class FocusSoundsManager {
 
   public getVolume(): number {
     return this.volume;
+  }
+
+  public getCurrentTrackName(): string {
+    return TRACKS[this.currentTrackIndex].name;
   }
 
   public isCurrentlyPlaying(): boolean {

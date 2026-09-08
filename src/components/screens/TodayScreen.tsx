@@ -23,6 +23,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const [editTaskTime, setEditTaskTime] = useState('');
   const [editTaskNote, setEditTaskNote] = useState('');
   const [showCompletedHabits, setShowCompletedHabits] = useState(false);
+  const [showCompletedTasks, setShowCompletedTasks] = useState(false);
 
   const today = new Date();
   const selectedISO = selectedDate.toISOString().split('T')[0];
@@ -68,9 +69,9 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const activeHabits = allDayHabits.filter(h => !h.completedDates.includes(selectedISO));
   const completedHabits = allDayHabits.filter(h => h.completedDates.includes(selectedISO));
   
-  // Get tasks for selected day (show all, including completed)
+  // Get tasks for selected day (separate active and completed)
   const allDayTasks = state.tasks.filter(t => t.date === selectedISO);
-  const dayTasks = allDayTasks; // Show all tasks (completed and uncompleted)
+  const activeTasks = allDayTasks.filter(t => !t.completed);
   const completedTasks = allDayTasks.filter(t => t.completed);
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
@@ -319,7 +320,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </h3>
         </div>
 
-          {dayTasks.length === 0 && allDayTasks.length === 0 && (
+          {activeTasks.length === 0 && completedTasks.length === 0 && (
             <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center mb-2">
               <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
                 <ListTodo size={20} className="text-[var(--accent)]" />
@@ -332,7 +333,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               </p>
             </div>
           )}
-          {dayTasks.length === 0 && allDayTasks.length > 0 && (
+          {activeTasks.length === 0 && completedTasks.length > 0 && (
             <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center mb-2">
               <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/10 flex items-center justify-center">
                 <Check size={20} className="text-green-500" />
@@ -346,7 +347,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             </div>
           )}
           <div className="space-y-2">
-          {dayTasks.map((task) => (
+          {activeTasks.map((task) => (
             <div 
               key={task.id} 
               className={`flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
@@ -407,6 +408,84 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               </button>
             </div>
           ))}
+          
+          {/* Completed tasks section */}
+          {completedTasks.length > 0 && (
+            <div className="mt-3">
+              <button
+                onClick={() => setShowCompletedTasks(!showCompletedTasks)}
+                className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <Check size={18} className="text-[var(--accent)]" />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">
+                    {lang === 'ru' ? 'Завершенные' : 'Completed'}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)]">
+                    ({completedTasks.length})
+                  </span>
+                </div>
+                <ChevronDown 
+                  size={18} 
+                  className={`text-[var(--text-muted)] transition-transform ${showCompletedTasks ? 'rotate-180' : ''}`}
+                />
+              </button>
+              
+              {showCompletedTasks && (
+                <div className="space-y-2 mt-2">
+                  {completedTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="flex items-start gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 cursor-pointer transition-all hover:border-[var(--accent)]/50"
+                      onClick={() => {
+                        setEditingTask(task);
+                        setEditTaskText(task.text);
+                        setEditTaskTime(task.time);
+                        setEditTaskNote(task.note || '');
+                      }}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleTaskCompletion(task.id);
+                        }}
+                        className="w-7 h-7 rounded-full bg-[var(--accent)] text-white flex items-center justify-center flex-shrink-0"
+                      >
+                        <Check size={12} />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium line-through text-[var(--text-muted)]">
+                          {task.text}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          {task.time && (
+                            <span className="text-xs text-[var(--text-muted)]">
+                              {task.time}
+                            </span>
+                          )}
+                          {task.note && (
+                            <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
+                              · {task.note}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTaskId(task.id);
+                        }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors flex-shrink-0"
+                      >
+                        <span className="text-xl">×</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          
           {/* Add task input */}
           <div className="flex items-center gap-2 p-2 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
             <input
