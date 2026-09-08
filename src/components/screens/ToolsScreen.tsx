@@ -166,9 +166,6 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
         <p className="text-6xl font-bold text-[var(--text-primary)] font-mono tracking-wider">
           {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
         </p>
-        <p className="text-sm text-[var(--text-muted)] mt-2">
-          {timerState.isBreak ? t('break', lang) : t('focus', lang)}
-        </p>
       </div>
 
       {/* Controls */}

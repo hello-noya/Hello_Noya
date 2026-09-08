@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { Plus, Check, Target, ListTodo, Sparkles } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Plus, Check, Target, ListTodo, Sparkles, ChevronDown } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { getDayOfWeek } from '../../utils/storage';
 import { Habit, Task, DayOfWeek } from '../../types';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { renderIcon } from '../../utils/icons';
+import { TestHabitsCleanup } from './TestHabitsCleanup';
 
 interface TodayScreenProps {
   onEditHabit: (habit: Habit) => void;
@@ -13,7 +14,7 @@ interface TodayScreenProps {
 }
 
 export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
-  const { state, toggleHabitCompletion, addTask, updateTask, toggleTaskCompletion, deleteTask } = useApp();
+  const { state, toggleHabitCompletion, addTask, updateTask, toggleTaskCompletion, deleteTask, updateHabit } = useApp();
   const lang = state.settings.language;
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [newTaskText, setNewTaskText] = useState('');
@@ -22,9 +23,23 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const [editTaskText, setEditTaskText] = useState('');
   const [editTaskTime, setEditTaskTime] = useState('');
   const [editTaskNote, setEditTaskNote] = useState('');
+  const [showCompletedHabits, setShowCompletedHabits] = useState(false);
 
   const today = new Date();
   const selectedISO = selectedDate.toISOString().split('T')[0];
+
+  // Clean up completed habits from previous days
+  useEffect(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    state.habits.forEach(habit => {
+      // Remove completion dates older than today
+      const oldDates = habit.completedDates.filter(date => date < todayStr);
+      if (oldDates.length > 0) {
+        const newDates = habit.completedDates.filter(date => date >= todayStr);
+        updateHabit({ ...habit, completedDates: newDates });
+      }
+    });
+  }, [state.habits, updateHabit]);
 
   // Get week days (Mon-Sun)
   const weekDays = useMemo(() => {
@@ -40,10 +55,10 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
     return days;
   }, [today.toDateString()]);
 
-  // Get habits for selected day (show all, completed will reset tomorrow)
+  // Get habits for selected day (separate active and completed)
   const dayOfWeek = getDayOfWeek(selectedDate) as DayOfWeek;
   const allDayHabits = state.habits.filter(h => h.days.includes(dayOfWeek));
-  const dayHabits = allDayHabits; // Show all habits
+  const activeHabits = allDayHabits.filter(h => !h.completedDates.includes(selectedISO));
   const completedHabits = allDayHabits.filter(h => h.completedDates.includes(selectedISO));
   
   // Get tasks for selected day (show all, including completed)
@@ -91,7 +106,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   };
 
   // Прогресс дня
-  const totalHabits = dayHabits.length;
+  const totalHabits = allDayHabits.length;
   const completedHabitsCount = completedHabits.length;
   const progressPercent = totalHabits > 0 ? (completedHabitsCount / totalHabits) * 100 : 0;
 
@@ -152,7 +167,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </button>
         </div>
 
-        {dayHabits.length === 0 ? (
+        {activeHabits.length === 0 && completedHabits.length === 0 ? (
           <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center">
             <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
               <Target size={20} className="text-[var(--accent)]" />
@@ -170,8 +185,8 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </div>
         ) : (
           <div className="space-y-2">
-            {dayHabits.map((habit) => {
-              const isCompleted = habit.completedDates.includes(selectedISO);
+            {activeHabits.map((habit) => {
+              const isCompleted = false; // Active habits are never completed
               return (
                 <div
                   key={habit.id}
@@ -220,6 +235,70 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 </div>
               );
             })}
+            
+            {/* Completed habits section */}
+            {completedHabits.length > 0 && (
+              <div className="mt-3">
+                <button
+                  onClick={() => setShowCompletedHabits(!showCompletedHabits)}
+                  className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-[var(--accent)]" />
+                    <span className="text-sm font-medium text-[var(--text-primary)]">
+                      {lang === 'ru' ? 'Завершенные' : 'Completed'}
+                    </span>
+                    <span className="text-xs text-[var(--text-muted)]">
+                      ({completedHabits.length})
+                    </span>
+                  </div>
+                  <ChevronDown 
+                    size={18} 
+                    className={`text-[var(--text-muted)] transition-transform ${showCompletedHabits ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                
+                {showCompletedHabits && (
+                  <div className="space-y-2 mt-2">
+                    {completedHabits.map((habit) => (
+                      <div
+                        key={habit.id}
+                        onClick={() => onEditHabit(habit)}
+                        className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 cursor-pointer transition-all hover:border-[var(--accent)]/50"
+                      >
+                        <div className="w-10 h-10 rounded-xl border-2 border-[var(--accent)] flex items-center justify-center text-[var(--accent)]">
+                          {renderIcon(habit.icon, 20, 'var(--accent)')}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate line-through text-[var(--text-muted)]">
+                            {habit.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <p className="text-xs text-[var(--text-muted)]">
+                              {habit.startTime || 'Без времени'}
+                            </p>
+                            {habit.note && (
+                              <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
+                                · {habit.note}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleHabitCompletion(habit.id, selectedISO);
+                          }}
+                          className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center"
+                        >
+                          <Check size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -409,6 +488,9 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </div>
         </div>
       )}
+
+      {/* Test component */}
+      <TestHabitsCleanup />
     </div>
   );
 }
