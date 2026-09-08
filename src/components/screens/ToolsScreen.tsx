@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2, SkipForward, SkipBack } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { lofiAudio } from '../../utils/lofiAudio';
+import { pomodoroTimer } from '../../utils/pomodoroTimer';
 
 interface ToolsScreenProps {
   onBack: () => void;
@@ -48,15 +49,6 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
     // НЕ останавливаем при unmount — музыка играет глобально
   }, [isPlaying]);
 
-  // Обновляем название трека периодически
-  useEffect(() => {
-    if (!isPlaying) return;
-    const interval = setInterval(() => {
-      setTrackName(lofiAudio.getCurrentTrackName());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isPlaying]);
-
   const togglePlay = () => {
     updateToolsState({ lofiPlaying: !isPlaying });
   };
@@ -65,18 +57,6 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
     const newVolume = Number(e.target.value);
     setVolume(newVolume);
     lofiAudio.setVolume(newVolume / 100);
-  };
-
-  const handleNextTrack = () => {
-    lofiAudio.nextTrack();
-    setTrackName(lofiAudio.getCurrentTrackName());
-    setProgress(0);
-  };
-
-  const handlePrevTrack = () => {
-    lofiAudio.previousTrack();
-    setTrackName(lofiAudio.getCurrentTrackName());
-    setProgress(0);
   };
 
   return (
@@ -106,27 +86,6 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
         </div>
       </div>
 
-      {/* Track controls */}
-      <div className="flex items-center justify-center gap-3 mb-3">
-        <button
-          onClick={handlePrevTrack}
-          disabled={!isPlaying}
-          className="w-8 h-8 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors disabled:opacity-30"
-        >
-          <SkipBack size={14} />
-        </button>
-        <span className="text-xs text-[var(--text-muted)]">
-          {lofiAudio.getTrackCount()} треков
-        </span>
-        <button
-          onClick={handleNextTrack}
-          disabled={!isPlaying}
-          className="w-8 h-8 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors disabled:opacity-30"
-        >
-          <SkipForward size={14} />
-        </button>
-      </div>
-
       {/* Volume slider */}
       <div className="flex items-center gap-2">
         <Volume2 size={14} className="text-[var(--text-muted)] flex-shrink-0" />
@@ -147,77 +106,57 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
 function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
   const { state, updateToolsState } = useApp();
 
-  const focusDuration = state.toolsState?.pomodoroFocusDuration || 25;
-  const breakDuration = state.toolsState?.pomodoroBreakDuration || 5;
-  const isBreak = state.toolsState?.pomodoroIsBreak || false;
-  const running = state.toolsState?.pomodoroRunning || false;
+  const [timerState, setTimerState] = useState(pomodoroTimer.getState());
 
-  const [timeLeft, setTimeLeft] = useState(
-    state.toolsState?.pomodoroTimeLeft || focusDuration * 60
-  );
-  const intervalRef = useRef<number | null>(null);
-
-  const totalSeconds = isBreak ? breakDuration * 60 : focusDuration * 60;
-  const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100;
-
-  // Timer logic — глобальный, не останавливается при unmount
+  // Синхронизация с глобальным таймером
   useEffect(() => {
-    if (running && timeLeft > 0) {
-      // Очищаем предыдущий интервал если есть
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      
-      intervalRef.current = window.setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            if (!isBreak) {
-              updateToolsState({ pomodoroIsBreak: true, pomodoroTimeLeft: breakDuration * 60 });
-              return breakDuration * 60;
-            } else {
-              updateToolsState({ pomodoroIsBreak: false, pomodoroRunning: false, pomodoroTimeLeft: focusDuration * 60 });
-              return focusDuration * 60;
-            }
-          }
-          const newVal = prev - 1;
-          updateToolsState({ pomodoroTimeLeft: newVal });
-          return newVal;
-        });
-      }, 1000);
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }
-    // НЕ очищаем при unmount — таймер работает глобально
-  }, [running, isBreak]);
+    pomodoroTimer.onTick((timeLeft, isBreak, running) => {
+      setTimerState({
+        timeLeft,
+        isBreak,
+        running,
+        focusDuration: timerState.focusDuration,
+        breakDuration: timerState.breakDuration,
+      });
 
-  useEffect(() => {
-    setTimeLeft(state.toolsState?.pomodoroTimeLeft || focusDuration * 60);
-  }, [state.toolsState?.pomodoroIsBreak]);
+      // Обновляем глобальное состояние
+      updateToolsState({
+        pomodoroTimeLeft: timeLeft,
+        pomodoroIsBreak: isBreak,
+        pomodoroRunning: running,
+      });
+    });
+
+    // Инициализация из глобального состояния
+    const focusDuration = state.toolsState?.pomodoroFocusDuration || 25;
+    const breakDuration = state.toolsState?.pomodoroBreakDuration || 5;
+    pomodoroTimer.setFocusDuration(focusDuration);
+    pomodoroTimer.setBreakDuration(breakDuration);
+  }, []);
+
+  const totalSeconds = timerState.isBreak ? timerState.breakDuration * 60 : timerState.focusDuration * 60;
+  const progress = ((totalSeconds - timerState.timeLeft) / totalSeconds) * 100;
 
   const handleToggle = () => {
-    if (!running && timeLeft === 0) {
-      const newTime = isBreak ? breakDuration * 60 : focusDuration * 60;
-      setTimeLeft(newTime);
-      updateToolsState({ pomodoroTimeLeft: newTime, pomodoroRunning: true });
+    if (timerState.running) {
+      pomodoroTimer.pause();
     } else {
-      updateToolsState({ pomodoroRunning: !running });
+      pomodoroTimer.start();
     }
+    updateToolsState({ pomodoroRunning: !timerState.running });
   };
 
   const handleReset = () => {
+    pomodoroTimer.reset();
     updateToolsState({
       pomodoroRunning: false,
       pomodoroIsBreak: false,
-      pomodoroTimeLeft: focusDuration * 60,
+      pomodoroTimeLeft: timerState.focusDuration * 60,
     });
-    setTimeLeft(focusDuration * 60);
   };
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  const minutes = Math.floor(timerState.timeLeft / 60);
+  const seconds = timerState.timeLeft % 60;
 
   return (
     <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
@@ -229,7 +168,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
             {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
           </p>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            {isBreak ? t('break', lang) : t('focus', lang)}
+            {timerState.isBreak ? t('break', lang) : t('focus', lang)}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -237,7 +176,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
             onClick={handleToggle}
             className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
           >
-            {running ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+            {timerState.running ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
           </button>
           <button
             onClick={handleReset}
@@ -250,7 +189,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
 
       <div className="h-1.5 rounded-full bg-[var(--hover)] overflow-hidden mb-3">
         <div
-          className={`h-full rounded-full transition-all duration-1000 ${isBreak ? 'bg-green-400' : 'bg-[var(--accent)]'}`}
+          className={`h-full rounded-full transition-all duration-1000 ${timerState.isBreak ? 'bg-green-400' : 'bg-[var(--accent)]'}`}
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -260,24 +199,20 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
           <span className="text-[var(--text-muted)]">{t('focus', lang)}:</span>
           <button
             onClick={() => {
-              const newDur = Math.max(5, focusDuration - 5);
+              const newDur = Math.max(5, timerState.focusDuration - 5);
+              pomodoroTimer.setFocusDuration(newDur);
               updateToolsState({ pomodoroFocusDuration: newDur });
-              if (!running && !isBreak) {
-                setTimeLeft(newDur * 60);
-                updateToolsState({ pomodoroFocusDuration: newDur, pomodoroTimeLeft: newDur * 60 });
-              }
+              setTimerState(prev => ({ ...prev, focusDuration: newDur }));
             }}
             className="w-6 h-6 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)]"
           >−</button>
-          <span className="font-medium text-[var(--text-primary)]">{focusDuration}</span>
+          <span className="font-medium text-[var(--text-primary)]">{timerState.focusDuration}</span>
           <button
             onClick={() => {
-              const newDur = Math.min(60, focusDuration + 5);
+              const newDur = Math.min(60, timerState.focusDuration + 5);
+              pomodoroTimer.setFocusDuration(newDur);
               updateToolsState({ pomodoroFocusDuration: newDur });
-              if (!running && !isBreak) {
-                setTimeLeft(newDur * 60);
-                updateToolsState({ pomodoroFocusDuration: newDur, pomodoroTimeLeft: newDur * 60 });
-              }
+              setTimerState(prev => ({ ...prev, focusDuration: newDur }));
             }}
             className="w-6 h-6 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)]"
           >+</button>
@@ -286,24 +221,20 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
           <span className="text-[var(--text-muted)]">{t('break', lang)}:</span>
           <button
             onClick={() => {
-              const newDur = Math.max(1, breakDuration - 1);
+              const newDur = Math.max(1, timerState.breakDuration - 1);
+              pomodoroTimer.setBreakDuration(newDur);
               updateToolsState({ pomodoroBreakDuration: newDur });
-              if (!running && isBreak) {
-                setTimeLeft(newDur * 60);
-                updateToolsState({ pomodoroBreakDuration: newDur, pomodoroTimeLeft: newDur * 60 });
-              }
+              setTimerState(prev => ({ ...prev, breakDuration: newDur }));
             }}
             className="w-6 h-6 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)]"
           >−</button>
-          <span className="font-medium text-[var(--text-primary)]">{breakDuration}</span>
+          <span className="font-medium text-[var(--text-primary)]">{timerState.breakDuration}</span>
           <button
             onClick={() => {
-              const newDur = Math.min(30, breakDuration + 1);
+              const newDur = Math.min(30, timerState.breakDuration + 1);
+              pomodoroTimer.setBreakDuration(newDur);
               updateToolsState({ pomodoroBreakDuration: newDur });
-              if (!running && isBreak) {
-                setTimeLeft(newDur * 60);
-                updateToolsState({ pomodoroBreakDuration: newDur, pomodoroTimeLeft: newDur * 60 });
-              }
+              setTimerState(prev => ({ ...prev, breakDuration: newDur }));
             }}
             className="w-6 h-6 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)]"
           >+</button>
@@ -311,7 +242,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
       </div>
 
       <p className="text-xs text-[var(--text-muted)] text-center mt-2">
-        {t('focusTip', lang, { focus: focusDuration, break: breakDuration })}
+        {t('focusTip', lang, { focus: timerState.focusDuration, break: timerState.breakDuration })}
       </p>
     </div>
   );
