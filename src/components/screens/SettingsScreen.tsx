@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -14,11 +14,34 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
   const theme = state.settings.theme;
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const themes: { id: 'pink' | 'lavender' | 'mint'; label: string }[] = [
+  const themes: { id: 'pink' | 'lavender' | 'mint' | 'dark'; label: string }[] = [
     { id: 'pink', label: t('themePink', lang) },
     { id: 'lavender', label: t('themeLavender', lang) },
     { id: 'mint', label: t('themeMint', lang) },
+    { id: 'dark', label: t('themeDark', lang) },
   ];
+
+  const handleExport = () => {
+    const data = {
+      profile: state.profile,
+      habits: state.habits,
+      tasks: state.tasks,
+      events: state.events,
+      goals: state.goals,
+      stats: state.stats,
+      exportDate: new Date().toISOString(),
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bloom-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-5">
@@ -69,6 +92,15 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
           ))}
         </div>
       </div>
+
+      {/* Export data */}
+      <button
+        onClick={handleExport}
+        className="w-full py-3 rounded-xl bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-primary)] font-medium flex items-center justify-center gap-2 transition-all hover:border-[var(--accent)]/50"
+      >
+        <Download size={18} />
+        {lang === 'ru' ? 'Экспорт данных' : 'Export Data'}
+      </button>
 
       {/* Logout */}
       <button

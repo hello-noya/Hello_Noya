@@ -11,6 +11,49 @@ class PomodoroTimer {
   private intervalId: number | null = null;
   private callbacks: Set<TimerCallback> = new Set();
 
+  private playNotificationSound(): void {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioCtx();
+      
+      // Мягкий колокольчик
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = 800;
+      
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 1);
+
+      // Второй тон (гармония)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      
+      osc2.type = 'sine';
+      osc2.frequency.value = 1200;
+      
+      gain2.gain.setValueAtTime(0, ctx.currentTime + 0.2);
+      gain2.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.3);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
+      
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      
+      osc2.start(ctx.currentTime + 0.2);
+      osc2.stop(ctx.currentTime + 1.2);
+    } catch (e) {
+      console.log('Audio notification failed:', e);
+    }
+  }
+
   private startInterval(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -21,6 +64,9 @@ class PomodoroTimer {
         this.timeLeft--;
         
         if (this.timeLeft === 0) {
+          // Звуковое уведомление
+          this.playNotificationSound();
+          
           // Переключение фазы
           if (!this.isBreak) {
             this.isBreak = true;

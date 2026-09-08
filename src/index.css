@@ -48,6 +48,20 @@
   --text-muted: #5fa8a0;
 }
 
+/* Dark theme — тёмная тема для вечерней учёбы */
+[data-theme="dark"] {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --card-bg: #242438;
+  --hover: #2d2d44;
+  --border: #3d3d5c;
+  --accent: #ff6b9d;
+  --accent-hover: #ff4f8a;
+  --text-primary: #f0e6ff;
+  --text-secondary: #b8a8d9;
+  --text-muted: #7a6b99;
+}
+
 /* Base styles */
 * {
   box-sizing: border-box;

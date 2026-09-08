@@ -117,14 +117,14 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
             </div>
           </div>
 
-          {/* Duration mode */}
-          <div>
+          {/* Duration mode - compact toggle */}
+          <div className="rounded-xl bg-[var(--hover)] p-3">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm text-[var(--text-secondary)]">{t('duration', lang)}</label>
-              <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--hover)]">
+              <label className="text-xs text-[var(--text-secondary)]">{t('duration', lang)}</label>
+              <div className="flex gap-0.5 p-0.5 rounded-md bg-[var(--bg-primary)]">
                 <button
                   onClick={() => setDurationMode('auto')}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-medium transition-all ${
                     durationMode === 'auto' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
                   }`}
                 >
@@ -132,7 +132,7 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
                 </button>
                 <button
                   onClick={() => setDurationMode('manual')}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-medium transition-all ${
                     durationMode === 'manual' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
                   }`}
                 >
@@ -140,16 +140,17 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
                 </button>
               </div>
             </div>
-            {durationMode === 'auto' ? (
-              <p className="text-xs text-[var(--text-muted)]">{t('defaultDuration', lang, { min: duration })}</p>
-            ) : (
-              <input
-                type="number"
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
-                min={1}
-                className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-              />
+            {durationMode === 'manual' && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(Number(e.target.value))}
+                  min={1}
+                  className="w-20 px-2 py-1 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-xs text-center focus:outline-none focus:border-[var(--accent)] transition-colors"
+                />
+                <span className="text-xs text-[var(--text-muted)]">{t('minutes', lang)}</span>
+              </div>
             )}
           </div>
 

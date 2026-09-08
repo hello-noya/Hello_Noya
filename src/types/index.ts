@@ -14,11 +14,11 @@ export interface Habit {
   id: string;
   name: string;
   icon: string;
+  icon2?: string;
   startTime: string; // HH:MM
-  duration: number; // minutes
-  durationMode: 'auto' | 'manual';
   days: DayOfWeek[];
   completedDates: string[]; // ISO date strings when completed
+  note?: string;
 }
 
 export interface Task {
@@ -27,6 +27,8 @@ export interface Task {
   time: string; // HH:MM or empty
   date: string; // ISO date
   completed: boolean;
+  note?: string;
+  deadline?: string; // ISO date
 }
 
 export interface ScheduleEvent {
@@ -50,7 +52,7 @@ export interface Goal {
 
 export interface AppSettings {
   language: 'ru' | 'en';
-  theme: 'pink' | 'lavender' | 'mint';
+  theme: 'pink' | 'lavender' | 'mint' | 'dark';
 }
 
 export interface Stats {

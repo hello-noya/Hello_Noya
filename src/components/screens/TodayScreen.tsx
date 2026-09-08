@@ -202,7 +202,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                       {habit.name}
                     </p>
                     <p className="text-xs text-[var(--text-muted)]">
-                      {habit.startTime ? `${habit.startTime} · ${habit.duration} ${t('minutes', lang)}` : `${habit.duration} ${t('minutes', lang)}`}
+                      {habit.startTime || 'Без времени'}
                     </p>
                   </div>
                   <button
@@ -236,10 +236,10 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
           <div className="space-y-2">
           {dayTasks.map((task) => (
-            <div key={task.id} className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+            <div key={task.id} className="flex items-start gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
               <button
                 onClick={() => toggleTaskCompletion(task.id)}
-                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all mt-0.5 ${
                   task.completed
                     ? 'bg-[var(--accent)] text-white'
                     : 'border-2 border-[var(--border)] hover:border-[var(--accent)]'
@@ -247,20 +247,30 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               >
                 {task.completed && <Check size={12} />}
               </button>
-              <button
-                onClick={() => {
-                  setEditingTask(task);
-                  setEditTaskText(task.text);
-                  setEditTaskTime(task.time);
-                }}
-                className={`flex-1 text-left text-sm ${task.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}
-              >
-                {task.text}
-              </button>
-              {task.time && <span className="text-xs text-[var(--text-muted)]">{task.time}</span>}
+              <div className="flex-1 min-w-0">
+                <button
+                  onClick={() => {
+                    setEditingTask(task);
+                    setEditTaskText(task.text);
+                    setEditTaskTime(task.time);
+                  }}
+                  className={`text-left text-sm ${task.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}
+                >
+                  {task.text}
+                </button>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {task.time && <span className="text-xs text-[var(--text-muted)]">{task.time}</span>}
+                  {task.deadline && (
+                    <span className="text-xs text-orange-500 flex items-center gap-1">
+                      ⏰ {new Date(task.deadline).toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US')}
+                    </span>
+                  )}
+                  {task.note && <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[200px]">💬 {task.note}</span>}
+                </div>
+              </div>
               <button
                 onClick={() => setDeleteTaskId(task.id)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors flex-shrink-0"
               >
                 <span className="text-xl">×</span>
               </button>

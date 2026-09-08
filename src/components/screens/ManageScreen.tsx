@@ -99,7 +99,7 @@ export function ManageScreen({ onBack }: ManageScreenProps) {
                   <div className="flex-1 min-w-0">
                     <span className="text-sm font-medium text-[var(--text-primary)] block truncate">{h.name}</span>
                     <span className="text-xs text-[var(--text-muted)]">
-                      {h.startTime && `${h.startTime} · `}{h.duration} {t('minutes', lang)}
+                      {h.startTime || 'Без времени'}
                     </span>
                   </div>
                   <button

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2, Droplets, Flame, Coffee, Trees } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
-import { lofiAudio } from '../../utils/lofiAudio';
+import { focusSounds, SoundType } from '../../utils/focusSounds';
 import { pomodoroTimer } from '../../utils/pomodoroTimer';
 
 interface ToolsScreenProps {
@@ -22,32 +22,26 @@ export function ToolsScreen({ onBack }: ToolsScreenProps) {
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">{t('tools', lang)}</h2>
       </div>
 
-      <LoFiPlayer lang={lang} />
+      <FocusSoundsPlayer lang={lang} />
       <PomodoroTimer lang={lang} />
     </div>
   );
 }
 
-function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
+function FocusSoundsPlayer({ lang }: { lang: 'ru' | 'en' }) {
   const { state, updateToolsState } = useApp();
-  const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(lofiAudio.getVolume() * 100);
-  const [trackName, setTrackName] = useState(lofiAudio.getCurrentTrackName());
+  const [volume, setVolume] = useState(focusSounds.getVolume() * 100);
+  const [currentSound, setCurrentSound] = useState<SoundType>('lofi');
 
   const isPlaying = state.toolsState?.lofiPlaying || false;
 
-  // Управление аудио через глобальный модуль
   useEffect(() => {
     if (isPlaying) {
-      lofiAudio.play();
-      lofiAudio.onProgress((p: number) => setProgress(p));
-      setTrackName(lofiAudio.getCurrentTrackName());
+      focusSounds.play(currentSound);
     } else {
-      lofiAudio.pause();
-      setProgress(0);
+      focusSounds.pause();
     }
-    // НЕ останавливаем при unmount — музыка играет глобально
-  }, [isPlaying]);
+  }, [isPlaying, currentSound]);
 
   const togglePlay = () => {
     updateToolsState({ lofiPlaying: !isPlaying });
@@ -56,34 +50,59 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = Number(e.target.value);
     setVolume(newVolume);
-    lofiAudio.setVolume(newVolume / 100);
+    focusSounds.setVolume(newVolume / 100);
   };
+
+  const sounds: { id: SoundType; icon: React.ReactNode; label: string }[] = [
+    { id: 'lofi', icon: <Music size={16} />, label: 'Lo-fi' },
+    { id: 'rain', icon: <Droplets size={16} />, label: lang === 'ru' ? 'Дождь' : 'Rain' },
+    { id: 'fire', icon: <Flame size={16} />, label: lang === 'ru' ? 'Костёр' : 'Fire' },
+    { id: 'cafe', icon: <Coffee size={16} />, label: lang === 'ru' ? 'Кафе' : 'Cafe' },
+    { id: 'nature', icon: <Trees size={16} />, label: lang === 'ru' ? 'Природа' : 'Nature' },
+  ];
 
   return (
     <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
       <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
         <Music size={16} className="text-[var(--accent)]" />
-        {t('lofiPlayer', lang)}
+        {lang === 'ru' ? 'Звуки для фокуса' : 'Focus Sounds'}
       </h3>
 
-      <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center gap-3 mb-4">
         <button
           onClick={togglePlay}
           className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white hover:opacity-90 transition-opacity flex-shrink-0"
         >
           {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
         </button>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-            {isPlaying ? trackName : '—'}
+        <div className="flex-1">
+          <p className="text-sm font-medium text-[var(--text-primary)]">
+            {sounds.find(s => s.id === currentSound)?.label || 'Lo-fi'}
           </p>
           <p className="text-xs text-[var(--text-muted)]">
-            {t('nowPlaying', lang)}: {isPlaying ? trackName : '—'}
+            {isPlaying ? (lang === 'ru' ? 'Сейчас играет' : 'Now playing') : '—'}
           </p>
-          <div className="h-1 rounded-full bg-[var(--hover)] mt-1.5 overflow-hidden">
-            <div className="h-full bg-[var(--accent)] transition-all" style={{ width: `${progress}%` }} />
-          </div>
         </div>
+      </div>
+
+      {/* Sound selection */}
+      <div className="grid grid-cols-5 gap-2 mb-4">
+        {sounds.map((sound) => (
+          <button
+            key={sound.id}
+            onClick={() => setCurrentSound(sound.id)}
+            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+              currentSound === sound.id
+                ? 'bg-[var(--accent)]/20 border-2 border-[var(--accent)]'
+                : 'bg-[var(--hover)] border border-transparent hover:border-[var(--accent)]/30'
+            }`}
+          >
+            <div className={currentSound === sound.id ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}>
+              {sound.icon}
+            </div>
+            <span className="text-[10px] font-medium">{sound.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Volume slider */}
@@ -105,12 +124,12 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
 
 function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
   const { state, updateToolsState } = useApp();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [timerState, setTimerState] = useState(pomodoroTimer.getState());
 
-  // Синхронизация с глобальным таймером
   useEffect(() => {
-    pomodoroTimer.onTick((timeLeft, isBreak, running) => {
+    const unsubscribe = pomodoroTimer.subscribe((timeLeft, isBreak, running) => {
       setTimerState({
         timeLeft,
         isBreak,
@@ -119,7 +138,6 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
         breakDuration: timerState.breakDuration,
       });
 
-      // Обновляем глобальное состояние
       updateToolsState({
         pomodoroTimeLeft: timeLeft,
         pomodoroIsBreak: isBreak,
@@ -127,12 +145,51 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
       });
     });
 
-    // Инициализация из глобального состояния
     const focusDuration = state.toolsState?.pomodoroFocusDuration || 25;
     const breakDuration = state.toolsState?.pomodoroBreakDuration || 5;
     pomodoroTimer.setFocusDuration(focusDuration);
     pomodoroTimer.setBreakDuration(breakDuration);
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
+
+  // Circular progress visualization
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const size = canvas.width;
+    const center = size / 2;
+    const radius = center - 10;
+
+    const totalSeconds = timerState.isBreak ? timerState.breakDuration * 60 : timerState.focusDuration * 60;
+    const progress = (totalSeconds - timerState.timeLeft) / totalSeconds;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, size, size);
+
+    // Background circle
+    ctx.beginPath();
+    ctx.arc(center, center, radius, 0, 2 * Math.PI);
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--hover').trim() || '#e5e7eb';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+
+    // Progress circle
+    ctx.beginPath();
+    ctx.arc(center, center, radius, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * progress);
+    ctx.strokeStyle = timerState.isBreak 
+      ? '#10b981' 
+      : getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ff6b9d';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }, [timerState.timeLeft, timerState.isBreak]);
 
   const totalSeconds = timerState.isBreak ? timerState.breakDuration * 60 : timerState.focusDuration * 60;
   const progress = ((totalSeconds - timerState.timeLeft) / totalSeconds) * 100;
@@ -143,12 +200,10 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
     } else {
       pomodoroTimer.start();
     }
-    // Состояние обновится через callback от pomodoroTimer
   };
 
   const handleReset = () => {
     pomodoroTimer.reset();
-    // Состояние обновится через callback от pomodoroTimer
   };
 
   const minutes = Math.floor(timerState.timeLeft / 60);
@@ -158,38 +213,41 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
     <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
       <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">{t('pomodoro', lang)}</h3>
 
-      <div className="flex items-center justify-between mb-3">
-        <div>
+      {/* Circular visualization */}
+      <div className="relative flex items-center justify-center mb-4">
+        <canvas
+          ref={canvasRef}
+          width={160}
+          height={160}
+          className="absolute"
+        />
+        <div className="relative z-10 text-center">
           <p className="text-3xl font-bold text-[var(--text-primary)] font-mono">
             {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
           </p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             {timerState.isBreak ? t('break', lang) : t('focus', lang)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleToggle}
-            className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-          >
-            {timerState.running ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
-          </button>
-          <button
-            onClick={handleReset}
-            className="w-10 h-10 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
-          >
-            <RotateCcw size={16} />
-          </button>
-        </div>
       </div>
 
-      <div className="h-1.5 rounded-full bg-[var(--hover)] overflow-hidden mb-3">
-        <div
-          className={`h-full rounded-full transition-all duration-1000 ${timerState.isBreak ? 'bg-green-400' : 'bg-[var(--accent)]'}`}
-          style={{ width: `${progress}%` }}
-        />
+      {/* Controls */}
+      <div className="flex items-center justify-center gap-3 mb-4">
+        <button
+          onClick={handleToggle}
+          className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+        >
+          {timerState.running ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
+        </button>
+        <button
+          onClick={handleReset}
+          className="w-12 h-12 rounded-full bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+        >
+          <RotateCcw size={18} />
+        </button>
       </div>
 
+      {/* Settings */}
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
           <span className="text-[var(--text-muted)]">{t('focus', lang)}:</span>
@@ -237,7 +295,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
         </div>
       </div>
 
-      <p className="text-xs text-[var(--text-muted)] text-center mt-2">
+      <p className="text-xs text-[var(--text-muted)] text-center mt-3">
         {t('focusTip', lang, { focus: timerState.focusDuration, break: timerState.breakDuration })}
       </p>
     </div>

@@ -68,21 +68,23 @@ export function createHabit(data: Partial<Habit>): Habit {
     id: uuidv4(),
     name: data.name || '',
     icon: data.icon || '✨',
+    icon2: data.icon2,
     startTime: data.startTime || '',
-    duration: data.duration || 60,
-    durationMode: data.durationMode || 'auto',
     days: data.days || [1, 2, 3, 4, 5],
     completedDates: [],
+    note: data.note,
   };
 }
 
-export function createTask(text: string, date: string): Task {
+export function createTask(text: string, date: string, note?: string, deadline?: string): Task {
   return {
     id: uuidv4(),
     text,
     time: '',
     date,
     completed: false,
+    note,
+    deadline,
   };
 }
 
