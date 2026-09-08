@@ -77,17 +77,18 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
       {/* Theme */}
       <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
         <p className="text-sm font-medium text-[var(--text-primary)] mb-3">{t('theme', lang)}</p>
-        <div className="flex gap-2">
+        <div className="flex gap-3 justify-center">
           {themes.map((th) => (
             <button
               key={th.id}
               onClick={() => updateSettings({ theme: th.id })}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
-                theme === th.id ? 'bg-[var(--accent)] text-white' : 'bg-[var(--hover)] text-[var(--text-secondary)]'
+              className={`w-14 h-14 rounded-2xl text-2xl transition-all flex items-center justify-center ${
+                theme === th.id 
+                  ? 'bg-[var(--accent)] text-white shadow-lg scale-110' 
+                  : 'bg-[var(--hover)] text-[var(--text-secondary)] hover:scale-105'
               }`}
             >
-              <span className="text-base">{th.icon}</span>
-              <span>{th.label}</span>
+              {th.icon}
             </button>
           ))}
         </div>

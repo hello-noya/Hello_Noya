@@ -1,10 +1,10 @@
 import React from 'react';
-import { User, ListChecks, Settings, Wrench, ChevronRight } from 'lucide-react';
+import { User, ListChecks, Settings, Wrench, ChevronRight, TrendingUp } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { renderIcon } from '../../utils/icons';
 
-type MenuSection = 'profile' | 'manage' | 'settings' | 'tools';
+type MenuSection = 'profile' | 'manage' | 'settings' | 'tools' | 'statistics';
 
 interface MenuScreenProps {
   onNavigate: (section: MenuSection) => void;
@@ -16,6 +16,7 @@ export function MenuScreen({ onNavigate }: MenuScreenProps) {
 
   const items = [
     { id: 'profile' as MenuSection, icon: <User size={20} />, label: t('profile', lang), desc: t('profileDesc', lang) },
+    { id: 'statistics' as MenuSection, icon: <TrendingUp size={20} />, label: lang === 'ru' ? 'Статистика' : 'Statistics', desc: lang === 'ru' ? 'ваш прогресс и достижения' : 'your progress and achievements' },
     { id: 'manage' as MenuSection, icon: <ListChecks size={20} />, label: t('manageLists', lang), desc: t('manageListsDesc', lang) },
     { id: 'settings' as MenuSection, icon: <Settings size={20} />, label: t('settings', lang), desc: t('settingsDesc', lang) },
     { id: 'tools' as MenuSection, icon: <Wrench size={20} />, label: t('tools', lang), desc: t('toolsDesc', lang) },

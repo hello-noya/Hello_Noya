@@ -68,39 +68,45 @@ export function GoalModal({ isOpen, onClose, goal }: GoalModalProps) {
             />
           </div>
 
-          {/* Unit and Target - две плашки в одну строку одинакового размера */}
-          <div>
+      {/* Unit and Target - две плашки в одну строку одинакового размера */}
+      <div>
+        <div className="flex gap-2 mb-2">
+          <div className="flex-1">
             <label className="text-xs text-[var(--text-secondary)] mb-1.5 block">{t('quantity', lang)}</label>
-            <div className="flex gap-2">
-              {/* Количество */}
-              <div className="flex-1 flex items-center justify-between gap-2 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
-                <button
-                  onClick={() => setTarget(Math.max(1, target - 1))}
-                  className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="text-base font-bold text-[var(--text-primary)]">{target}</span>
-                <button
-                  onClick={() => setTarget(target + 1)}
-                  className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
-              {/* Единицы */}
-              <div className="flex-1 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
-                <input
-                  type="text"
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
-                  placeholder={t('unitPlaceholder', lang)}
-                  className="w-full text-base text-[var(--text-primary)] bg-transparent placeholder:text-[var(--text-muted)] focus:outline-none"
-                />
-              </div>
-            </div>
           </div>
-
+          <div className="flex-1">
+            <label className="text-xs text-[var(--text-secondary)] mb-1.5 block">{t('unit', lang)}</label>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {/* Количество */}
+          <div className="flex-1 flex items-center justify-between gap-2 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+            <button
+              onClick={() => setTarget(Math.max(1, target - 1))}
+              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
+            >
+              <Minus size={14} />
+            </button>
+            <span className="text-base font-bold text-[var(--text-primary)]">{target}</span>
+            <button
+              onClick={() => setTarget(target + 1)}
+              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+          {/* Единицы */}
+          <div className="flex-1 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+            <input
+              type="text"
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              placeholder={t('unitPlaceholder', lang)}
+              className="w-full text-base text-[var(--text-primary)] bg-transparent placeholder:text-[var(--text-muted)] focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
           {/* Actions */}
           <div className="flex gap-2 pt-2">
             {goal && (

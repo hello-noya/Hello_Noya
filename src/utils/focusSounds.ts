@@ -36,12 +36,22 @@ class FocusSoundsManager {
   private playLofi(): void {
     if (!this.audioCtx || !this.masterGain) return;
 
-    // Мягкие аккорды
-    const chords = [
-      [261.63, 329.63, 392.00], // C major
-      [293.66, 349.23, 440.00], // D minor
-      [349.23, 440.00, 523.25], // F major
-      [392.00, 493.88, 587.33], // G major
+    // Корейские lo-fi аккорды - более сложные и атмосферные
+    const chordProgressions = [
+      // Прогрессия 1: I - V - vi - IV (популярная в K-pop)
+      [
+        [261.63, 329.63, 392.00, 493.88], // Cmaj7
+        [392.00, 493.88, 587.33, 739.99], // Gmaj7
+        [440.00, 523.25, 659.25, 783.99], // Am7
+        [349.23, 440.00, 523.25, 659.25], // Fmaj7
+      ],
+      // Прогрессия 2: vi - IV - I - V (эмоциональная)
+      [
+        [440.00, 523.25, 659.25, 783.99], // Am7
+        [349.23, 440.00, 523.25, 659.25], // Fmaj7
+        [261.63, 329.63, 392.00, 493.88], // Cmaj7
+        [392.00, 493.88, 587.33, 739.99], // Gmaj7
+      ],
     ];
 
     const playChordSequence = () => {
@@ -49,26 +59,31 @@ class FocusSoundsManager {
 
       const ctx = this.audioCtx;
       const now = ctx.currentTime;
+      
+      // Выбираем случайную прогрессию
+      const progression = chordProgressions[Math.floor(Math.random() * chordProgressions.length)];
 
-      chords.forEach((chord, chordIdx) => {
-        const startTime = now + chordIdx * 8;
+      progression.forEach((chord, chordIdx) => {
+        const startTime = now + chordIdx * 4;
 
-        chord.forEach((freq) => {
+        chord.forEach((freq, noteIdx) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           
-          osc.type = 'sine';
+          // Используем треугольную волну для более мягкого звука
+          osc.type = noteIdx === 0 ? 'sine' : 'triangle';
           osc.frequency.value = freq;
 
+          // Более плавная огибающая
           gain.gain.setValueAtTime(0, startTime);
-          gain.gain.linearRampToValueAtTime(0.06, startTime + 2);
-          gain.gain.setValueAtTime(0.06, startTime + 6);
-          gain.gain.linearRampToValueAtTime(0, startTime + 8);
+          gain.gain.linearRampToValueAtTime(0.04, startTime + 1);
+          gain.gain.setValueAtTime(0.04, startTime + 3);
+          gain.gain.linearRampToValueAtTime(0, startTime + 4);
 
           osc.connect(gain);
           gain.connect(this.masterGain!);
           osc.start(startTime);
-          osc.stop(startTime + 8);
+          osc.stop(startTime + 4);
 
           this.oscillators.push(osc);
           this.gains.push(gain);
@@ -79,7 +94,7 @@ class FocusSoundsManager {
         if (this.isPlaying) {
           playChordSequence();
         }
-      }, 32000);
+      }, 16000);
     };
 
     playChordSequence();

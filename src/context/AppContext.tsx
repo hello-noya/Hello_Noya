@@ -24,6 +24,7 @@ interface AppContextType {
   incrementGoal: (id: string) => void;
   decrementGoal: (id: string) => void;
   resetAll: () => void;
+  logout: () => void;
   updateToolsState: (updates: Partial<ToolsState>) => void;
   toast: string | null;
   showToast: (msg: string) => void;
@@ -195,6 +196,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(getDefaultState());
   }, []);
 
+  const logout = useCallback(() => {
+    setState(prev => ({ ...prev, profile: null }));
+  }, []);
+
   const updateToolsState = useCallback((updates: Partial<ToolsState>) => {
     setState(prev => ({
       ...prev,
@@ -209,7 +214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       addTask, updateTask, deleteTask, toggleTaskCompletion,
       addEvent, updateEvent, deleteEvent,
       addGoal, updateGoal, deleteGoal, incrementGoal, decrementGoal,
-      resetAll, updateToolsState, toast, showToast,
+      resetAll, logout, updateToolsState, toast, showToast,
     }}>
       {children}
     </AppContext.Provider>

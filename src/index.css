@@ -1,51 +1,53 @@
 @import "tailwindcss";
 
 /* 
-  K-pop стиль: три пастельные темы — розовый, лавандовый и мятный.
-  Создают уютную, мечтательную атмосферу в стиле корейской поп-культуры.
+  K-pop стиль: три связанные темы в корейской эстетике
+  - Cherry Blossom: светлая розовая (по умолчанию)
+  - Lavender Dream: светлая фиолетовая
+  - Midnight Seoul: тёмная (связана с лавандовой)
 */
 
-/* Pink theme (default) — нежно-розовый */
+/* Cherry Blossom theme (default) — нежно-розовая, корейская эстетика */
 :root,
 [data-theme="pink"] {
-  --bg-primary: #fff5f7;
-  --bg-secondary: #ffeef2;
+  --bg-primary: #fff0f5;
+  --bg-secondary: #ffe8f0;
   --card-bg: #ffffff;
-  --hover: #ffe4ea;
-  --border: #ffd1d9;
-  --accent: #ff6b9d;
-  --accent-hover: #ff4f8a;
-  --text-primary: #4a2c3d;
-  --text-secondary: #7a5568;
-  --text-muted: #a8899a;
+  --hover: #ffd4e0;
+  --border: #ffb8cc;
+  --accent: #ff4d8d;
+  --accent-hover: #ff3377;
+  --text-primary: #2d1b2e;
+  --text-secondary: #5c3d5e;
+  --text-muted: #8b6b8d;
 }
 
-/* Lavender theme — нежно-фиолетовый */
+/* Lavender Dream theme — светлая фиолетовая */
 [data-theme="lavender"] {
-  --bg-primary: #f8f5ff;
-  --bg-secondary: #f0ebff;
+  --bg-primary: #f5f0ff;
+  --bg-secondary: #ede5ff;
   --card-bg: #ffffff;
-  --hover: #e8e0ff;
-  --border: #d4c8f5;
-  --accent: #a78bfa;
-  --accent-hover: #8b6ff0;
-  --text-primary: #3d2c5e;
-  --text-secondary: #6b5599;
-  --text-muted: #9a8bb5;
+  --border: #d4c4f5;
+  --hover: #e0d4f5;
+  --accent: #8b5cf6;
+  --accent-hover: #7c3aed;
+  --text-primary: #1e1b2e;
+  --text-secondary: #4c3d5e;
+  --text-muted: #7b6b8d;
 }
 
-/* Dark theme — тёмная тема для вечерней учёбы */
+/* Midnight Seoul theme — тёмная, связана с лавандовой */
 [data-theme="dark"] {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --card-bg: #242438;
-  --hover: #2d2d44;
-  --border: #3d3d5c;
-  --accent: #ff6b9d;
-  --accent-hover: #ff4f8a;
+  --bg-primary: #1a1625;
+  --bg-secondary: #231e30;
+  --card-bg: #2a2438;
+  --hover: #352e45;
+  --border: #4a4260;
+  --accent: #a78bfa;
+  --accent-hover: #8b5cf6;
   --text-primary: #f0e6ff;
-  --text-secondary: #b8a8d9;
-  --text-muted: #7a6b99;
+  --text-secondary: #c4b5e0;
+  --text-muted: #8b7ba8;
 }
 
 /* Base styles */

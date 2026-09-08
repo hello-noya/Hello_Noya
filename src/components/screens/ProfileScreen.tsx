@@ -11,7 +11,7 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({ onBack }: ProfileScreenProps) {
-  const { state, updateProfile, showToast, resetAll } = useApp();
+  const { state, updateProfile, showToast, logout } = useApp();
   const lang = state.settings.language;
   const profile = state.profile;
 
@@ -119,8 +119,7 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
         isOpen={showLogoutConfirm}
         message={t('logoutConfirm', lang)}
         onConfirm={() => {
-          resetAll();
-          window.location.reload();
+          logout();
         }}
         onCancel={() => setShowLogoutConfirm(false)}
       />

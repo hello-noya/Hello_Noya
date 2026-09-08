@@ -116,11 +116,18 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-[var(--text-muted)]">{t('habits', lang)}</span>
-                <span className="text-xs font-medium text-[var(--accent)]">{completedHabitsCount}/{totalHabits}</span>
+                <span className={`text-xs font-medium ${progressPercent === 100 ? 'text-green-500' : 'text-[var(--accent)]'}`}>
+                  {completedHabitsCount}/{totalHabits}
+                  {progressPercent === 100 && ' ✓'}
+                </span>
               </div>
               <div className="h-2 rounded-full bg-[var(--hover)] overflow-hidden">
                 <div 
-                  className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] transition-all duration-500"
+                  className={`h-full transition-all duration-500 ${
+                    progressPercent === 100 
+                      ? 'bg-gradient-to-r from-green-400 to-green-500' 
+                      : 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)]'
+                  }`}
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -128,11 +135,22 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-[var(--text-muted)]">{t('tasks', lang)}</span>
-                <span className="text-xs font-medium text-[var(--accent)]">{completedTasks.length}/{allDayTasks.length}</span>
+                <span className={`text-xs font-medium ${
+                  allDayTasks.length > 0 && completedTasks.length === allDayTasks.length 
+                    ? 'text-green-500' 
+                    : 'text-[var(--accent)]'
+                }`}>
+                  {completedTasks.length}/{allDayTasks.length}
+                  {allDayTasks.length > 0 && completedTasks.length === allDayTasks.length && ' ✓'}
+                </span>
               </div>
               <div className="h-2 rounded-full bg-[var(--hover)] overflow-hidden">
                 <div 
-                  className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] transition-all duration-500"
+                  className={`h-full transition-all duration-500 ${
+                    allDayTasks.length > 0 && completedTasks.length === allDayTasks.length
+                      ? 'bg-gradient-to-r from-green-400 to-green-500'
+                      : 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)]'
+                  }`}
                   style={{ width: `${allDayTasks.length > 0 ? (completedTasks.length / allDayTasks.length) * 100 : 0}%` }}
                 />
               </div>

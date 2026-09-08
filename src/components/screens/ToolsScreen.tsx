@@ -59,19 +59,19 @@ function LoFiPlayer({ lang }: { lang: 'ru' | 'en' }) {
         Lo-fi {lang === 'ru' ? 'плеер' : 'Player'}
       </h3>
 
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-4 mb-4">
         <button
           onClick={togglePlay}
-          className="w-12 h-12 rounded-full bg-[var(--accent)] flex items-center justify-center text-white hover:opacity-90 transition-opacity flex-shrink-0"
+          className="w-14 h-14 rounded-full bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] flex items-center justify-center text-white shadow-lg hover:scale-105 transition-transform flex-shrink-0"
         >
-          {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
+          {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
         </button>
         <div className="flex-1">
-          <p className="text-sm font-medium text-[var(--text-primary)]">
-            {isPlaying ? 'Lo-fi Study Beats' : (lang === 'ru' ? 'Музыка' : 'Music')}
+          <p className="text-base font-semibold text-[var(--text-primary)]">
+            {isPlaying ? '✨ Seoul Nights' : (lang === 'ru' ? 'Lo-fi Music' : 'Lo-fi Music')}
           </p>
-          <p className="text-xs text-[var(--text-muted)]">
-            {isPlaying ? (lang === 'ru' ? 'Сейчас играет' : 'Now playing') : (lang === 'ru' ? 'Нажми чтобы включить' : 'Tap to play')}
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            {isPlaying ? (lang === 'ru' ? 'Расслабляющие биты для учёбы' : 'Relaxing beats for studying') : (lang === 'ru' ? 'Нажми чтобы включить' : 'Tap to play')}
           </p>
         </div>
       </div>
