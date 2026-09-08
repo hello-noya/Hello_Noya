@@ -118,54 +118,7 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
             </div>
           </div>
 
-          {/* Duration mode - compact toggle */}
-          <div className="rounded-xl bg-[var(--hover)] p-3">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs text-[var(--text-secondary)]">{t('duration', lang)}</label>
-              <button
-                onClick={() => setDurationEnabled(!durationEnabled)}
-                className={`px-2.5 py-0.5 rounded-md text-xs font-medium transition-all ${
-                  durationEnabled ? 'bg-[var(--accent)] text-white' : 'bg-[var(--bg-primary)] text-[var(--text-muted)]'
-                }`}
-              >
-                {durationEnabled ? 'ВКЛ' : 'ВЫКЛ'}
-              </button>
-            </div>
-            {durationEnabled && (
-              <>
-                <div className="flex gap-0.5 p-0.5 rounded-md bg-[var(--bg-primary)] mb-2">
-                  <button
-                    onClick={() => setDurationMode('auto')}
-                    className={`flex-1 px-2 py-0.5 rounded text-xs font-medium transition-all ${
-                      durationMode === 'auto' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
-                    }`}
-                  >
-                    {t('auto', lang)}
-                  </button>
-                  <button
-                    onClick={() => setDurationMode('manual')}
-                    className={`flex-1 px-2 py-0.5 rounded text-xs font-medium transition-all ${
-                      durationMode === 'manual' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
-                    }`}
-                  >
-                    {t('manual', lang)}
-                  </button>
-                </div>
-                {durationMode === 'manual' && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      value={duration}
-                      onChange={(e) => setDuration(Number(e.target.value))}
-                      min={1}
-                      className="w-20 px-2 py-1 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-xs text-center focus:outline-none focus:border-[var(--accent)] transition-colors"
-                    />
-                    <span className="text-xs text-[var(--text-muted)]">{t('minutes', lang)}</span>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+
 
           {/* Days */}
           <div>

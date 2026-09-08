@@ -201,14 +201,14 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
               <Target size={20} className="text-[var(--accent)]" />
             </div>
-            <p className="text-sm text-[var(--text-muted)] mb-1">
+            <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
               {allDayHabits.length === 0 
-                ? (lang === 'ru' ? 'Пока нет привычек' : 'No habits yet')
-                : (lang === 'ru' ? 'Все привычки выполнены!' : 'All habits completed!')}
+                ? (lang === 'ru' ? 'Дисциплина бьет рекорды' : 'Discipline breaks records')
+                : (lang === 'ru' ? 'Все привычки закрыты' : 'All habits completed')}
             </p>
             {allDayHabits.length === 0 && (
               <p className="text-xs text-[var(--text-muted)]">
-                {lang === 'ru' ? 'Нажми "+ Привычка" чтобы добавить' : 'Tap "+ Habit" to add one'}
+                {lang === 'ru' ? 'Добавь свою первую привычку' : 'Add your first habit'}
               </p>
             )}
           </div>
@@ -267,19 +267,30 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
                 <ListTodo size={20} className="text-[var(--accent)]" />
               </div>
-              <p className="text-sm text-[var(--text-muted)] mb-1">
-                {lang === 'ru' ? 'Пока нет задач' : 'No tasks yet'}
+              <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                {lang === 'ru' ? 'Список чист' : 'List is clean'}
               </p>
               <p className="text-xs text-[var(--text-muted)]">
-                {lang === 'ru' ? 'Добавь задачу ниже' : 'Add a task below'}
+                {lang === 'ru' ? 'Время выдохнуть и отдохнуть' : 'Time to breathe and relax'}
               </p>
             </div>
           )}
           <div className="space-y-2">
           {dayTasks.map((task) => (
-            <div key={task.id} className="flex items-start gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+            <div 
+              key={task.id} 
+              className="flex items-start gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)]/30 transition-colors"
+              onClick={() => {
+                setEditingTask(task);
+                setEditTaskText(task.text);
+                setEditTaskTime(task.time);
+              }}
+            >
               <button
-                onClick={() => toggleTaskCompletion(task.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTaskCompletion(task.id);
+                }}
                 className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all mt-0.5 ${
                   task.completed
                     ? 'bg-[var(--accent)] text-white'
@@ -289,16 +300,9 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 {task.completed && <Check size={12} />}
               </button>
               <div className="flex-1 min-w-0">
-                <button
-                  onClick={() => {
-                    setEditingTask(task);
-                    setEditTaskText(task.text);
-                    setEditTaskTime(task.time);
-                  }}
-                  className={`text-left text-sm ${task.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}
-                >
+                <p className={`text-sm ${task.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
                   {task.text}
-                </button>
+                </p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   {task.time && <span className="text-xs text-[var(--text-muted)]">{task.time}</span>}
                   {task.deadline && (
@@ -310,7 +314,10 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 </div>
               </div>
               <button
-                onClick={() => setDeleteTaskId(task.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteTaskId(task.id);
+                }}
                 className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors flex-shrink-0"
               >
                 <span className="text-xl">×</span>

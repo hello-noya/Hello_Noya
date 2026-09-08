@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { createProfile } from '../../utils/storage';
+import { createProfile, getExampleData } from '../../utils/storage';
 import { PROFILE_ICONS } from '../../utils/storage';
 import { t } from '../../utils/i18n';
 import { renderIcon } from '../../utils/icons';
@@ -11,7 +11,7 @@ interface OnboardingScreenProps {
 }
 
 export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
-  const { setProfile } = useApp();
+  const { setProfile, addHabit, addTask, addGoal } = useApp();
   const [step, setStep] = useState(0); // 0 = welcome, 1 = name, 2 = icon
   const [name, setName] = useState('');
   const [motto, setMotto] = useState('');
@@ -20,12 +20,26 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const handleSocialLogin = (provider: string) => {
     const profile = createProfile('Пользователь', '', 'star');
     setProfile(profile);
+    
+    // Добавляем примеры данных
+    const examples = getExampleData();
+    examples.habits.forEach(h => addHabit(h));
+    examples.tasks.forEach(t => addTask(t));
+    examples.goals.forEach(g => addGoal(g));
+    
     setTimeout(() => onComplete(), 100);
   };
 
   const handleGuestLogin = () => {
     const profile = createProfile('Гость', '', 'sparkles');
     setProfile(profile);
+    
+    // Добавляем примеры данных
+    const examples = getExampleData();
+    examples.habits.forEach(h => addHabit(h));
+    examples.tasks.forEach(t => addTask(t));
+    examples.goals.forEach(g => addGoal(g));
+    
     setTimeout(() => onComplete(), 100);
   };
 
@@ -42,6 +56,13 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const handleStart = () => {
     const profile = createProfile(name || 'Гость', motto, selectedIcon);
     setProfile(profile);
+    
+    // Добавляем примеры данных
+    const examples = getExampleData();
+    examples.habits.forEach(h => addHabit(h));
+    examples.tasks.forEach(t => addTask(t));
+    examples.goals.forEach(g => addGoal(g));
+    
     setTimeout(() => onComplete(), 100);
   };
 

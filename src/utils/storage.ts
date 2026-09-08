@@ -53,6 +53,85 @@ export function getDefaultState(): AppState {
   };
 }
 
+export function getExampleData(): { habits: Habit[]; tasks: Task[]; goals: Goal[] } {
+  const today = new Date().toISOString().split('T')[0];
+  
+  return {
+    habits: [
+      {
+        id: uuidv4(),
+        name: 'Пить воду',
+        icon: 'water',
+        startTime: '09:00',
+        days: [1, 2, 3, 4, 5, 6, 0],
+        completedDates: [],
+      },
+      {
+        id: uuidv4(),
+        name: 'Читать книгу',
+        icon: 'book',
+        startTime: '20:00',
+        days: [1, 2, 3, 4, 5],
+        completedDates: [],
+      },
+      {
+        id: uuidv4(),
+        name: 'Утренняя пробежка',
+        icon: 'run',
+        startTime: '07:00',
+        days: [1, 3, 5],
+        completedDates: [],
+      },
+    ],
+    tasks: [
+      {
+        id: uuidv4(),
+        text: 'Сделать домашнее задание по математике',
+        time: '16:00',
+        date: today,
+        completed: false,
+      },
+      {
+        id: uuidv4(),
+        text: 'Позвонить маме',
+        time: '18:00',
+        date: today,
+        completed: false,
+      },
+      {
+        id: uuidv4(),
+        text: 'Купить продукты',
+        time: '',
+        date: today,
+        completed: false,
+      },
+    ],
+    goals: [
+      {
+        id: uuidv4(),
+        name: 'Прочитать 12 книг за год',
+        unit: 'книг',
+        target: 12,
+        current: 0,
+      },
+      {
+        id: uuidv4(),
+        name: 'Выучить 1000 английских слов',
+        unit: 'слов',
+        target: 1000,
+        current: 0,
+      },
+      {
+        id: uuidv4(),
+        name: 'Пробежать 100 км',
+        unit: 'км',
+        target: 100,
+        current: 0,
+      },
+    ],
+  };
+}
+
 export function createProfile(name: string, motto: string, icon: string): Profile {
   return {
     id: uuidv4(),

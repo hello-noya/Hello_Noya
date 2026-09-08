@@ -59,11 +59,8 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
           <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
             <Target size={20} className="text-[var(--accent)]" />
           </div>
-          <p className="text-sm text-[var(--text-muted)] mb-1">
-            {lang === 'ru' ? 'Пока нет целей' : 'No goals yet'}
-          </p>
-          <p className="text-xs text-[var(--text-muted)]">
-            {lang === 'ru' ? 'Нажми "+ Новая цель" чтобы добавить' : 'Tap "+ New goal" to add one'}
+          <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+            {lang === 'ru' ? 'Сделайте цель, которая будет зажигать вас каждое утро' : 'Set a goal that will ignite you every morning'}
           </p>
         </div>
       ) : (
