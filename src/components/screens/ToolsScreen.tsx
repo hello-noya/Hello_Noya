@@ -160,9 +160,14 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
   const totalSeconds = isBreak ? breakDuration * 60 : focusDuration * 60;
   const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100;
 
-  // Timer logic
+  // Timer logic — глобальный, не останавливается при unmount
   useEffect(() => {
     if (running && timeLeft > 0) {
+      // Очищаем предыдущий интервал если есть
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
       intervalRef.current = window.setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
@@ -185,12 +190,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
         intervalRef.current = null;
       }
     }
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
+    // НЕ очищаем при unmount — таймер работает глобально
   }, [running, isBreak]);
 
   useEffect(() => {
