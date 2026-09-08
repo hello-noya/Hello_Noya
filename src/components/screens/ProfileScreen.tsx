@@ -16,12 +16,11 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
   const profile = state.profile;
 
   const [name, setName] = useState(profile?.name || '');
-  const [motto, setMotto] = useState(profile?.motto || '');
   const [icon, setIcon] = useState(profile?.icon || 'star');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleSave = () => {
-    updateProfile({ name, motto, icon });
+    updateProfile({ name, icon });
     showToast(t('saved', lang));
   };
 
@@ -41,16 +40,6 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('motto', lang)}</label>
-          <input
-            type="text"
-            value={motto}
-            onChange={(e) => setMotto(e.target.value)}
             className="w-full px-4 py-3 rounded-xl bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
           />
         </div>

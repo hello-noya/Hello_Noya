@@ -25,12 +25,11 @@ export function MenuScreen({ onNavigate }: MenuScreenProps) {
       {/* Profile card */}
       {state.profile && (
         <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] mb-4 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+          <div className="w-12 h-12 rounded-full border-2 border-[var(--accent)] flex items-center justify-center text-[var(--accent)]">
             {renderIcon(state.profile.icon, 24, 'var(--accent)')}
           </div>
           <div>
             <p className="font-semibold text-[var(--text-primary)]">{state.profile.name}</p>
-            {state.profile.motto && <p className="text-xs text-[var(--text-secondary)] italic">{state.profile.motto}</p>}
           </div>
         </div>
       )}

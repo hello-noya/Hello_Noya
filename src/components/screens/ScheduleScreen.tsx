@@ -128,10 +128,10 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
                 <div className="flex flex-col items-center justify-center min-w-[60px]">
                   <div className={`px-3 py-1.5 rounded-lg border-2 ${
                     active 
-                      ? 'bg-[var(--accent)] border-[var(--accent)]' 
-                      : 'bg-[var(--hover)] border-[var(--border)]'
+                      ? 'border-[var(--accent)]' 
+                      : 'border-[var(--border)]'
                   }`}>
-                    <span className={`text-sm font-bold ${active ? 'text-white' : 'text-[var(--text-primary)]'}`}>
+                    <span className={`text-sm font-bold ${active ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>
                       {event.startTime}
                     </span>
                   </div>

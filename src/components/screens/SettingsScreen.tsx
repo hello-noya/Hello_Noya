@@ -112,15 +112,15 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
                   : 'bg-[var(--hover)] text-[var(--text-secondary)] hover:bg-[var(--accent)]/10'
               }`}
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={theme === th.id ? 'white' : th.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 {th.id === 'pink' && (
-                  <path d="M8 2C8 2 10 4 10 6C10 8 8 8 8 8C8 8 6 8 6 6C6 4 8 2 8 2Z" fill={theme === th.id ? 'white' : th.color}/>
+                  <path d="M8 2C8 2 10 4 10 6C10 8 8 8 8 8C8 8 6 8 6 6C6 4 8 2 8 2Z"/>
                 )}
                 {th.id === 'lavender' && (
-                  <circle cx="8" cy="8" r="5" fill={theme === th.id ? 'white' : th.color}/>
+                  <circle cx="8" cy="8" r="5"/>
                 )}
                 {th.id === 'dark' && (
-                  <path d="M8 2C5.24 2 3 4.24 3 7C3 9.76 5.24 12 8 12C10.76 12 13 9.76 13 7C13 6.5 12.9 6 12.75 5.5C12.25 6.5 11 7.25 9.5 7.25C7.5 7.25 6 5.75 6 3.75C6 3.25 6.1 2.75 6.25 2.25C5.75 2.1 5.25 2 4.75 2C3.75 2 2.75 2.5 2 3.25C3.5 2.5 5.5 2 8 2Z" fill={theme === th.id ? 'white' : th.color}/>
+                  <path d="M8 2C5.24 2 3 4.24 3 7C3 9.76 5.24 12 8 12C10.76 12 13 9.76 13 7C13 6.5 12.9 6 12.75 5.5C12.25 6.5 11 7.25 9.5 7.25C7.5 7.25 6 5.75 6 3.75C6 3.25 6.1 2.75 6.25 2.25C5.75 2.1 5.25 2 4.75 2C3.75 2 2.75 2.5 2 3.25C3.5 2.5 5.5 2 8 2Z"/>
                 )}
               </svg>
               <span>{th.label}</span>

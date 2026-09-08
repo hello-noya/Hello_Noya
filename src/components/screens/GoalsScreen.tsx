@@ -101,7 +101,7 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
 
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-[var(--text-secondary)]">
-                    {goal.current} {t('step', lang)} {goal.unit ? `/ ${goal.target} ${goal.unit}` : `/ ${goal.target}`}
+                    {goal.current} {goal.unit ? `/ ${goal.target} ${goal.unit}` : `/ ${goal.target}`}
                     {isAchieved && <span className="ml-2 text-[var(--accent)] font-medium">{t('achieved', lang)}</span>}
                   </span>
                   <div className="flex items-center gap-2">
