@@ -68,36 +68,42 @@ export function GoalModal({ isOpen, onClose, goal }: GoalModalProps) {
             />
           </div>
 
-          {/* Unit and Target - одна строка */}
+          {/* Unit and Target - две плашки в одну строку */}
           <div>
             <label className="text-xs text-[var(--text-secondary)] mb-1.5 block">{t('quantity', lang)}</label>
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)]">
-              <button
-                onClick={() => setTarget(Math.max(1, target - 1))}
-                className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
-              >
-                <Minus size={14} />
-              </button>
-              <input
-                type="number"
-                value={target}
-                onChange={(e) => setTarget(Math.max(1, Number(e.target.value)))}
-                min={1}
-                className="w-16 px-2 py-1.5 text-center text-base font-bold text-[var(--text-primary)] bg-transparent focus:outline-none"
-              />
-              <button
-                onClick={() => setTarget(target + 1)}
-                className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
-              >
-                <Plus size={14} />
-              </button>
-              <input
-                type="text"
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                placeholder={t('unitPlaceholder', lang)}
-                className="flex-1 px-2 py-1.5 text-sm text-[var(--text-primary)] bg-transparent placeholder:text-[var(--text-muted)] focus:outline-none"
-              />
+            <div className="flex items-stretch gap-2">
+              {/* Количество */}
+              <div className="flex-1 flex items-center gap-2 p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+                <button
+                  onClick={() => setTarget(Math.max(1, target - 1))}
+                  className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
+                >
+                  <Minus size={14} />
+                </button>
+                <input
+                  type="number"
+                  value={target}
+                  onChange={(e) => setTarget(Math.max(1, Number(e.target.value)))}
+                  min={1}
+                  className="flex-1 px-2 py-1.5 text-center text-base font-bold text-[var(--text-primary)] bg-transparent focus:outline-none"
+                />
+                <button
+                  onClick={() => setTarget(target + 1)}
+                  className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+              {/* Единицы */}
+              <div className="flex-1 p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+                <input
+                  type="text"
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  placeholder={t('unitPlaceholder', lang)}
+                  className="w-full h-full px-2 py-1.5 text-base text-[var(--text-primary)] bg-transparent placeholder:text-[var(--text-muted)] focus:outline-none"
+                />
+              </div>
             </div>
           </div>
 

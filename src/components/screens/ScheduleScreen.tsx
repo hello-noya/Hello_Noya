@@ -128,12 +128,12 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
                   <span className="text-[10px] text-[var(--text-muted)]">{event.duration} {t('minutes', lang)}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[var(--text-primary)] truncate">{event.name}</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">{event.name}</p>
                   {event.note && (
-                    <p className="text-xs text-[var(--text-secondary)] italic truncate">{event.note}</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{event.note}</p>
                   )}
                   {active && (
-                    <span className="text-xs font-semibold text-[var(--accent)] mt-0.5">● {t('now', lang)}</span>
+                    <span className="text-xs font-semibold text-[var(--accent)] mt-1 inline-block">● {t('now', lang)}</span>
                   )}
                 </div>
                 <button

@@ -275,6 +275,19 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               </p>
             </div>
           )}
+          {dayTasks.length === 0 && allDayTasks.length > 0 && (
+            <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center mb-2">
+              <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/10 flex items-center justify-center">
+                <Check size={20} className="text-green-500" />
+              </div>
+              <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                {lang === 'ru' ? 'Все задачи выполнены!' : 'All tasks completed!'}
+              </p>
+              <p className="text-xs text-[var(--text-muted)]">
+                {lang === 'ru' ? 'Отличная работа! Можешь отдохнуть' : 'Great job! Time to relax'}
+              </p>
+            </div>
+          )}
           <div className="space-y-2">
           {dayTasks.map((task) => (
             <div 
