@@ -126,15 +126,9 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
               >
                 {/* Time info - две строки */}
                 <div className="flex flex-col items-start justify-center min-w-[90px] space-y-1">
-                  <div className={`px-3 py-1.5 rounded-lg border-2 ${
-                    active 
-                      ? 'border-[var(--accent)] bg-[var(--accent)]/5' 
-                      : 'border-[var(--border)]'
-                  }`}>
-                    <span className={`text-base font-bold ${active ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>
-                      {event.startTime}
-                    </span>
-                  </div>
+                  <span className={`text-base font-bold ${active ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>
+                    {event.startTime}
+                  </span>
                   <span className="text-sm text-[var(--text-muted)] font-medium">
                     до {event.endTime}
                   </span>
@@ -142,6 +136,9 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
                     <span className="text-[10px] font-semibold text-[var(--accent)]">● {t('now', lang)}</span>
                   )}
                 </div>
+                
+                {/* Divider line */}
+                <div className={`w-px self-stretch ${active ? 'bg-[var(--accent)]/30' : 'bg-[var(--border)]'}`} />
                 
                 {/* Content - название и заметка */}
                 <div className="flex-1 min-w-0 space-y-1">

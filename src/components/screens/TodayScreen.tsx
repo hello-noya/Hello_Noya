@@ -175,7 +175,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </button>
         </div>
 
-        {activeHabits.length === 0 && completedHabits.length === 0 ? (
+        {activeHabits.length === 0 ? (
           <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center">
             <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
               <Target size={20} className="text-[var(--accent)]" />
@@ -183,11 +183,15 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
               {allDayHabits.length === 0 
                 ? (lang === 'ru' ? 'Дисциплина бьет рекорды' : 'Discipline breaks records')
-                : (lang === 'ru' ? 'Все привычки закрыты' : 'All habits completed')}
+                : (lang === 'ru' ? 'Все привычки выполнены!' : 'All habits completed!')}
             </p>
-            {allDayHabits.length === 0 && (
+            {allDayHabits.length === 0 ? (
               <p className="text-xs text-[var(--text-muted)]">
                 {lang === 'ru' ? 'Добавь свою первую привычку' : 'Add your first habit'}
+              </p>
+            ) : (
+              <p className="text-xs text-[var(--text-muted)]">
+                {lang === 'ru' ? 'Отличная работа! Можешь отдохнуть' : 'Great job! Time to relax'}
               </p>
             )}
           </div>

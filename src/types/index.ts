@@ -34,6 +34,7 @@ export interface Task {
 export interface ScheduleEvent {
   id: string;
   name: string;
+  icon: string;
   startTime: string; // HH:MM
   endTime: string; // HH:MM
   duration: number; // minutes

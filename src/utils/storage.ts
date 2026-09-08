@@ -171,6 +171,7 @@ export function createEvent(data: Partial<ScheduleEvent>): ScheduleEvent {
   return {
     id: uuidv4(),
     name: data.name || '',
+    icon: data.icon || 'class',
     startTime: data.startTime || '',
     endTime: data.endTime || '',
     duration: data.duration || 60,
@@ -241,3 +242,5 @@ export function calculateStats(state: AppState): Stats {
 export const PROFILE_ICONS = ['star', 'crown', 'flame', 'diamond', 'rocket', 'heart', 'leaf', 'zap', 'sun', 'moon', 'trophy', 'sparkles'];
 
 export const HABIT_ICONS = ['water', 'book', 'run', 'sleep', 'apple', 'brain', 'music', 'gym', 'coffee', 'laptop'];
+
+export const EVENT_ICONS = ['class', 'meeting', 'workout', 'lunch', 'call', 'work', 'rest', 'travel'];

@@ -5,7 +5,8 @@ import { t } from '../../utils/i18n';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ScheduleEvent, DayOfWeek } from '../../types';
-import { createEvent } from '../../utils/storage';
+import { createEvent, EVENT_ICONS } from '../../utils/storage';
+import { renderIcon } from '../../utils/icons';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
   const lang = state.settings.language;
 
   const [name, setName] = useState('');
+  const [icon, setIcon] = useState('class');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [durationEnabled, setDurationEnabled] = useState(true);
@@ -30,6 +32,7 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
   useEffect(() => {
     if (event) {
       setName(event.name);
+      setIcon(event.icon || 'class');
       setStartTime(event.startTime);
       setEndTime(event.endTime);
       setDurationMode(event.durationMode);
@@ -38,6 +41,7 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
       setNote(event.note);
     } else {
       setName('');
+      setIcon('class');
       setStartTime('');
       setEndTime('');
       setDurationMode('auto');
@@ -64,9 +68,9 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
     if (!name.trim()) return;
     const calculatedEnd = durationMode === 'auto' ? calculateEndTime() : endTime;
     if (event) {
-      updateEvent({ ...event, name, startTime, endTime: calculatedEnd, durationMode, duration, days, note });
+      updateEvent({ ...event, name, icon, startTime, endTime: calculatedEnd, durationMode, duration, days, note });
     } else {
-      addEvent(createEvent({ name, startTime, endTime: calculatedEnd, durationMode, duration, days, note }));
+      addEvent(createEvent({ name, icon, startTime, endTime: calculatedEnd, durationMode, duration, days, note }));
     }
     showToast(t('saved', lang));
     onClose();
@@ -97,28 +101,67 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
             />
           </div>
 
-          {/* Start time */}
-          <div>
-            <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('startTime', lang)}</label>
-            <div className="relative">
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-              />
-              {startTime && (
-                <button
-                  onClick={() => setStartTime('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                >
-                  <X size={16} />
-                </button>
-              )}
+          {/* Start and End time - two fields */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">Начало</label>
+              <div className="relative">
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                />
+                {startTime && (
+                  <button
+                    onClick={() => setStartTime('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="flex-1">
+              <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">Конец</label>
+              <div className="relative">
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                />
+                {endTime && (
+                  <button
+                    onClick={() => setEndTime('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
-
+          {/* Icon */}
+          <div>
+            <label className="text-sm text-[var(--text-secondary)] mb-2 block">Значок</label>
+            <div className="grid grid-cols-4 gap-2">
+              {EVENT_ICONS.map((iconKey) => (
+                <button
+                  key={iconKey}
+                  onClick={() => setIcon(iconKey)}
+                  className={`aspect-square rounded-xl flex items-center justify-center transition-all ${
+                    icon === iconKey
+                      ? 'bg-[var(--accent)]/20 border-2 border-[var(--accent)]'
+                      : 'bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)]/50'
+                  }`}
+                >
+                  {renderIcon(iconKey, 20, icon === iconKey ? 'var(--accent)' : 'var(--text-secondary)')}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Days */}
           <div>
