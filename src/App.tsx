@@ -68,8 +68,6 @@ function AppContent() {
           return <SettingsScreen onBack={() => setMenuSection(null)} />;
         case 'tools':
           return <ToolsScreen onBack={() => setMenuSection(null)} />;
-        case 'manage':
-          return <ManageScreen onBack={() => setMenuSection(null)} />;
         case 'statistics':
           return <StatisticsScreen onBack={() => setMenuSection(null)} />;
       }

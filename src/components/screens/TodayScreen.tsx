@@ -105,67 +105,80 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   return (
     <div className="space-y-5">
-      {/* Greeting card */}
+      {/* Greeting card - улучшенный прогресс */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--accent)]/10 via-[var(--accent)]/5 to-transparent p-4 border border-[var(--accent)]/20">
         <div className="relative z-10">
           <p className="text-lg font-semibold text-[var(--text-primary)] mb-1">{getGreeting()}!</p>
-          <p className="text-sm text-[var(--text-secondary)] italic mb-3">"{getDailyQuote()}"</p>
+          <p className="text-xs text-[var(--text-secondary)] italic mb-4">"{getDailyQuote()}"</p>
           
-          {/* Общий прогресс */}
-          <div className="space-y-2">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-[var(--text-muted)]">{t('habits', lang)}</span>
-                <span className={`text-xs font-medium ${progressPercent === 100 ? 'text-green-500' : 'text-[var(--accent)]'}`}>
-                  {completedHabitsCount}/{totalHabits}
-                  {progressPercent === 100 && ' ✓'}
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-[var(--hover)] overflow-hidden">
-                <div 
-                  className={`h-full transition-all duration-500 ${
-                    progressPercent === 100 
-                      ? 'bg-gradient-to-r from-green-400 to-green-500' 
-                      : 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)]'
-                  }`}
-                  style={{ width: `${progressPercent}%` }}
+          {/* Общий прогресс - визуальный */}
+          <div className="flex items-center gap-4">
+            {/* Круговой индикатор */}
+            <div className="relative w-20 h-20 flex-shrink-0">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke="var(--hover)"
+                  strokeWidth="6"
                 />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="35"
+                  fill="none"
+                  stroke={progressPercent === 100 ? '#10b981' : 'var(--accent)'}
+                  strokeWidth="6"
+                  strokeDasharray={`${2 * Math.PI * 35}`}
+                  strokeDashoffset={`${2 * Math.PI * 35 * (1 - progressPercent / 100)}`}
+                  strokeLinecap="round"
+                  className="transition-all duration-500"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className={`text-xl font-bold ${progressPercent === 100 ? 'text-green-500' : 'text-[var(--accent)]'}`}>
+                  {Math.round(progressPercent)}%
+                </span>
               </div>
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-[var(--text-muted)]">{t('tasks', lang)}</span>
-                <span className={`text-xs font-medium ${
-                  allDayTasks.length > 0 && completedTasks.length === allDayTasks.length 
-                    ? 'text-green-500' 
-                    : 'text-[var(--accent)]'
-                }`}>
-                  {completedTasks.length}/{allDayTasks.length}
-                  {allDayTasks.length > 0 && completedTasks.length === allDayTasks.length && ' ✓'}
+            
+            {/* Детали прогресса */}
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+                  <span className="text-xs font-medium text-[var(--text-primary)]">{t('habits', lang)}</span>
+                </div>
+                <span className={`text-xs font-bold ${progressPercent === 100 ? 'text-green-500' : 'text-[var(--text-primary)]'}`}>
+                  {completedHabitsCount}/{totalHabits}
                 </span>
               </div>
-              <div className="h-2 rounded-full bg-[var(--hover)] overflow-hidden">
-                <div 
-                  className={`h-full transition-all duration-500 ${
-                    allDayTasks.length > 0 && completedTasks.length === allDayTasks.length
-                      ? 'bg-gradient-to-r from-green-400 to-green-500'
-                      : 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)]'
-                  }`}
-                  style={{ width: `${allDayTasks.length > 0 ? (completedTasks.length / allDayTasks.length) * 100 : 0}%` }}
-                />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[var(--accent)]/60" />
+                  <span className="text-xs font-medium text-[var(--text-primary)]">{t('tasks', lang)}</span>
+                </div>
+                <span className={`text-xs font-bold ${
+                  allDayTasks.length > 0 && completedTasks.length === allDayTasks.length 
+                    ? 'text-green-500' 
+                    : 'text-[var(--text-primary)]'
+                }`}>
+                  {completedTasks.length}/{allDayTasks.length}
+                </span>
               </div>
+              {progressPercent === 100 && (
+                <p className="text-[10px] text-green-500 font-medium pt-1">
+                  ✓ {lang === 'ru' ? 'Все задачи выполнены!' : 'All tasks completed!'}
+                </p>
+              )}
             </div>
           </div>
         </div>
         {/* Декоративные элементы K-pop стиль */}
         <div className="absolute top-2 right-2 opacity-20">
           <Sparkles size={32} className="text-[var(--accent)] animate-sparkle" />
-        </div>
-        <div className="absolute bottom-1 right-8 opacity-10">
-          <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
-        </div>
-        <div className="absolute top-8 right-16 opacity-10">
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" style={{ animationDelay: '0.5s' }} />
         </div>
       </div>
 
