@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Check, Target, ListTodo } from 'lucide-react';
+import { Plus, Check, Target, ListTodo, Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { getDayOfWeek } from '../../utils/storage';
@@ -39,15 +39,16 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
     return days;
   }, [today.toDateString()]);
 
-  // Get habits for selected day
+  // Get habits for selected day (only incomplete)
   const dayOfWeek = getDayOfWeek(selectedDate) as DayOfWeek;
-  const dayHabits = state.habits.filter(h => h.days.includes(dayOfWeek));
-  const completedHabits = dayHabits.filter(h => h.completedDates.includes(selectedISO));
-
-  // Get tasks for selected day
-  const dayTasks = state.tasks.filter(t => t.date === selectedISO);
-  const completedTasks = dayTasks.filter(t => t.completed);
-
+  const allDayHabits = state.habits.filter(h => h.days.includes(dayOfWeek));
+  const dayHabits = allDayHabits.filter(h => !h.completedDates.includes(selectedISO));
+  const completedHabits = allDayHabits.filter(h => h.completedDates.includes(selectedISO));
+  
+  // Get tasks for selected day (only incomplete)
+  const allDayTasks = state.tasks.filter(t => t.date === selectedISO);
+  const dayTasks = allDayTasks.filter(t => !t.completed);
+  const completedTasks = allDayTasks.filter(t => t.completed);
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
     const task: Task = {
@@ -61,6 +62,38 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
     setNewTaskText('');
   };
 
+  // Приветствие в зависимости от времени
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return lang === 'ru' ? 'Доброе утро' : 'Good morning';
+    if (hour >= 12 && hour < 18) return lang === 'ru' ? 'Добрый день' : 'Good afternoon';
+    if (hour >= 18 && hour < 22) return lang === 'ru' ? 'Добрый вечер' : 'Good evening';
+    return lang === 'ru' ? 'Доброй ночи' : 'Good night';
+  };
+
+  // Цитаты
+  const quotes = [
+    { ru: 'Каждый день — это новая возможность', en: 'Every day is a new opportunity' },
+    { ru: 'Маленькие шаги ведут к большим целям', en: 'Small steps lead to big goals' },
+    { ru: 'Ты сильнее, чем думаешь', en: 'You are stronger than you think' },
+    { ru: 'Прогресс, а не совершенство', en: 'Progress, not perfection' },
+    { ru: 'Сегодня — твой день', en: 'Today is your day' },
+    { ru: 'Мечтай. Действуй. Достигай.', en: 'Dream. Act. Achieve.' },
+    { ru: 'Будь лучшей версией себя', en: 'Be the best version of yourself' },
+    { ru: 'Верь в себя', en: 'Believe in yourself' },
+  ];
+
+  const getDailyQuote = () => {
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+    const quote = quotes[dayOfYear % quotes.length];
+    return lang === 'ru' ? quote.ru : quote.en;
+  };
+
+  // Прогресс дня
+  const totalHabits = dayHabits.length;
+  const completedHabitsCount = completedHabits.length;
+  const progressPercent = totalHabits > 0 ? (completedHabitsCount / totalHabits) * 100 : 0;
+
   // Check if all habits completed for a day
   const isDayComplete = (date: Date) => {
     const iso = date.toISOString().split('T')[0];
@@ -72,6 +105,38 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   return (
     <div className="space-y-5">
+      {/* Greeting card */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--accent)]/10 via-[var(--accent)]/5 to-transparent p-4 border border-[var(--accent)]/20">
+        <div className="relative z-10">
+          <p className="text-lg font-semibold text-[var(--text-primary)] mb-1">{getGreeting()}!</p>
+          <p className="text-sm text-[var(--text-secondary)] italic mb-3">"{getDailyQuote()}"</p>
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-[var(--text-muted)]">{t('habits', lang)}</span>
+                <span className="text-xs font-medium text-[var(--accent)]">{completedHabitsCount}/{totalHabits}</span>
+              </div>
+              <div className="h-2 rounded-full bg-[var(--hover)] overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Декоративные элементы K-pop стиль */}
+        <div className="absolute top-2 right-2 opacity-20">
+          <Sparkles size={32} className="text-[var(--accent)] animate-sparkle" />
+        </div>
+        <div className="absolute bottom-1 right-8 opacity-10">
+          <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+        </div>
+        <div className="absolute top-8 right-16 opacity-10">
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" style={{ animationDelay: '0.5s' }} />
+        </div>
+      </div>
+
       {/* Week selector */}
       <div className="flex gap-1.5 justify-between">
         {weekDays.map((day, i) => {
@@ -106,7 +171,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <Target size={18} className="text-[var(--accent)]" />
-            {t('habits', lang)} <span className="text-[var(--text-muted)] font-normal">({completedHabits.length}/{dayHabits.length})</span>
+            {t('habits', lang)} <span className="text-[var(--text-muted)] font-normal">({completedHabits.length}/{allDayHabits.length})</span>
           </h3>
           <button
             onClick={onAddHabit}
@@ -133,7 +198,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                     {renderIcon(habit.icon, 20, 'var(--accent)')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
+                    <p className="text-sm font-medium truncate text-[var(--text-primary)]">
                       {habit.name}
                     </p>
                     <p className="text-xs text-[var(--text-muted)]">
@@ -165,7 +230,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <ListTodo size={18} className="text-[var(--accent)]" />
-            {t('tasks', lang)} <span className="text-[var(--text-muted)] font-normal">({completedTasks.length}/{dayTasks.length})</span>
+            {t('tasks', lang)} <span className="text-[var(--text-muted)] font-normal">({completedTasks.length}/{allDayTasks.length})</span>
           </h3>
         </div>
 

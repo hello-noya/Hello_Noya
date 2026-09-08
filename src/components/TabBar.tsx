@@ -23,17 +23,20 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-primary)]/95 backdrop-blur-sm border-t border-[var(--border)]">
-      <div className="max-w-[420px] mx-auto flex">
+      <div className="max-w-[420px] mx-auto flex relative">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`flex-1 flex flex-col items-center py-2.5 transition-colors ${
+            className={`flex-1 flex flex-col items-center py-2.5 transition-colors relative ${
               activeTab === tab.id ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'
             }`}
           >
             {tab.icon}
             <span className="text-[10px] mt-0.5 font-medium">{tab.label}</span>
+            {activeTab === tab.id && (
+              <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--accent)] animate-twinkle" />
+            )}
           </button>
         ))}
       </div>

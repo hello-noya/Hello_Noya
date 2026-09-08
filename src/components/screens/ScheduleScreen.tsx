@@ -59,7 +59,7 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between relative">
         <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
           <Calendar size={20} className="text-[var(--accent)]" />
           {t('schedule', lang)}
@@ -71,6 +71,10 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
           <Plus size={14} />
           <span>{t('addEvent', lang).replace('+ ', '')}</span>
         </button>
+        {/* Декоративный элемент */}
+        <div className="absolute -top-1 -right-1 opacity-20">
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-twinkle" />
+        </div>
       </div>
 
       {/* Day tabs */}
