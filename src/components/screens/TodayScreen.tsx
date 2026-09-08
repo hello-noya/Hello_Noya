@@ -6,7 +6,6 @@ import { getDayOfWeek } from '../../utils/storage';
 import { Habit, Task, DayOfWeek } from '../../types';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { renderIcon } from '../../utils/icons';
-import { TestHabitsCleanup } from './TestHabitsCleanup';
 
 interface TodayScreenProps {
   onEditHabit: (habit: Habit) => void;
@@ -28,18 +27,26 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const today = new Date();
   const selectedISO = selectedDate.toISOString().split('T')[0];
 
-  // Clean up completed habits from previous days
+  // Clean up completed habits and tasks from previous days
   useEffect(() => {
     const todayStr = new Date().toISOString().split('T')[0];
+    
+    // Clean up old habit completions
     state.habits.forEach(habit => {
-      // Remove completion dates older than today
       const oldDates = habit.completedDates.filter(date => date < todayStr);
       if (oldDates.length > 0) {
         const newDates = habit.completedDates.filter(date => date >= todayStr);
         updateHabit({ ...habit, completedDates: newDates });
       }
     });
-  }, [state.habits, updateHabit]);
+    
+    // Clean up old completed tasks
+    state.tasks.forEach(task => {
+      if (task.completed && task.date < todayStr) {
+        deleteTask(task.id);
+      }
+    });
+  }, [state.habits, state.tasks, updateHabit, deleteTask]);
 
   // Get week days (Mon-Sun)
   const weekDays = useMemo(() => {
@@ -488,9 +495,6 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </div>
         </div>
       )}
-
-      {/* Test component */}
-      <TestHabitsCleanup />
     </div>
   );
 }

@@ -124,8 +124,8 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
                     : 'border-[var(--border)] hover:border-[var(--accent)]/30'
                 }`}
               >
-                {/* Time badge */}
-                <div className="flex flex-col items-center justify-center min-w-[60px]">
+                {/* Time info */}
+                <div className="flex flex-col items-start justify-center min-w-[80px]">
                   <div className={`px-3 py-1.5 rounded-lg border-2 ${
                     active 
                       ? 'border-[var(--accent)]' 
@@ -135,6 +135,12 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
                       {event.startTime}
                     </span>
                   </div>
+                  <span className="text-xs text-[var(--text-muted)] mt-1">
+                    –{event.endTime}
+                  </span>
+                  <span className="text-[10px] text-[var(--text-muted)]">
+                    {event.duration} мин
+                  </span>
                   {active && (
                     <span className="text-[10px] font-semibold text-[var(--accent)] mt-1">● {t('now', lang)}</span>
                   )}
