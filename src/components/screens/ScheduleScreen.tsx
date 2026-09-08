@@ -126,7 +126,11 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
               >
                 {/* Time badge */}
                 <div className="flex flex-col items-center justify-center min-w-[60px]">
-                  <div className={`px-3 py-1.5 rounded-lg ${active ? 'bg-[var(--accent)]' : 'bg-[var(--hover)]'}`}>
+                  <div className={`px-3 py-1.5 rounded-lg border-2 ${
+                    active 
+                      ? 'bg-[var(--accent)] border-[var(--accent)]' 
+                      : 'bg-[var(--hover)] border-[var(--border)]'
+                  }`}>
                     <span className={`text-sm font-bold ${active ? 'text-white' : 'text-[var(--text-primary)]'}`}>
                       {event.startTime}
                     </span>

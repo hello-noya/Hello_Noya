@@ -181,7 +181,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                     {renderIcon(habit.icon, 20, 'var(--accent)')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate text-[var(--text-primary)]">
+                    <p className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
                       {habit.name}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -190,7 +190,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                       </p>
                       {habit.note && (
                         <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
-                          💬 {habit.note}
+                          · {habit.note}
                         </span>
                       )}
                     </div>
@@ -295,7 +295,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                   )}
                   {task.note && (
                     <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[200px]">
-                      💬 {task.note}
+                      · {task.note}
                     </span>
                   )}
                 </div>

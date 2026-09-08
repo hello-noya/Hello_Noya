@@ -82,14 +82,20 @@ export function GoalModal({ isOpen, onClose, goal }: GoalModalProps) {
           {/* Количество */}
           <div className="flex-1 flex items-center justify-between gap-2 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
             <button
-              onClick={() => setTarget(Math.max(1, target - 1))}
+              onClick={() => {
+                const step = target >= 1000 ? 10 : target >= 100 ? 5 : 1;
+                setTarget(Math.max(1, target - step));
+              }}
               className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
             >
               <Minus size={14} />
             </button>
             <span className="text-base font-bold text-[var(--text-primary)]">{target}</span>
             <button
-              onClick={() => setTarget(target + 1)}
+              onClick={() => {
+                const step = target >= 1000 ? 10 : target >= 100 ? 5 : 1;
+                setTarget(target + step);
+              }}
               className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
             >
               <Plus size={14} />
