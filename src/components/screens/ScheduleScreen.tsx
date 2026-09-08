@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X } from 'lucide-react';
+import { X, Calendar, Plus } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { ScheduleEvent, DayOfWeek } from '../../types';
@@ -60,12 +60,16 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-[var(--text-primary)]">{t('schedule', lang)}</h2>
+        <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+          <Calendar size={20} className="text-[var(--accent)]" />
+          {t('schedule', lang)}
+        </h3>
         <button
           onClick={onAddEvent}
-          className="text-xs font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
         >
-          {t('addEvent', lang)}
+          <Plus size={14} />
+          <span>{t('addEvent', lang).replace('+ ', '')}</span>
         </button>
       </div>
 

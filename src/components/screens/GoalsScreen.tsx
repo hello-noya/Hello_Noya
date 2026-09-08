@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Minus, X, Check } from 'lucide-react';
+import { Plus, Minus, X, Check, Target } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { Goal } from '../../types';
@@ -37,12 +37,16 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-[var(--text-primary)]">{t('goalsTitle', lang)}</h2>
+        <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+          <Target size={20} className="text-[var(--accent)]" />
+          {t('goals', lang)}
+        </h3>
         <button
           onClick={onAddGoal}
-          className="text-xs font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
         >
-          {t('addGoal', lang)}
+          <Plus size={14} />
+          <span>{t('addGoal', lang).replace('+ ', '')}</span>
         </button>
       </div>
 

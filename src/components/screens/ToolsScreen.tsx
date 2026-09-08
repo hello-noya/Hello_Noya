@@ -143,16 +143,12 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
     } else {
       pomodoroTimer.start();
     }
-    updateToolsState({ pomodoroRunning: !timerState.running });
+    // Состояние обновится через callback от pomodoroTimer
   };
 
   const handleReset = () => {
     pomodoroTimer.reset();
-    updateToolsState({
-      pomodoroRunning: false,
-      pomodoroIsBreak: false,
-      pomodoroTimeLeft: timerState.focusDuration * 60,
-    });
+    // Состояние обновится через callback от pomodoroTimer
   };
 
   const minutes = Math.floor(timerState.timeLeft / 60);
