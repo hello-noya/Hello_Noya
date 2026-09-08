@@ -9,7 +9,7 @@ class PomodoroTimer {
   private isBreak: boolean = false;
   private running: boolean = false;
   private intervalId: number | null = null;
-  private onTickCallback: TimerCallback | null = null;
+  private callbacks: Set<TimerCallback> = new Set();
 
   private startInterval(): void {
     if (this.intervalId) {
@@ -33,7 +33,7 @@ class PomodoroTimer {
           }
         }
         
-        this.notifyCallback();
+        this.notifyAll();
       }
     }, 1000);
   }
@@ -45,22 +45,26 @@ class PomodoroTimer {
     }
   }
 
-  private notifyCallback(): void {
-    if (this.onTickCallback) {
-      this.onTickCallback(this.timeLeft, this.isBreak, this.running);
-    }
+  private notifyAll(): void {
+    this.callbacks.forEach(cb => {
+      cb(this.timeLeft, this.isBreak, this.running);
+    });
   }
 
   public start(): void {
-    this.running = true;
-    this.startInterval();
-    this.notifyCallback();
+    if (!this.running) {
+      this.running = true;
+      this.startInterval();
+      this.notifyAll();
+    }
   }
 
   public pause(): void {
-    this.running = false;
-    this.stopInterval();
-    this.notifyCallback();
+    if (this.running) {
+      this.running = false;
+      this.stopInterval();
+      this.notifyAll();
+    }
   }
 
   public reset(): void {
@@ -68,19 +72,19 @@ class PomodoroTimer {
     this.isBreak = false;
     this.timeLeft = this.focusDuration * 60;
     this.stopInterval();
-    this.notifyCallback();
+    this.notifyAll();
   }
 
   public setTimeLeft(seconds: number): void {
     this.timeLeft = seconds;
-    this.notifyCallback();
+    this.notifyAll();
   }
 
   public setFocusDuration(minutes: number): void {
     this.focusDuration = minutes;
     if (!this.running && !this.isBreak) {
       this.timeLeft = minutes * 60;
-      this.notifyCallback();
+      this.notifyAll();
     }
   }
 
@@ -88,15 +92,11 @@ class PomodoroTimer {
     this.breakDuration = minutes;
     if (!this.running && this.isBreak) {
       this.timeLeft = minutes * 60;
-      this.notifyCallback();
+      this.notifyAll();
     }
   }
 
-  public onTick(callback: TimerCallback): void {
-    this.onTickCallback = callback;
-  }
-
-  public getState(): { timeLeft: number; isBreak: boolean; running: boolean; focusDuration: number; breakDuration: number } {
+  public getState() {
     return {
       timeLeft: this.timeLeft,
       isBreak: this.isBreak,
@@ -105,7 +105,19 @@ class PomodoroTimer {
       breakDuration: this.breakDuration,
     };
   }
+
+  public subscribe(callback: TimerCallback): () => void {
+    this.callbacks.add(callback);
+    // Немедленно уведомляем о текущем состоянии
+    callback(this.timeLeft, this.isBreak, this.running);
+    return () => {
+      this.callbacks.delete(callback);
+    };
+  }
+
+  public onTick(callback: TimerCallback): void {
+    this.callbacks.add(callback);
+  }
 }
 
-// Singleton instance
 export const pomodoroTimer = new PomodoroTimer();

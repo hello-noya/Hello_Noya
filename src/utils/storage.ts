@@ -159,4 +159,4 @@ export function calculateStats(state: AppState): Stats {
 // SVG-иконки вместо эмодзи
 export const PROFILE_ICONS = ['star', 'crown', 'flame', 'diamond', 'rocket', 'heart', 'leaf', 'zap', 'sun', 'moon', 'trophy', 'sparkles'];
 
-export const HABIT_ICONS = ['water', 'book', 'run', 'yoga', 'sleep', 'apple', 'pencil', 'brain', 'music', 'gym', 'walk', 'meditate', 'target', 'clock', 'coffee', 'laptop', 'pill', 'stretch'];
+export const HABIT_ICONS = ['water', 'book', 'run', 'sleep', 'apple', 'brain', 'music', 'gym', 'coffee', 'laptop'];

@@ -25,17 +25,15 @@ export function Header({ onToolsClick }: HeaderProps) {
 
   // Подписка на глобальный таймер помодоро
   useEffect(() => {
-    pomodoroTimer.onTick((timeLeft, isBreak, running) => {
+    const unsubscribe = pomodoroTimer.subscribe((timeLeft, isBreak, running) => {
       setPomodoroTime(timeLeft);
       setPomodoroIsBreak(isBreak);
       setPomodoroRunning(running);
     });
 
-    // Инициализация
-    const initialState = pomodoroTimer.getState();
-    setPomodoroTime(initialState.timeLeft);
-    setPomodoroIsBreak(initialState.isBreak);
-    setPomodoroRunning(initialState.running);
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const timeStr = time.toLocaleTimeString(lang === 'ru' ? 'ru-RU' : 'en-US', {

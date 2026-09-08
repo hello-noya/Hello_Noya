@@ -6,7 +6,7 @@ import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Habit, DayOfWeek } from '../../types';
 import { createHabit, HABIT_ICONS } from '../../utils/storage';
-import { HabitIcons, renderIcon } from '../../utils/icons';
+import { renderIcon } from '../../utils/icons';
 
 interface HabitModalProps {
   isOpen: boolean;
@@ -107,17 +107,20 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
             </div>
           </div>
 
-          {/* Duration mode */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs text-[var(--text-secondary)]">{t('duration', lang)}</label>
+          {/* Duration - компактная плашка с тумблером */}
+          <div className="p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-[var(--text-secondary)]">{t('duration', lang)}</span>
+              {/* Тумблер ВКЛ/ВЫКЛ */}
               <button
                 onClick={() => setDurationEnabled(!durationEnabled)}
-                className={`px-2.5 py-0.5 rounded-md text-xs font-medium transition-all ${
-                  durationEnabled ? 'bg-[var(--accent)] text-white' : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                className={`relative w-10 h-5 rounded-full transition-colors ${
+                  durationEnabled ? 'bg-[var(--accent)]' : 'bg-[var(--hover)]'
                 }`}
               >
-                {durationEnabled ? 'ВКЛ' : 'ВЫКЛ'}
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                  durationEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                }`} />
               </button>
             </div>
             {durationEnabled && (
@@ -125,7 +128,7 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
                 <div className="flex gap-0.5 p-0.5 rounded-md bg-[var(--hover)] flex-1">
                   <button
                     onClick={() => setDurationMode('auto')}
-                    className={`flex-1 px-2 py-0.5 rounded text-xs font-medium transition-all ${
+                    className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-all ${
                       durationMode === 'auto' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
                     }`}
                   >
@@ -133,7 +136,7 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
                   </button>
                   <button
                     onClick={() => setDurationMode('manual')}
-                    className={`flex-1 px-2 py-0.5 rounded text-xs font-medium transition-all ${
+                    className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-all ${
                       durationMode === 'manual' ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
                     }`}
                   >
@@ -147,7 +150,7 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
                       value={duration}
                       onChange={(e) => setDuration(Number(e.target.value))}
                       min={1}
-                      className="w-16 px-2 py-1 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-xs text-center focus:outline-none focus:border-[var(--accent)] transition-colors"
+                      className="w-14 px-2 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-primary)] text-xs text-center focus:outline-none focus:border-[var(--accent)]"
                     />
                     <span className="text-xs text-[var(--text-muted)]">{t('minutes', lang)}</span>
                   </div>
