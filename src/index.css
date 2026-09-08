@@ -34,20 +34,6 @@
   --text-muted: #9a8bb5;
 }
 
-/* Mint theme — свежий мятный */
-[data-theme="mint"] {
-  --bg-primary: #f0fdfa;
-  --bg-secondary: #e6fffa;
-  --card-bg: #ffffff;
-  --hover: #ccfbf1;
-  --border: #a7f3d0;
-  --accent: #2dd4bf;
-  --accent-hover: #14b8a6;
-  --text-primary: #134e4a;
-  --text-secondary: #2d7a73;
-  --text-muted: #5fa8a0;
-}
-
 /* Dark theme — тёмная тема для вечерней учёбы */
 [data-theme="dark"] {
   --bg-primary: #1a1a2e;

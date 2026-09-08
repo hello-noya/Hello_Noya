@@ -52,7 +52,7 @@ export interface Goal {
 
 export interface AppSettings {
   language: 'ru' | 'en';
-  theme: 'pink' | 'lavender' | 'mint' | 'dark';
+  theme: 'pink' | 'lavender' | 'dark';
 }
 
 export interface Stats {

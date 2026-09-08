@@ -99,7 +99,17 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
 
       {/* Events list */}
       {dayEvents.length === 0 ? (
-        <p className="text-sm text-[var(--text-muted)] text-center py-8">{t('noItems', lang)}</p>
+        <div className="p-8 rounded-2xl border-2 border-dashed border-[var(--border)] text-center">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+            <Calendar size={20} className="text-[var(--accent)]" />
+          </div>
+          <p className="text-sm text-[var(--text-muted)] mb-1">
+            {lang === 'ru' ? 'Нет событий на этот день' : 'No events for this day'}
+          </p>
+          <p className="text-xs text-[var(--text-muted)]">
+            {lang === 'ru' ? 'Нажми "+ Новое событие" чтобы добавить' : 'Tap "+ New event" to add one'}
+          </p>
+        </div>
       ) : (
         <div className="space-y-2">
           {dayEvents.map((event) => {

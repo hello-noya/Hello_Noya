@@ -14,11 +14,10 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
   const theme = state.settings.theme;
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const themes: { id: 'pink' | 'lavender' | 'mint' | 'dark'; label: string }[] = [
-    { id: 'pink', label: t('themePink', lang) },
-    { id: 'lavender', label: t('themeLavender', lang) },
-    { id: 'mint', label: t('themeMint', lang) },
-    { id: 'dark', label: t('themeDark', lang) },
+  const themes: { id: 'pink' | 'lavender' | 'dark'; label: string; icon: string }[] = [
+    { id: 'pink', label: t('themePink', lang), icon: '🌸' },
+    { id: 'lavender', label: t('themeLavender', lang), icon: '💜' },
+    { id: 'dark', label: t('themeDark', lang), icon: '🌙' },
   ];
 
   const handleExport = () => {
@@ -83,11 +82,12 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
             <button
               key={th.id}
               onClick={() => updateSettings({ theme: th.id })}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
                 theme === th.id ? 'bg-[var(--accent)] text-white' : 'bg-[var(--hover)] text-[var(--text-secondary)]'
               }`}
             >
-              {th.label}
+              <span className="text-base">{th.icon}</span>
+              <span>{th.label}</span>
             </button>
           ))}
         </div>

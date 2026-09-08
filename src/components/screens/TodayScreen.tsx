@@ -110,8 +110,10 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         <div className="relative z-10">
           <p className="text-lg font-semibold text-[var(--text-primary)] mb-1">{getGreeting()}!</p>
           <p className="text-sm text-[var(--text-secondary)] italic mb-3">"{getDailyQuote()}"</p>
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
+          
+          {/* Общий прогресс */}
+          <div className="space-y-2">
+            <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-[var(--text-muted)]">{t('habits', lang)}</span>
                 <span className="text-xs font-medium text-[var(--accent)]">{completedHabitsCount}/{totalHabits}</span>
@@ -120,6 +122,18 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 <div 
                   className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-[var(--text-muted)]">{t('tasks', lang)}</span>
+                <span className="text-xs font-medium text-[var(--accent)]">{completedTasks.length}/{allDayTasks.length}</span>
+              </div>
+              <div className="h-2 rounded-full bg-[var(--hover)] overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-hover)] transition-all duration-500"
+                  style={{ width: `${allDayTasks.length > 0 ? (completedTasks.length / allDayTasks.length) * 100 : 0}%` }}
                 />
               </div>
             </div>
@@ -183,7 +197,21 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         </div>
 
         {dayHabits.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)] text-center py-4">{t('noItems', lang)}</p>
+          <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center">
+            <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+              <Target size={20} className="text-[var(--accent)]" />
+            </div>
+            <p className="text-sm text-[var(--text-muted)] mb-1">
+              {allDayHabits.length === 0 
+                ? (lang === 'ru' ? 'Пока нет привычек' : 'No habits yet')
+                : (lang === 'ru' ? 'Все привычки выполнены!' : 'All habits completed!')}
+            </p>
+            {allDayHabits.length === 0 && (
+              <p className="text-xs text-[var(--text-muted)]">
+                {lang === 'ru' ? 'Нажми "+ Привычка" чтобы добавить' : 'Tap "+ Habit" to add one'}
+              </p>
+            )}
+          </div>
         ) : (
           <div className="space-y-2">
             {dayHabits.map((habit) => {
@@ -234,6 +262,19 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </h3>
         </div>
 
+          {dayTasks.length === 0 && allDayTasks.length === 0 && (
+            <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center mb-2">
+              <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                <ListTodo size={20} className="text-[var(--accent)]" />
+              </div>
+              <p className="text-sm text-[var(--text-muted)] mb-1">
+                {lang === 'ru' ? 'Пока нет задач' : 'No tasks yet'}
+              </p>
+              <p className="text-xs text-[var(--text-muted)]">
+                {lang === 'ru' ? 'Добавь задачу ниже' : 'Add a task below'}
+              </p>
+            </div>
+          )}
           <div className="space-y-2">
           {dayTasks.map((task) => (
             <div key={task.id} className="flex items-start gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">

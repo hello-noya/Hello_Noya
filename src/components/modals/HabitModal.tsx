@@ -20,7 +20,6 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('water');
-  const [icon2, setIcon2] = useState('');
   const [startTime, setStartTime] = useState('');
   const [days, setDays] = useState<DayOfWeek[]>([1, 2, 3, 4, 5]);
   const [note, setNote] = useState('');
@@ -30,14 +29,12 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
     if (habit) {
       setName(habit.name);
       setIcon(habit.icon);
-      setIcon2(habit.icon2 || '');
       setStartTime(habit.startTime);
       setDays(habit.days);
       setNote(habit.note || '');
     } else {
       setName('');
       setIcon('water');
-      setIcon2('');
       setStartTime('');
       setDays([1, 2, 3, 4, 5]);
       setNote('');
@@ -51,9 +48,9 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
   const handleSave = () => {
     if (!name.trim()) return;
     if (habit) {
-      updateHabit({ ...habit, name, icon, icon2: icon2 || undefined, startTime, days, note: note || undefined });
+      updateHabit({ ...habit, name, icon, startTime, days, note: note || undefined });
     } else {
-      addHabit(createHabit({ name, icon, icon2: icon2 || undefined, startTime, days, note: note || undefined }));
+      addHabit(createHabit({ name, icon, startTime, days, note: note || undefined }));
     }
     showToast(t('saved', lang));
     onClose();
@@ -125,47 +122,25 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
             </div>
           </div>
 
-          {/* Icons - 2 icons */}
+          {/* Icon */}
           <div>
-            <label className="text-sm text-[var(--text-secondary)] mb-2 block">{t('icon', lang)} (1-2)</label>
+            <label className="text-sm text-[var(--text-secondary)] mb-2 block">{t('icon', lang)}</label>
             <div className="grid grid-cols-5 gap-2">
               {HABIT_ICONS.map((iconKey) => (
                 <button
                   key={iconKey}
-                  onClick={() => {
-                    if (!icon || icon === iconKey) {
-                      setIcon(iconKey);
-                    } else if (!icon2) {
-                      setIcon2(iconKey);
-                    } else {
-                      setIcon(iconKey);
-                      setIcon2('');
-                    }
-                  }}
-                  className={`aspect-square rounded-xl flex items-center justify-center transition-all relative ${
-                    icon === iconKey || icon2 === iconKey
+                  onClick={() => setIcon(iconKey)}
+                  className={`aspect-square rounded-xl flex items-center justify-center transition-all ${
+                    icon === iconKey
                       ? 'bg-[var(--accent)]/20 border-2 border-[var(--accent)]'
                       : 'bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)]/50'
                   }`}
                   title={t(`icon_${iconKey}`, lang)}
                 >
-                  {renderIcon(iconKey, 20, icon === iconKey || icon2 === iconKey ? 'var(--accent)' : 'var(--text-secondary)')}
-                  {icon === iconKey && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--accent)] text-white text-[8px] flex items-center justify-center font-bold">1</span>
-                  )}
-                  {icon2 === iconKey && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--accent)] text-white text-[8px] flex items-center justify-center font-bold">2</span>
-                  )}
+                  {renderIcon(iconKey, 20, icon === iconKey ? 'var(--accent)' : 'var(--text-secondary)')}
                 </button>
               ))}
             </div>
-            {(icon || icon2) && (
-              <div className="mt-2 flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                <span>Выбрано:</span>
-                {icon && <span className="px-2 py-0.5 rounded bg-[var(--hover)]">1: {t(`icon_${icon}`, lang)}</span>}
-                {icon2 && <span className="px-2 py-0.5 rounded bg-[var(--hover)]">2: {t(`icon_${icon2}`, lang)}</span>}
-              </div>
-            )}
           </div>
 
           {/* Note */}
