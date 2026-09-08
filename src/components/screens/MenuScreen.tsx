@@ -1,10 +1,10 @@
 import React from 'react';
-import { User, Settings, Wrench, ChevronRight, TrendingUp } from 'lucide-react';
+import { User, Settings, Wrench, ChevronRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { renderIcon } from '../../utils/icons';
 
-type MenuSection = 'profile' | 'settings' | 'tools' | 'statistics';
+type MenuSection = 'profile' | 'settings' | 'tools';
 
 interface MenuScreenProps {
   onNavigate: (section: MenuSection) => void;
@@ -16,7 +16,6 @@ export function MenuScreen({ onNavigate }: MenuScreenProps) {
 
   const items = [
     { id: 'profile' as MenuSection, icon: <User size={20} />, label: t('profile', lang), desc: t('profileDesc', lang) },
-    { id: 'statistics' as MenuSection, icon: <TrendingUp size={20} />, label: lang === 'ru' ? 'Статистика' : 'Statistics', desc: lang === 'ru' ? 'ваш прогресс и достижения' : 'your progress and achievements' },
     { id: 'settings' as MenuSection, icon: <Settings size={20} />, label: t('settings', lang), desc: t('settingsDesc', lang) },
     { id: 'tools' as MenuSection, icon: <Wrench size={20} />, label: t('tools', lang), desc: t('toolsDesc', lang) },
   ];

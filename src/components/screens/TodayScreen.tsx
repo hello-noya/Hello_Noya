@@ -45,9 +45,9 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const dayHabits = allDayHabits; // Show all habits
   const completedHabits = allDayHabits.filter(h => h.completedDates.includes(selectedISO));
   
-  // Get tasks for selected day (show all)
+  // Get tasks for selected day (show all, including completed)
   const allDayTasks = state.tasks.filter(t => t.date === selectedISO);
-  const dayTasks = allDayTasks; // Show all tasks
+  const dayTasks = allDayTasks; // Show all tasks (completed and uncompleted)
   const completedTasks = allDayTasks.filter(t => t.completed);
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
@@ -105,82 +105,6 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   return (
     <div className="space-y-5">
-      {/* Greeting card - улучшенный прогресс */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--accent)]/10 via-[var(--accent)]/5 to-transparent p-4 border border-[var(--accent)]/20">
-        <div className="relative z-10">
-          <p className="text-lg font-semibold text-[var(--text-primary)] mb-1">{getGreeting()}!</p>
-          <p className="text-xs text-[var(--text-secondary)] italic mb-4">"{getDailyQuote()}"</p>
-          
-          {/* Общий прогресс - визуальный */}
-          <div className="flex items-center gap-4">
-            {/* Круговой индикатор */}
-            <div className="relative w-20 h-20 flex-shrink-0">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="35"
-                  fill="none"
-                  stroke="var(--hover)"
-                  strokeWidth="6"
-                />
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="35"
-                  fill="none"
-                  stroke={progressPercent === 100 ? '#10b981' : 'var(--accent)'}
-                  strokeWidth="6"
-                  strokeDasharray={`${2 * Math.PI * 35}`}
-                  strokeDashoffset={`${2 * Math.PI * 35 * (1 - progressPercent / 100)}`}
-                  strokeLinecap="round"
-                  className="transition-all duration-500"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className={`text-xl font-bold ${progressPercent === 100 ? 'text-green-500' : 'text-[var(--accent)]'}`}>
-                  {Math.round(progressPercent)}%
-                </span>
-              </div>
-            </div>
-            
-            {/* Детали прогресса */}
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-                  <span className="text-xs font-medium text-[var(--text-primary)]">{t('habits', lang)}</span>
-                </div>
-                <span className={`text-xs font-bold ${progressPercent === 100 ? 'text-green-500' : 'text-[var(--text-primary)]'}`}>
-                  {completedHabitsCount}/{totalHabits}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[var(--accent)]/60" />
-                  <span className="text-xs font-medium text-[var(--text-primary)]">{t('tasks', lang)}</span>
-                </div>
-                <span className={`text-xs font-bold ${
-                  allDayTasks.length > 0 && completedTasks.length === allDayTasks.length 
-                    ? 'text-green-500' 
-                    : 'text-[var(--text-primary)]'
-                }`}>
-                  {completedTasks.length}/{allDayTasks.length}
-                </span>
-              </div>
-              {progressPercent === 100 && (
-                <p className="text-[10px] text-green-500 font-medium pt-1">
-                  ✓ {lang === 'ru' ? 'Все задачи выполнены!' : 'All tasks completed!'}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-        {/* Декоративные элементы K-pop стиль */}
-        <div className="absolute top-2 right-2 opacity-20">
-          <Sparkles size={32} className="text-[var(--accent)] animate-sparkle" />
-        </div>
-      </div>
 
       {/* Week selector */}
       <div className="flex gap-1.5 justify-between">
@@ -260,9 +184,16 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                     <p className="text-sm font-medium truncate text-[var(--text-primary)]">
                       {habit.name}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">
-                      {habit.startTime || 'Без времени'}
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {habit.startTime || 'Без времени'}
+                      </p>
+                      {habit.note && (
+                        <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
+                          💬 {habit.note}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <button
                     onClick={(e) => {
@@ -323,7 +254,11 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           {dayTasks.map((task) => (
             <div 
               key={task.id} 
-              className="flex items-start gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)]/30 transition-colors"
+              className={`flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:shadow-md ${
+                task.completed 
+                  ? 'bg-gradient-to-br from-green-50 to-transparent border-green-200 dark:from-green-900/10 dark:border-green-800/30' 
+                  : 'bg-[var(--card-bg)] border-[var(--border)] hover:border-[var(--accent)]/30'
+              }`}
               onClick={() => {
                 setEditingTask(task);
                 setEditTaskText(task.text);
@@ -337,24 +272,32 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 }}
                 className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all mt-0.5 ${
                   task.completed
-                    ? 'bg-[var(--accent)] text-white'
+                    ? 'bg-green-500 text-white'
                     : 'border-2 border-[var(--border)] hover:border-[var(--accent)]'
                 }`}
               >
                 {task.completed && <Check size={12} />}
               </button>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm ${task.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
+                <p className={`text-sm font-medium ${task.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
                   {task.text}
                 </p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  {task.time && <span className="text-xs text-[var(--text-muted)]">{task.time}</span>}
+                  {task.time && (
+                    <span className="text-xs text-[var(--accent)] font-medium bg-[var(--accent)]/10 px-2 py-0.5 rounded">
+                      {task.time}
+                    </span>
+                  )}
                   {task.deadline && (
-                    <span className="text-xs text-orange-500 flex items-center gap-1">
+                    <span className="text-xs text-orange-500 font-medium bg-orange-500/10 px-2 py-0.5 rounded flex items-center gap-1">
                       ⏰ {new Date(task.deadline).toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US')}
                     </span>
                   )}
-                  {task.note && <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[200px]">💬 {task.note}</span>}
+                  {task.note && (
+                    <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[200px]">
+                      💬 {task.note}
+                    </span>
+                  )}
                 </div>
               </div>
               <button

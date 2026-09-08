@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Download, Bell, BellOff } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { requestNotificationPermission, sendNotification } from '../../utils/notifications';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -14,6 +15,28 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
   const theme = state.settings.theme;
   const [showConfirm, setShowConfirm] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  // Check notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      setNotificationsEnabled(true);
+    }
+  }, []);
+
+  const handleToggleNotifications = async () => {
+    if (!notificationsEnabled) {
+      const granted = await requestNotificationPermission();
+      setNotificationsEnabled(granted);
+      if (granted) {
+        sendNotification(
+          lang === 'ru' ? '🎉 Уведомления включены!' : '🎉 Notifications enabled!',
+          lang === 'ru' ? 'Вы будете получать напоминания о привычках' : 'You will receive habit reminders'
+        );
+      }
+    } else {
+      setNotificationsEnabled(false);
+    }
+  };
 
   const themes: { id: 'pink' | 'lavender' | 'dark'; label: string; color: string }[] = [
     { id: 'pink', label: t('themePink', lang), color: '#ff4d8d' },
@@ -125,14 +148,14 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
             </div>
           </div>
           <button
-            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+            onClick={handleToggleNotifications}
             className={`relative w-11 h-6 rounded-full transition-colors ${
               notificationsEnabled ? 'bg-[var(--accent)]' : 'bg-[var(--hover)]'
             }`}
           >
             <div
               className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
-                notificationsEnabled ? 'translate-x-5.5' : 'translate-x-0.5'
+                notificationsEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
               }`}
             />
           </button>

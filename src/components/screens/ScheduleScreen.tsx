@@ -111,35 +111,46 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {dayEvents.map((event) => {
             const active = isNow(event);
             return (
               <div
                 key={event.id}
                 onClick={() => onEditEvent(event)}
-                className={`flex gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border cursor-pointer transition-colors ${
-                  active ? 'border-[var(--accent)]' : 'border-[var(--border)] hover:border-[var(--accent)]/30'
+                className={`relative flex gap-3 p-4 rounded-2xl bg-[var(--card-bg)] border cursor-pointer transition-all hover:shadow-md ${
+                  active 
+                    ? 'border-[var(--accent)] shadow-sm bg-gradient-to-br from-[var(--accent)]/5 to-transparent' 
+                    : 'border-[var(--border)] hover:border-[var(--accent)]/30'
                 }`}
               >
-                <div className="flex flex-col items-end min-w-[50px]">
-                  <span className="text-lg font-bold text-[var(--text-primary)]">{event.startTime}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">{event.name}</p>
-                  {event.note && (
-                    <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{event.note}</p>
-                  )}
+                {/* Time badge */}
+                <div className="flex flex-col items-center justify-center min-w-[60px]">
+                  <div className={`px-3 py-1.5 rounded-lg ${active ? 'bg-[var(--accent)]' : 'bg-[var(--hover)]'}`}>
+                    <span className={`text-sm font-bold ${active ? 'text-white' : 'text-[var(--text-primary)]'}`}>
+                      {event.startTime}
+                    </span>
+                  </div>
                   {active && (
-                    <span className="text-xs font-semibold text-[var(--accent)] mt-1 inline-block">● {t('now', lang)}</span>
+                    <span className="text-[10px] font-semibold text-[var(--accent)] mt-1">● {t('now', lang)}</span>
                   )}
                 </div>
+                
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">{event.name}</p>
+                  {event.note && (
+                    <p className="text-xs text-[var(--text-muted)] line-clamp-2 italic">{event.note}</p>
+                  )}
+                </div>
+                
+                {/* Delete button */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setDeleteConfirmId(event.id);
                   }}
-                  className="text-[var(--text-muted)] hover:text-red-400 transition-colors self-start"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors self-start"
                 >
                   <X size={16} />
                 </button>
