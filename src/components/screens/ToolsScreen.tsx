@@ -111,18 +111,21 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
 
   useEffect(() => {
     const unsubscribe = pomodoroTimer.subscribe((timeLeft, isBreak, running) => {
+      const currentState = pomodoroTimer.getState();
       setTimerState({
         timeLeft,
         isBreak,
         running,
-        focusDuration: timerState.focusDuration,
-        breakDuration: timerState.breakDuration,
+        focusDuration: currentState.focusDuration,
+        breakDuration: currentState.breakDuration,
       });
 
       updateToolsState({
         pomodoroTimeLeft: timeLeft,
         pomodoroIsBreak: isBreak,
         pomodoroRunning: running,
+        pomodoroFocusDuration: currentState.focusDuration,
+        pomodoroBreakDuration: currentState.breakDuration,
       });
     });
 
@@ -194,10 +197,10 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
         </button>
       </div>
 
-      {/* Settings - две строки */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
-          <span className="text-sm font-medium text-[var(--text-primary)]">{t('focus', lang)}</span>
+      {/* Settings - две плашки в одну строку */}
+      <div className="flex gap-3">
+        <div className="flex-1 flex flex-col items-center p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+          <span className="text-xs font-medium text-[var(--text-muted)] mb-2">{t('focus', lang)}</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
@@ -206,9 +209,9 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
                 updateToolsState({ pomodoroFocusDuration: newDur });
                 setTimerState(prev => ({ ...prev, focusDuration: newDur }));
               }}
-              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+              className="w-7 h-7 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
             >−</button>
-            <span className="font-bold text-[var(--text-primary)] text-lg w-10 text-center">{timerState.focusDuration}</span>
+            <span className="font-bold text-[var(--text-primary)] text-lg w-8 text-center">{timerState.focusDuration}</span>
             <button
               onClick={() => {
                 const newDur = Math.min(60, timerState.focusDuration + 5);
@@ -216,12 +219,12 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
                 updateToolsState({ pomodoroFocusDuration: newDur });
                 setTimerState(prev => ({ ...prev, focusDuration: newDur }));
               }}
-              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+              className="w-7 h-7 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
             >+</button>
           </div>
         </div>
-        <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
-          <span className="text-sm font-medium text-[var(--text-primary)]">{t('break', lang)}</span>
+        <div className="flex-1 flex flex-col items-center p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+          <span className="text-xs font-medium text-[var(--text-muted)] mb-2">{t('break', lang)}</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
@@ -230,9 +233,9 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
                 updateToolsState({ pomodoroBreakDuration: newDur });
                 setTimerState(prev => ({ ...prev, breakDuration: newDur }));
               }}
-              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+              className="w-7 h-7 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
             >−</button>
-            <span className="font-bold text-[var(--text-primary)] text-lg w-10 text-center">{timerState.breakDuration}</span>
+            <span className="font-bold text-[var(--text-primary)] text-lg w-8 text-center">{timerState.breakDuration}</span>
             <button
               onClick={() => {
                 const newDur = Math.min(30, timerState.breakDuration + 5);
@@ -240,7 +243,7 @@ function PomodoroTimer({ lang }: { lang: 'ru' | 'en' }) {
                 updateToolsState({ pomodoroBreakDuration: newDur });
                 setTimerState(prev => ({ ...prev, breakDuration: newDur }));
               }}
-              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+              className="w-7 h-7 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
             >+</button>
           </div>
         </div>

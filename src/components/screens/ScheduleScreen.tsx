@@ -124,8 +124,6 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
               >
                 <div className="flex flex-col items-end min-w-[50px]">
                   <span className="text-lg font-bold text-[var(--text-primary)]">{event.startTime}</span>
-                  <span className="text-xs text-[var(--text-muted)]">–{event.endTime}</span>
-                  <span className="text-[10px] text-[var(--text-muted)]">{event.duration} {t('minutes', lang)}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[var(--text-primary)]">{event.name}</p>
