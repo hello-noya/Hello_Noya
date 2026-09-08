@@ -86,7 +86,7 @@ export function GoalModal({ isOpen, onClose, goal }: GoalModalProps) {
                 const step = target >= 1000 ? 10 : target >= 100 ? 5 : 1;
                 setTarget(Math.max(1, target - step));
               }}
-              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
+              className="w-8 h-8 rounded-lg border-2 border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors flex-shrink-0"
             >
               <Minus size={14} />
             </button>
@@ -96,7 +96,7 @@ export function GoalModal({ isOpen, onClose, goal }: GoalModalProps) {
                 const step = target >= 1000 ? 10 : target >= 100 ? 5 : 1;
                 setTarget(target + step);
               }}
-              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors flex-shrink-0"
+              className="w-8 h-8 rounded-lg border-2 border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors flex-shrink-0"
             >
               <Plus size={14} />
             </button>

@@ -41,7 +41,7 @@ export function MenuScreen({ onNavigate }: MenuScreenProps) {
           onClick={() => onNavigate(item.id)}
           className="w-full flex items-center gap-3 p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] hover:border-[var(--accent)]/30 transition-colors text-left"
         >
-          <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+          <div className="w-10 h-10 rounded-xl border-2 border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)]">
             {item.icon}
           </div>
           <div className="flex-1 min-w-0">

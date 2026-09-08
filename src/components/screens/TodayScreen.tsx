@@ -21,6 +21,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editTaskText, setEditTaskText] = useState('');
   const [editTaskTime, setEditTaskTime] = useState('');
+  const [editTaskNote, setEditTaskNote] = useState('');
 
   const today = new Date();
   const selectedISO = selectedDate.toISOString().split('T')[0];
@@ -175,10 +176,18 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 <div
                   key={habit.id}
                   onClick={() => onEditHabit(habit)}
-                  className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)]/30 transition-colors"
+                  className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
+                    isCompleted 
+                      ? 'bg-[var(--card-bg)] border-[var(--accent)]/30' 
+                      : 'bg-[var(--card-bg)] border-[var(--border)]'
+                  }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
-                    {renderIcon(habit.icon, 20, 'var(--accent)')}
+                  <div className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center ${
+                    isCompleted 
+                      ? 'border-[var(--accent)] text-[var(--accent)]' 
+                      : 'border-[var(--border)] text-[var(--text-secondary)]'
+                  }`}>
+                    {renderIcon(habit.icon, 20, isCompleted ? 'var(--accent)' : 'var(--text-secondary)')}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
@@ -254,15 +263,16 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           {dayTasks.map((task) => (
             <div 
               key={task.id} 
-              className={`flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:shadow-md ${
+              className={`flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
                 task.completed 
-                  ? 'bg-gradient-to-br from-green-50 to-transparent border-green-200 dark:from-green-900/10 dark:border-green-800/30' 
-                  : 'bg-[var(--card-bg)] border-[var(--border)] hover:border-[var(--accent)]/30'
+                  ? 'bg-[var(--card-bg)] border-[var(--accent)]/30' 
+                  : 'bg-[var(--card-bg)] border-[var(--border)]'
               }`}
               onClick={() => {
                 setEditingTask(task);
                 setEditTaskText(task.text);
                 setEditTaskTime(task.time);
+                setEditTaskNote(task.note || '');
               }}
             >
               <button
@@ -272,7 +282,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 }}
                 className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all mt-0.5 ${
                   task.completed
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-[var(--accent)] text-white'
                     : 'border-2 border-[var(--border)] hover:border-[var(--accent)]'
                 }`}
               >
@@ -367,6 +377,16 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                   className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
                 />
               </div>
+              <div>
+                <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">Заметка</label>
+                <textarea
+                  value={editTaskNote}
+                  onChange={(e) => setEditTaskNote(e.target.value)}
+                  placeholder="Добавить заметку..."
+                  rows={2}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
+                />
+              </div>
             </div>
 
             <div className="flex gap-2 mt-5">
@@ -378,7 +398,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               </button>
               <button
                 onClick={() => {
-                  updateTask({ ...editingTask, text: editTaskText, time: editTaskTime });
+                  updateTask({ ...editingTask, text: editTaskText, time: editTaskTime, note: editTaskNote || undefined });
                   setEditingTask(null);
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
