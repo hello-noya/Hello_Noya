@@ -39,15 +39,15 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
     return days;
   }, [today.toDateString()]);
 
-  // Get habits for selected day (only incomplete)
+  // Get habits for selected day (show all, completed will reset tomorrow)
   const dayOfWeek = getDayOfWeek(selectedDate) as DayOfWeek;
   const allDayHabits = state.habits.filter(h => h.days.includes(dayOfWeek));
-  const dayHabits = allDayHabits.filter(h => !h.completedDates.includes(selectedISO));
+  const dayHabits = allDayHabits; // Show all habits
   const completedHabits = allDayHabits.filter(h => h.completedDates.includes(selectedISO));
   
-  // Get tasks for selected day (only incomplete)
+  // Get tasks for selected day (show all)
   const allDayTasks = state.tasks.filter(t => t.date === selectedISO);
-  const dayTasks = allDayTasks.filter(t => !t.completed);
+  const dayTasks = allDayTasks; // Show all tasks
   const completedTasks = allDayTasks.filter(t => t.completed);
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
