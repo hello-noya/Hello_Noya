@@ -14,6 +14,10 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
   const lang = state.settings.language;
   const [period, setPeriod] = useState<Period>('week');
   const [metric, setMetric] = useState<Metric>('habits');
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
 
   // Get date range for selected period
   const getDateRange = () => {
@@ -21,19 +25,15 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     let start: Date;
     let end: Date = new Date(now);
 
-    switch (period) {
-      case 'week':
-        start = new Date(now);
-        start.setDate(now.getDate() - 7);
-        break;
-      case 'month':
-        start = new Date(now);
-        start.setMonth(now.getMonth() - 1);
-        break;
-      case 'year':
-        start = new Date(now);
-        start.setFullYear(now.getFullYear() - 1);
-        break;
+    if (period === 'month') {
+      start = new Date(selectedMonth);
+      end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+    } else if (period === 'year') {
+      start = new Date(now.getFullYear(), 0, 1);
+      end = new Date(now.getFullYear(), 11, 31);
+    } else {
+      start = new Date(now);
+      start.setDate(now.getDate() - 7);
     }
 
     return { start, end };
@@ -65,7 +65,70 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
       tasks: tasksCompleted,
       goals: goalsProgress,
     };
-  }, [period, state.completionLog]);
+  }, [period, selectedMonth, state.completionLog]);
+
+  // Calculate previous period stats for trend
+  const prevStats = useMemo(() => {
+    const { start, end } = getDateRange();
+    const duration = end.getTime() - start.getTime();
+    const prevStart = new Date(start.getTime() - duration);
+    const prevEnd = new Date(start.getTime() - 1);
+    const startStr = prevStart.toISOString().split('T')[0];
+    const endStr = prevEnd.toISOString().split('T')[0];
+
+    const habitsCompleted = state.completionLog?.habits?.filter(h => 
+      h.date >= startStr && h.date <= endStr && h.completed
+    ).length || 0;
+
+    const tasksCompleted = state.completionLog?.tasks?.filter(t => 
+      t.date >= startStr && t.date <= endStr
+    ).length || 0;
+
+    const goalsProgress = state.completionLog?.goals?.filter(g => 
+      g.date >= startStr && g.date <= endStr
+    ).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+
+    return {
+      habits: habitsCompleted,
+      tasks: tasksCompleted,
+      goals: goalsProgress,
+    };
+  }, [period, selectedMonth, state.completionLog]);
+
+  // Calculate streak
+  const streak = useMemo(() => {
+    let count = 0;
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Check if today has activity
+    const todayHasActivity = 
+      state.completionLog?.habits?.some(h => h.date === todayStr && h.completed) ||
+      state.completionLog?.tasks?.some(t => t.date === todayStr);
+    
+    if (!todayHasActivity) return 0;
+    
+    count = 1;
+    
+    // Check previous days
+    for (let i = 1; i < 365; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const hasActivity = 
+        state.completionLog?.habits?.some(h => h.date === dateStr && h.completed) ||
+        state.completionLog?.tasks?.some(t => t.date === dateStr);
+      
+      if (hasActivity) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    
+    return count;
+  }, [state.completionLog]);
 
   // Get metric value
   const getMetricValue = () => {
@@ -75,6 +138,108 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
       case 'goals': return stats.goals;
     }
   };
+
+  // Calculate productivity percentage
+  const getProductivity = () => {
+    const current = getMetricValue();
+    const prev = prevStats[metric];
+    
+    if (prev === 0) return current > 0 ? 100 : 0;
+    
+    const percentage = Math.round((current / prev) * 100);
+    return Math.min(percentage, 999); // Cap at 999%
+  };
+
+  // Get trend
+  const getTrend = () => {
+    const current = getMetricValue();
+    const prev = prevStats[metric];
+    
+    if (prev === 0) return current > 0 ? 100 : 0;
+    
+    const change = Math.round(((current - prev) / prev) * 100);
+    return change;
+  };
+
+  // Generate activity data for heatmap
+  const activityData = useMemo(() => {
+    const { start, end } = getDateRange();
+    const data: Array<{ date: string; value: number }> = [];
+    
+    const current = new Date(start);
+    while (current <= end) {
+      const dateStr = current.toISOString().split('T')[0];
+      
+      let value = 0;
+      if (metric === 'habits') {
+        value = state.completionLog?.habits?.filter(h => h.date === dateStr && h.completed).length || 0;
+      } else if (metric === 'tasks') {
+        value = state.completionLog?.tasks?.filter(t => t.date === dateStr).length || 0;
+      } else if (metric === 'goals') {
+        value = state.completionLog?.goals?.filter(g => g.date === dateStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+      }
+      
+      data.push({ date: dateStr, value });
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return data;
+  }, [period, selectedMonth, metric, state.completionLog]);
+
+  // Generate monthly data for year view
+  const monthlyData = useMemo(() => {
+    if (period !== 'year') return [];
+    
+    const year = new Date().getFullYear();
+    const data: Array<{ month: number; label: string; value: number }> = [];
+    
+    for (let month = 0; month < 12; month++) {
+      const start = new Date(year, month, 1);
+      const end = new Date(year, month + 1, 0);
+      const startStr = start.toISOString().split('T')[0];
+      const endStr = end.toISOString().split('T')[0];
+      
+      let value = 0;
+      if (metric === 'habits') {
+        value = state.completionLog?.habits?.filter(h => h.date >= startStr && h.date <= endStr && h.completed).length || 0;
+      } else if (metric === 'tasks') {
+        value = state.completionLog?.tasks?.filter(t => t.date >= startStr && t.date <= endStr).length || 0;
+      } else if (metric === 'goals') {
+        value = state.completionLog?.goals?.filter(g => g.date >= startStr && g.date <= endStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+      }
+      
+      const label = start.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { month: 'short' });
+      data.push({ month, label, value });
+    }
+    
+    return data;
+  }, [period, metric, state.completionLog, lang]);
+
+  // Navigation for month view
+  const prevMonth = () => {
+    setSelectedMonth(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(newDate.getMonth() - 1);
+      return newDate;
+    });
+  };
+
+  const nextMonth = () => {
+    setSelectedMonth(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(newDate.getMonth() + 1);
+      return newDate;
+    });
+  };
+
+  // Month title
+  const monthTitle = selectedMonth.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { 
+    month: 'long', 
+    year: 'numeric' 
+  });
+
+  const productivity = getProductivity();
+  const trend = getTrend();
 
   return (
     <div className="fixed inset-0 z-50 bg-[var(--bg-primary)] flex flex-col">
@@ -112,6 +277,52 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             ))}
           </div>
 
+          {/* Month navigation for month view */}
+          {period === 'month' && (
+            <div className="flex items-center justify-between">
+              <button onClick={prevMonth} className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors">
+                <ChevronLeft size={20} className="text-[var(--text-primary)]" />
+              </button>
+              <span className="text-sm font-semibold text-[var(--text-primary)] capitalize">
+                {monthTitle}
+              </span>
+              <button onClick={nextMonth} className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors">
+                <ChevronRight size={20} className="text-[var(--text-primary)]" />
+              </button>
+            </div>
+          )}
+
+          {/* Productivity card */}
+          <div className="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-xs text-[var(--text-muted)] mb-1">
+                  {lang === 'ru' ? 'Продуктивность' : 'Productivity'}
+                </p>
+                <p className="text-5xl font-bold text-[var(--text-primary)]">
+                  {productivity}%
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                {trend > 0 ? (
+                  <TrendingUp size={20} className="text-green-500" />
+                ) : trend < 0 ? (
+                  <TrendingDown size={20} className="text-red-500" />
+                ) : null}
+                <span className={`text-sm font-medium ${
+                  trend > 0 ? 'text-green-500' : trend < 0 ? 'text-red-500' : 'text-[var(--text-muted)]'
+                }`}>
+                  {trend > 0 ? '+' : ''}{trend}%
+                </span>
+              </div>
+            </div>
+            {streak > 0 && (
+              <p className="text-sm text-[var(--text-secondary)]">
+                🔥 {streak} {lang === 'ru' ? 'дней подряд' : 'days in a row'}
+              </p>
+            )}
+          </div>
+
           {/* Metric selector */}
           <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--hover)]">
             {(['habits', 'tasks', 'goals'] as const).map((m) => (
@@ -129,17 +340,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             ))}
           </div>
 
-          {/* Main stat */}
-          <div className="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-            <p className="text-xs text-[var(--text-muted)] mb-2">
-              {lang === 'ru' ? 'Всего выполнено' : 'Total completed'}
-            </p>
-            <p className="text-5xl font-bold text-[var(--text-primary)]">
-              {getMetricValue()}
-            </p>
-          </div>
-
-          {/* All stats */}
+          {/* Three metric cards */}
           <div className="grid grid-cols-3 gap-3">
             <div className="p-4 rounded-xl bg-[var(--card-bg)] border border-[var(--border)]">
               <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.habits}</p>
@@ -154,6 +355,94 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
               <p className="text-xs text-[var(--text-muted)] mt-1">{lang === 'ru' ? 'Цели' : 'Goals'}</p>
             </div>
           </div>
+
+          {/* Activity heatmap for week/month */}
+          {(period === 'week' || period === 'month') && (
+            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                {lang === 'ru' ? 'Активность' : 'Activity'}
+              </h3>
+              <div className="grid grid-cols-7 gap-1">
+                {activityData.map((day, i) => {
+                  const maxValue = Math.max(...activityData.map(d => d.value), 1);
+                  const intensity = day.value / maxValue;
+                  
+                  return (
+                    <div
+                      key={i}
+                      className="aspect-square rounded"
+                      style={{
+                        backgroundColor: `var(--accent)`,
+                        opacity: day.value === 0 ? 0.1 : Math.max(0.2, intensity),
+                      }}
+                      title={`${day.date}: ${day.value}`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Monthly overview for year view */}
+          {period === 'year' && (
+            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                {lang === 'ru' ? 'Обзор по месяцам' : 'Monthly Overview'}
+              </h3>
+              
+              {/* Bar chart */}
+              <div className="flex items-end justify-between gap-1 h-32 mb-4">
+                {monthlyData.map((month, i) => {
+                  const maxValue = Math.max(...monthlyData.map(m => m.value), 1);
+                  const height = (month.value / maxValue) * 100;
+                  
+                  return (
+                    <div
+                      key={i}
+                      className="flex-1 flex flex-col items-center gap-1"
+                    >
+                      <div
+                        className="w-full rounded-t transition-all hover:opacity-80 cursor-pointer"
+                        style={{
+                          height: `${height}%`,
+                          backgroundColor: 'var(--accent)',
+                          minHeight: month.value > 0 ? '4px' : '0px',
+                        }}
+                        onClick={() => {
+                          setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
+                          setPeriod('month');
+                        }}
+                      />
+                      <span className="text-[9px] text-[var(--text-muted)]">
+                        {month.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Monthly list */}
+              <div className="space-y-2">
+                {monthlyData.map((month, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
+                      setPeriod('month');
+                    }}
+                    className="w-full flex items-center justify-between p-2 rounded-lg bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
+                  >
+                    <span className="text-xs text-[var(--text-primary)] capitalize">
+                      {month.label}
+                    </span>
+                    <span className="text-xs font-medium text-[var(--text-primary)]">
+                      {month.value}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
