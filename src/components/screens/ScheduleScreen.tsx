@@ -124,27 +124,29 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
                     : 'border-[var(--border)] hover:border-[var(--accent)]/30'
                 }`}
               >
-                {/* Time info - две строки */}
-                <div className="flex flex-col items-start justify-center min-w-[90px] space-y-1">
-                  <span className={`text-base font-bold ${active ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>
-                    {event.startTime}
-                  </span>
-                  <span className="text-sm text-[var(--text-muted)] font-medium">
-                    до {event.endTime}
-                  </span>
-                  {active && (
-                    <span className="text-[10px] font-semibold text-[var(--accent)]">● {t('now', lang)}</span>
-                  )}
+                {/* Icon */}
+                <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] flex-shrink-0">
+                  <Calendar size={24} />
                 </div>
                 
-                {/* Divider line */}
-                <div className={`w-px self-stretch ${active ? 'bg-[var(--accent)]/30' : 'bg-[var(--border)]'}`} />
-                
-                {/* Content - название и заметка */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <p className="text-base font-semibold text-[var(--text-primary)]">{event.name}</p>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  {/* Time - first line */}
+                  <p className={`text-base font-bold ${active ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>
+                    {event.startTime}
+                  </p>
+                  {/* Time - second line */}
+                  <p className="text-sm text-[var(--text-muted)]">
+                    {lang === 'ru' ? 'до' : 'until'} {event.endTime}
+                  </p>
+                  {/* Name */}
+                  <p className="text-sm font-semibold text-[var(--text-primary)] mt-1">{event.name}</p>
+                  {/* Note */}
                   {event.note && (
-                    <p className="text-sm text-[var(--text-muted)] line-clamp-2">{event.note}</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">{event.note}</p>
+                  )}
+                  {active && (
+                    <span className="text-[10px] font-semibold text-[var(--accent)] mt-1 inline-block">● {t('now', lang)}</span>
                   )}
                 </div>
                 
