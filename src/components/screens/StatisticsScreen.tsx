@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, Calendar, Target } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 interface StatisticsScreenProps {
@@ -32,8 +32,12 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
       start = new Date(now.getFullYear(), 0, 1);
       end = new Date(now.getFullYear(), 11, 31);
     } else {
+      // Week starts from Sunday
+      const dayOfWeek = now.getDay(); // 0 = Sunday
       start = new Date(now);
-      start.setDate(now.getDate() - 6);
+      start.setDate(now.getDate() - dayOfWeek); // Go back to Sunday
+      end = new Date(start);
+      end.setDate(start.getDate() + 6); // Saturday
     }
 
     return { start, end };
@@ -148,17 +152,15 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     return change;
   };
 
-  // Generate week data with icons
+  // Generate week data (Sunday to Saturday)
   const weekData = useMemo(() => {
     if (period !== 'week') return [];
     const { start } = getDateRange();
-    const data: Array<{ date: string; dayName: string; value: number; icon: string }> = [];
+    const data: Array<{ date: string; dayName: string; value: number }> = [];
     
     const dayLabels = lang === 'ru' 
-      ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    
-    const icons = ['📅', '📝', '🎯', '✅', '📈', '🎯', '🏆'];
+      ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
@@ -177,8 +179,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
       data.push({ 
         date: dateStr, 
         dayName: dayLabels[i],
-        value,
-        icon: icons[i]
+        value
       });
     }
     
@@ -390,7 +391,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             </div>
           </div>
 
-          {/* Week view with icons */}
+          {/* Week view (Sunday to Saturday) */}
           {period === 'week' && (
             <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
               <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
@@ -403,12 +404,11 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                   
                   return (
                     <div key={i} className="flex flex-col items-center gap-1">
-                      <div className="text-lg">{day.icon}</div>
                       <div 
                         className="w-full aspect-square rounded-lg flex items-center justify-center"
                         style={{
                           backgroundColor: `var(--accent)`,
-                          opacity: day.value === 0 ? 0.1 : Math.max(0.3, intensity),
+                          opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
                         }}
                       >
                         <span className="text-xs font-bold text-white">{day.value}</span>
@@ -429,8 +429,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
               </h3>
               <div className="grid grid-cols-7 gap-1">
                 {/* Day labels */}
-                {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day, i) => (
-                  <div key={i} className="text-center text-[10px] text-[var(--text-muted)] py-1">
+                {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day, i) => (
+                  <div key={i} className="text-center-center text-[10px] text-[var(--text-muted)] py-1">
                     {day}
                   </div>
                 ))}
@@ -447,8 +447,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                       }`}
                       style={{
                         backgroundColor: `var(--accent)`,
-                        opacity: day.value === 0 ? 0.1 : Math.max(0.3, intensity),
-                      }}
+                          opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
+                        }}
                     >
                       <span className="text-xs font-bold text-white">{day.day}</span>
                       {day.value > 0 && (

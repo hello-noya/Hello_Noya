@@ -19,6 +19,14 @@ export function loadState(): AppState {
           pomodoroBreakDuration: 5,
         };
       }
+      // Ensure completionLog exists for backward compatibility
+      if (!parsed.completionLog) {
+        parsed.completionLog = {
+          habits: [],
+          tasks: [],
+          goals: [],
+        };
+      }
       return parsed;
     }
   } catch { /* ignore */ }

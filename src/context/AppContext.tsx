@@ -96,7 +96,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             : [...h.completedDates, date],
         };
       });
-      const newState = { ...prev, habits };
+      
+      // Update completionLog
+      const completionLog = { ...prev.completionLog };
+      const existingIndex = completionLog.habits.findIndex(
+        h => h.habitId === habitId && h.date === date
+      );
+      
+      if (existingIndex >= 0) {
+        // Remove from log if uncompleting
+        completionLog.habits = completionLog.habits.filter((_, i) => i !== existingIndex);
+      } else {
+        // Add to log if completing
+        completionLog.habits = [...completionLog.habits, { habitId, date, completed: true }];
+      }
+      
+      const newState = { ...prev, habits, completionLog };
       return { ...newState, stats: calculateStats(newState) };
     });
   }, []);
@@ -124,11 +139,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const toggleTaskCompletion = useCallback((id: string) => {
     setState(prev => {
+      const task = prev.tasks.find(t => t.id === id);
+      if (!task) return prev;
+      
       const newState = {
         ...prev,
         tasks: prev.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t),
       };
-      return { ...newState, stats: calculateStats(newState) };
+      
+      // Update completionLog
+      const completionLog = { ...prev.completionLog };
+      const existingIndex = completionLog.tasks.findIndex(t => t.taskId === id);
+      
+      if (existingIndex >= 0) {
+        // Remove from log if uncompleting
+        completionLog.tasks = completionLog.tasks.filter((_, i) => i !== existingIndex);
+      } else {
+        // Add to log if completing
+        completionLog.tasks = [...completionLog.tasks, { 
+          taskId: id, 
+          date: task.date, 
+          completedAt: new Date().toISOString() 
+        }];
+      }
+      
+      const finalState = { ...newState, completionLog };
+      return { ...finalState, stats: calculateStats(finalState) };
     });
   }, []);
 
@@ -175,7 +211,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (g.current >= g.target) return g;
         return { ...g, current: g.current + 1 };
       });
-      const newState = { ...prev, goals };
+      
+      // Update completionLog
+      const completionLog = { ...prev.completionLog };
+      completionLog.goals = [...completionLog.goals, { 
+        goalId: id, 
+        date: new Date().toISOString().split('T')[0], 
+        progressAdded: 1 
+      }];
+      
+      const newState = { ...prev, goals, completionLog };
       return { ...newState, stats: calculateStats(newState) };
     });
   }, []);
@@ -186,7 +231,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (g.id !== id) return g;
         return { ...g, current: Math.max(0, g.current - 1) };
       });
-      const newState = { ...prev, goals };
+      
+      // Update completionLog - remove last entry for this goal
+      const completionLog = { ...prev.completionLog };
+      const lastIndex = completionLog.goals.map((g, i) => ({ g, i }))
+        .filter(g => g.g.goalId === id)
+        .pop()?.i;
+      
+      if (lastIndex !== undefined) {
+        completionLog.goals = completionLog.goals.filter((_, i) => i !== lastIndex);
+      }
+      
+      const newState = { ...prev, goals, completionLog };
       return { ...newState, stats: calculateStats(newState) };
     });
   }, []);
