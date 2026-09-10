@@ -136,13 +136,14 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
                     <span className="font-bold">{lang === 'ru' ? 'с ' : 'from '}{event.startTime}</span>
                     <span className="font-semibold ml-2">{event.name}</span>
                   </p>
-                  {/* Second line: end time + note */}
+                  {/* Second line: end time */}
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">
                     <span className="font-medium">{lang === 'ru' ? 'до ' : 'to '}{event.endTime}</span>
-                    {event.note && (
-                      <span className="ml-2 line-clamp-1">{event.note}</span>
-                    )}
                   </p>
+                  {/* Third line: note (if exists) */}
+                  {event.note && (
+                    <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{event.note}</p>
+                  )}
                   {active && (
                     <span className="text-[10px] font-semibold text-[var(--accent)] mt-1 inline-block">● {t('now', lang)}</span>
                   )}

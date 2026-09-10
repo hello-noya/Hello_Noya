@@ -250,70 +250,70 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 </div>
               );
             })}
-            
-            {/* Completed habits section - always visible */}
-            <div className="mt-3">
-              <button
-                onClick={() => setShowCompletedHabits(!showCompletedHabits)}
-                className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
-              >
-                <div className="flex items-center gap-2">
-                  <Check size={18} className="text-[var(--accent)]" />
-                  <span className="text-sm font-medium text-[var(--text-primary)]">
-                    {lang === 'ru' ? 'Завершенные' : 'Completed'}
-                  </span>
-                  <span className="text-xs text-[var(--text-muted)]">
-                    ({completedHabits.length})
-                  </span>
-                </div>
-                <ChevronDown 
-                  size={18} 
-                  className={`text-[var(--text-muted)] transition-transform ${showCompletedHabits ? 'rotate-180' : ''}`}
-                />
-              </button>
-                
-                {showCompletedHabits && (
-                  <div className="space-y-2 mt-2">
-                    {completedHabits.map((habit) => (
-                      <div
-                        key={habit.id}
-                        onClick={() => onEditHabit(habit)}
-                        className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 cursor-pointer transition-all hover:border-[var(--accent)]/50"
-                      >
-                        <div className="w-10 h-10 rounded-xl border-2 border-[var(--accent)] flex items-center justify-center text-[var(--accent)]">
-                          {renderIcon(habit.icon, 20, 'var(--accent)')}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate line-through text-[var(--text-muted)]">
-                            {habit.name}
-                          </p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <p className="text-xs text-[var(--text-muted)]">
-                              {habit.startTime || 'Без времени'}
-                            </p>
-                            {habit.note && (
-                              <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
-                                · {habit.note}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleHabitCompletion(habit.id, selectedISO);
-                          }}
-                          className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center"
-                        >
-                          <Check size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
           </div>
         )}
+        
+        {/* Completed habits section - always visible */}
+        <div className="mt-3">
+          <button
+            onClick={() => setShowCompletedHabits(!showCompletedHabits)}
+            className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
+          >
+            <div className="flex items-center gap-2">
+              <Check size={18} className="text-[var(--accent)]" />
+              <span className="text-sm font-medium text-[var(--text-primary)]">
+                {lang === 'ru' ? 'Завершенные' : 'Completed'}
+              </span>
+              <span className="text-xs text-[var(--text-muted)]">
+                ({completedHabits.length})
+              </span>
+            </div>
+            <ChevronDown 
+              size={18} 
+              className={`text-[var(--text-muted)] transition-transform ${showCompletedHabits ? 'rotate-180' : ''}`}
+            />
+          </button>
+            
+          {showCompletedHabits && (
+            <div className="space-y-2 mt-2">
+              {completedHabits.map((habit) => (
+                <div
+                  key={habit.id}
+                  onClick={() => onEditHabit(habit)}
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 cursor-pointer transition-all hover:border-[var(--accent)]/50"
+                >
+                  <div className="w-10 h-10 rounded-xl border-2 border-[var(--accent)] flex items-center justify-center text-[var(--accent)]">
+                    {renderIcon(habit.icon, 20, 'var(--accent)')}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate line-through text-[var(--text-muted)]">
+                      {habit.name}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {habit.startTime || 'Без времени'}
+                      </p>
+                      {habit.note && (
+                        <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
+                          · {habit.note}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleHabitCompletion(habit.id, selectedISO);
+                    }}
+                    className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center"
+                  >
+                    <Check size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tasks section */}
@@ -339,9 +339,9 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             </div>
           )}
           {activeTasks.length === 0 && completedTasks.length > 0 && (
-            <div className="p-6 rounded-2xl border-2 border-dashed border-green-500/30 bg-green-500/5 text-center mb-4">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
-                <Check size={20} className="text-green-500" />
+            <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center mb-4">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
+                <Check size={20} className="text-[var(--accent)]" />
               </div>
               <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
                 {lang === 'ru' ? 'Все задачи выполнены!' : 'All tasks completed!'}
