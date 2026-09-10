@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2 } from 'lucide-react';
+import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2, Focus } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { focusSounds } from '../../utils/focusSounds';
 import { pomodoroTimer } from '../../utils/pomodoroTimer';
+import { FocusMode } from './FocusMode';
 
 interface ToolsScreenProps {
   onBack: () => void;
@@ -12,6 +13,11 @@ interface ToolsScreenProps {
 export function ToolsScreen({ onBack }: ToolsScreenProps) {
   const { state } = useApp();
   const lang = state.settings.language;
+  const [showFocusMode, setShowFocusMode] = useState(false);
+
+  if (showFocusMode) {
+    return <FocusMode onBack={() => setShowFocusMode(false)} />;
+  }
 
   return (
     <div className="space-y-4">
@@ -24,6 +30,15 @@ export function ToolsScreen({ onBack }: ToolsScreenProps) {
 
       <LoFiPlayer lang={lang} />
       <PomodoroTimer lang={lang} />
+      
+      {/* Focus Mode Button */}
+      <button
+        onClick={() => setShowFocusMode(true)}
+        className="w-full p-4 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] text-white font-medium flex items-center justify-center gap-3 hover:opacity-90 transition-opacity"
+      >
+        <Focus size={24} />
+        <span>{lang === 'ru' ? 'Фокус-режим' : 'Focus Mode'}</span>
+      </button>
     </div>
   );
 }
