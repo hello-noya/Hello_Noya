@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, Calendar, Target } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 interface StatisticsScreenProps {
@@ -33,7 +33,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
       end = new Date(now.getFullYear(), 11, 31);
     } else {
       start = new Date(now);
-      start.setDate(now.getDate() - 7);
+      start.setDate(now.getDate() - 6);
     }
 
     return { start, end };
@@ -45,26 +45,19 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     const startStr = start.toISOString().split('T')[0];
     const endStr = end.toISOString().split('T')[0];
 
-    // Habits
     const habitsCompleted = state.completionLog?.habits?.filter(h => 
       h.date >= startStr && h.date <= endStr && h.completed
     ).length || 0;
 
-    // Tasks
     const tasksCompleted = state.completionLog?.tasks?.filter(t => 
       t.date >= startStr && t.date <= endStr
     ).length || 0;
 
-    // Goals
     const goalsProgress = state.completionLog?.goals?.filter(g => 
       g.date >= startStr && g.date <= endStr
     ).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
 
-    return {
-      habits: habitsCompleted,
-      tasks: tasksCompleted,
-      goals: goalsProgress,
-    };
+    return { habits: habitsCompleted, tasks: tasksCompleted, goals: goalsProgress };
   }, [period, selectedMonth, state.completionLog]);
 
   // Calculate previous period stats for trend
@@ -88,11 +81,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
       g.date >= startStr && g.date <= endStr
     ).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
 
-    return {
-      habits: habitsCompleted,
-      tasks: tasksCompleted,
-      goals: goalsProgress,
-    };
+    return { habits: habitsCompleted, tasks: tasksCompleted, goals: goalsProgress };
   }, [period, selectedMonth, state.completionLog]);
 
   // Calculate streak
@@ -101,7 +90,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     
-    // Check if today has activity
     const todayHasActivity = 
       state.completionLog?.habits?.some(h => h.date === todayStr && h.completed) ||
       state.completionLog?.tasks?.some(t => t.date === todayStr);
@@ -110,7 +98,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     
     count = 1;
     
-    // Check previous days
     for (let i = 1; i < 365; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
@@ -147,7 +134,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     if (prev === 0) return current > 0 ? 100 : 0;
     
     const percentage = Math.round((current / prev) * 100);
-    return Math.min(percentage, 999); // Cap at 999%
+    return Math.min(percentage, 999);
   };
 
   // Get trend
@@ -161,14 +148,22 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     return change;
   };
 
-  // Generate activity data for heatmap
-  const activityData = useMemo(() => {
-    const { start, end } = getDateRange();
-    const data: Array<{ date: string; value: number }> = [];
+  // Generate week data with icons
+  const weekData = useMemo(() => {
+    if (period !== 'week') return [];
+    const { start } = getDateRange();
+    const data: Array<{ date: string; dayName: string; value: number; icon: string }> = [];
     
-    const current = new Date(start);
-    while (current <= end) {
-      const dateStr = current.toISOString().split('T')[0];
+    const dayLabels = lang === 'ru' 
+      ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    const icons = ['📅', '📝', '🎯', '✅', '📈', '🎯', '🏆'];
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + i);
+      const dateStr = date.toISOString().split('T')[0];
       
       let value = 0;
       if (metric === 'habits') {
@@ -179,7 +174,46 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
         value = state.completionLog?.goals?.filter(g => g.date === dateStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
       }
       
-      data.push({ date: dateStr, value });
+      data.push({ 
+        date: dateStr, 
+        dayName: dayLabels[i],
+        value,
+        icon: icons[i]
+      });
+    }
+    
+    return data;
+  }, [period, metric, state.completionLog, lang]);
+
+  // Generate calendar data for month
+  const calendarData = useMemo(() => {
+    if (period !== 'month') return [];
+    const { start, end } = getDateRange();
+    const data: Array<{ date: string; day: number; value: number; isToday: boolean }> = [];
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    const current = new Date(start);
+    while (current <= end) {
+      const dateStr = current.toISOString().split('T')[0];
+      const day = current.getDate();
+      
+      let value = 0;
+      if (metric === 'habits') {
+        value = state.completionLog?.habits?.filter(h => h.date === dateStr && h.completed).length || 0;
+      } else if (metric === 'tasks') {
+        value = state.completionLog?.tasks?.filter(t => t.date === dateStr).length || 0;
+      } else if (metric === 'goals') {
+        value = state.completionLog?.goals?.filter(g => g.date === dateStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+      }
+      
+      data.push({ 
+        date: dateStr,
+        day,
+        value,
+        isToday: dateStr === todayStr
+      });
       current.setDate(current.getDate() + 1);
     }
     
@@ -356,90 +390,116 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             </div>
           </div>
 
-          {/* Activity heatmap for week/month */}
-          {(period === 'week' || period === 'month') && (
+          {/* Week view with icons */}
+          {period === 'week' && (
             <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
               <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-                {lang === 'ru' ? 'Активность' : 'Activity'}
+                {lang === 'ru' ? 'Активность по дням' : 'Daily Activity'}
               </h3>
-              <div className="grid grid-cols-7 gap-1">
-                {activityData.map((day, i) => {
-                  const maxValue = Math.max(...activityData.map(d => d.value), 1);
+              <div className="grid grid-cols-7 gap-2">
+                {weekData.map((day, i) => {
+                  const maxValue = Math.max(...weekData.map(d => d.value), 1);
                   const intensity = day.value / maxValue;
                   
                   return (
-                    <div
-                      key={i}
-                      className="aspect-square rounded"
-                      style={{
-                        backgroundColor: `var(--accent)`,
-                        opacity: day.value === 0 ? 0.1 : Math.max(0.2, intensity),
-                      }}
-                      title={`${day.date}: ${day.value}`}
-                    />
+                    <div key={i} className="flex flex-col items-center gap-1">
+                      <div className="text-lg">{day.icon}</div>
+                      <div 
+                        className="w-full aspect-square rounded-lg flex items-center justify-center"
+                        style={{
+                          backgroundColor: `var(--accent)`,
+                          opacity: day.value === 0 ? 0.1 : Math.max(0.3, intensity),
+                        }}
+                      >
+                        <span className="text-xs font-bold text-white">{day.value}</span>
+                      </div>
+                      <span className="text-[10px] text-[var(--text-muted)]">{day.dayName}</span>
+                    </div>
                   );
                 })}
               </div>
             </div>
           )}
 
-          {/* Monthly overview for year view */}
+          {/* Month view with calendar */}
+          {period === 'month' && (
+            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                {lang === 'ru' ? 'Календарь активности' : 'Activity Calendar'}
+              </h3>
+              <div className="grid grid-cols-7 gap-1">
+                {/* Day labels */}
+                {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day, i) => (
+                  <div key={i} className="text-center text-[10px] text-[var(--text-muted)] py-1">
+                    {day}
+                  </div>
+                ))}
+                {/* Calendar days */}
+                {calendarData.map((day, i) => {
+                  const maxValue = Math.max(...calendarData.map(d => d.value), 1);
+                  const intensity = day.value / maxValue;
+                  
+                  return (
+                    <div 
+                      key={i}
+                      className={`aspect-square rounded flex flex-col items-center justify-center relative ${
+                        day.isToday ? 'ring-2 ring-[var(--accent)]' : ''
+                      }`}
+                      style={{
+                        backgroundColor: `var(--accent)`,
+                        opacity: day.value === 0 ? 0.1 : Math.max(0.3, intensity),
+                      }}
+                    >
+                      <span className="text-xs font-bold text-white">{day.day}</span>
+                      {day.value > 0 && (
+                        <span className="text-[8px] text-white/80">{day.value}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Year view with two blocks */}
           {period === 'year' && (
             <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
               <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
                 {lang === 'ru' ? 'Обзор по месяцам' : 'Monthly Overview'}
               </h3>
               
-              {/* Bar chart */}
-              <div className="flex items-end justify-between gap-1 h-32 mb-4">
+              {/* Two blocks layout */}
+              <div className="grid grid-cols-2 gap-3">
                 {monthlyData.map((month, i) => {
                   const maxValue = Math.max(...monthlyData.map(m => m.value), 1);
-                  const height = (month.value / maxValue) * 100;
+                  const height = (month.value / maxValue) * 60;
                   
                   return (
-                    <div
+                    <button
                       key={i}
-                      className="flex-1 flex flex-col items-center gap-1"
+                      onClick={() => {
+                        setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
+                        setPeriod('month');
+                      }}
+                      className="flex flex-col items-center p-3 rounded-lg bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
                     >
-                      <div
-                        className="w-full rounded-t transition-all hover:opacity-80 cursor-pointer"
+                      <div 
+                        className="w-full rounded-full mb-2"
                         style={{
-                          height: `${height}%`,
+                          height: `${height}px`,
                           backgroundColor: 'var(--accent)',
                           minHeight: month.value > 0 ? '4px' : '0px',
                         }}
-                        onClick={() => {
-                          setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
-                          setPeriod('month');
-                        }}
                       />
-                      <span className="text-[9px] text-[var(--text-muted)]">
+                      <span className="text-xs font-medium text-[var(--text-primary)] capitalize">
                         {month.label}
                       </span>
-                    </div>
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {month.value}
+                      </span>
+                    </button>
                   );
                 })}
-              </div>
-
-              {/* Monthly list */}
-              <div className="space-y-2">
-                {monthlyData.map((month, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
-                      setPeriod('month');
-                    }}
-                    className="w-full flex items-center justify-between p-2 rounded-lg bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
-                  >
-                    <span className="text-xs text-[var(--text-primary)] capitalize">
-                      {month.label}
-                    </span>
-                    <span className="text-xs font-medium text-[var(--text-primary)]">
-                      {month.value}
-                    </span>
-                  </button>
-                ))}
               </div>
             </div>
           )}
