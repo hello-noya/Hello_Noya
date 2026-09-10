@@ -9,7 +9,6 @@ import { MenuScreen, MenuSection } from './components/screens/MenuScreen';
 import { ProfileScreen } from './components/screens/ProfileScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
 import { ToolsScreen } from './components/screens/ToolsScreen';
-import { ManageScreen } from './components/screens/ManageScreen';
 import { StatisticsScreen } from './components/screens/StatisticsScreen';
 import { StudentTemplates } from './components/screens/StudentTemplates';
 import { Header } from './components/Header';
@@ -68,8 +67,6 @@ function AppContent() {
           return <SettingsScreen onBack={() => setMenuSection(null)} />;
         case 'tools':
           return <ToolsScreen onBack={() => setMenuSection(null)} />;
-        case 'manage':
-          return <ManageScreen onBack={() => setMenuSection(null)} />;
         case 'statistics':
           return <StatisticsScreen onBack={() => setMenuSection(null)} />;
         case 'templates':

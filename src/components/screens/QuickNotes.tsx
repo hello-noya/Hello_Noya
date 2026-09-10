@@ -1,36 +1,52 @@
 import React, { useState } from 'react';
-import { FileText, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
+import { FileText, List, Plus, Trash2, ArrowLeft, X, Check } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+
+type NoteMode = 'notebook' | 'list';
 
 interface Notebook {
   id: string;
   name: string;
   content: string;
   createdAt: number;
-  updatedAt: number;
+}
+
+interface ListItem {
+  id: string;
+  text: string;
+  completed: boolean;
 }
 
 export function QuickNotes() {
   const { state } = useApp();
   const lang = state.settings.language;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [mode, setMode] = useState<NoteMode>('notebook');
+  
+  // Notebook state
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   const [activeNotebookId, setActiveNotebookId] = useState<string | null>(null);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editName, setEditName] = useState('');
+  const [newNotebookName, setNewNotebookName] = useState('');
+  const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
+  
+  // List state
+  const [listItems, setListItems] = useState<ListItem[]>([]);
+  const [newListItem, setNewListItem] = useState('');
 
   const activeNotebook = notebooks.find(n => n.id === activeNotebookId);
 
   // Notebook functions
   const createNotebook = () => {
+    if (!newNotebookName.trim()) return;
     const newNotebook: Notebook = {
       id: Date.now().toString(),
-      name: lang === 'ru' ? 'Новый блокнот' : 'New notebook',
+      name: newNotebookName.trim(),
       content: '',
       createdAt: Date.now(),
-      updatedAt: Date.now(),
     };
     setNotebooks([...notebooks, newNotebook]);
+    setNewNotebookName('');
+    setIsCreatingNotebook(false);
     setActiveNotebookId(newNotebook.id);
   };
 
@@ -45,19 +61,30 @@ export function QuickNotes() {
     if (!activeNotebookId) return;
     setNotebooks(notebooks.map(n => 
       n.id === activeNotebookId 
-        ? { ...n, content, updatedAt: Date.now() }
+        ? { ...n, content }
         : n
     ));
   };
 
-  const updateNotebookName = () => {
-    if (!editName.trim() || !activeNotebookId) return;
-    setNotebooks(notebooks.map(n => 
-      n.id === activeNotebookId 
-        ? { ...n, name: editName.trim(), updatedAt: Date.now() }
-        : n
+  // List functions
+  const addListItem = () => {
+    if (!newListItem.trim()) return;
+    setListItems([...listItems, {
+      id: Date.now().toString(),
+      text: newListItem.trim(),
+      completed: false,
+    }]);
+    setNewListItem('');
+  };
+
+  const toggleListItem = (id: string) => {
+    setListItems(listItems.map(item =>
+      item.id === id ? { ...item, completed: !item.completed } : item
     ));
-    setIsEditingName(false);
+  };
+
+  const deleteListItem = (id: string) => {
+    setListItems(listItems.filter(item => item.id !== id));
   };
 
   return (
@@ -72,137 +99,199 @@ export function QuickNotes() {
           <h3 className="text-base font-semibold text-[var(--text-primary)]">
             {lang === 'ru' ? 'Заметки' : 'Notes'}
           </h3>
-          {notebooks.length > 0 && (
-            <span className="text-xs text-[var(--text-muted)]">
-              ({notebooks.length})
-            </span>
-          )}
         </div>
       </button>
 
       {/* Expanded content */}
       {(isExpanded || activeNotebookId) && (
         <div className="px-4 pb-4">
-          {!activeNotebook ? (
-            <div className="space-y-3">
-              {notebooks.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText size={40} className="mx-auto text-[var(--text-muted)] mb-3 opacity-30" />
-                  <p className="text-sm text-[var(--text-muted)] mb-3">
-                    {lang === 'ru' ? 'Нет блокнотов' : 'No notebooks'}
-                  </p>
-                  <button
-                    onClick={createNotebook}
-                    className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium flex items-center gap-2 mx-auto hover:opacity-90 transition-opacity"
-                  >
-                    <Plus size={16} />
-                    {lang === 'ru' ? 'Создать блокнот' : 'Create notebook'}
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {notebooks.map(notebook => (
-                    <button
-                      key={notebook.id}
-                      onClick={() => setActiveNotebookId(notebook.id)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)]/50 transition-colors text-left"
-                    >
-                      <FileText size={16} className="text-[var(--accent)] flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                          {notebook.name}
-                        </p>
-                        <p className="text-xs text-[var(--text-muted)] truncate">
-                          {notebook.content || (lang === 'ru' ? 'Пусто' : 'Empty')}
-                        </p>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteNotebook(notebook.id);
-                        }}
-                        className="text-[var(--text-muted)] hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </button>
-                  ))}
-                  {notebooks.length < 6 && (
-                    <button
-                      onClick={createNotebook}
-                      className="w-full py-2 rounded-lg bg-[var(--hover)] text-[var(--text-secondary)] text-sm font-medium flex items-center justify-center gap-2 hover:bg-[var(--accent)]/10 transition-colors"
-                    >
-                      <Plus size={16} />
-                      {lang === 'ru' ? 'Создать блокнот' : 'Create notebook'}
-                    </button>
-                  )}
-                </div>
-              )}
+          {/* Mode selector */}
+          {!activeNotebookId && (
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setMode('notebook')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                  mode === 'notebook'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                }`}
+              >
+                {lang === 'ru' ? 'Блокнот' : 'Notebook'}
+              </button>
+              <button
+                onClick={() => setMode('list')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                  mode === 'list'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                }`}
+              >
+                {lang === 'ru' ? 'Список' : 'List'}
+              </button>
             </div>
-          ) : (
+          )}
+
+          {/* Notebook mode */}
+          {mode === 'notebook' && (
             <div className="space-y-3">
-              {/* Notebook header */}
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)]">
-                {isEditingName ? (
-                  <>
-                    <input
-                      type="text"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && updateNotebookName()}
-                      className="flex-1 px-2 py-1 rounded bg-transparent text-sm text-[var(--text-primary)] focus:outline-none"
-                      autoFocus
-                    />
-                    <button
-                      onClick={updateNotebookName}
-                      className="p-1 rounded hover:bg-[var(--hover)] transition-colors"
-                    >
-                      <Save size={14} className="text-[var(--accent)]" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsEditingName(false);
-                        setEditName(activeNotebook.name);
-                      }}
-                      className="p-1 rounded hover:bg-[var(--hover)] transition-colors"
-                    >
-                      <X size={14} className="text-[var(--text-muted)]" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setIsEditingName(true);
-                        setEditName(activeNotebook.name);
-                      }}
-                      className="flex-1 text-left text-sm font-medium text-[var(--text-primary)]"
-                    >
-                      {activeNotebook.name}
-                    </button>
-                    <button
-                      onClick={() => deleteNotebook(activeNotebook.id)}
-                      className="p-1 rounded hover:bg-red-500/10 transition-colors"
-                    >
-                      <Trash2 size={14} className="text-red-400" />
-                    </button>
+              {!activeNotebook ? (
+                <>
+                  {isCreatingNotebook ? (
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={newNotebookName}
+                        onChange={(e) => setNewNotebookName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && createNotebook()}
+                        placeholder={lang === 'ru' ? 'Название блокнота' : 'Notebook name'}
+                        className="w-full px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={createNotebook}
+                          className="flex-1 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium"
+                        >
+                          {lang === 'ru' ? 'Создать' : 'Create'}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsCreatingNotebook(false);
+                            setNewNotebookName('');
+                          }}
+                          className="px-4 py-2 rounded-lg bg-[var(--hover)] text-[var(--text-secondary)] text-sm"
+                        >
+                          {lang === 'ru' ? 'Отмена' : 'Cancel'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {notebooks.length === 0 ? (
+                        <div className="text-center py-8">
+                          <FileText size={40} className="mx-auto text-[var(--text-muted)] mb-3 opacity-30" />
+                          <p className="text-sm text-[var(--text-muted)] mb-3">
+                            {lang === 'ru' ? 'Нет блокнотов' : 'No notebooks'}
+                          </p>
+                          <button
+                            onClick={() => setIsCreatingNotebook(true)}
+                            className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium flex items-center gap-2 mx-auto hover:opacity-90 transition-opacity"
+                          >
+                            <Plus size={16} />
+                            {lang === 'ru' ? 'Создать блокнот' : 'Create notebook'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {notebooks.map(notebook => (
+                            <button
+                              key={notebook.id}
+                              onClick={() => setActiveNotebookId(notebook.id)}
+                              className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)]/50 transition-colors text-left"
+                            >
+                              <FileText size={16} className="text-[var(--accent)] flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                                  {notebook.name}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                          {notebooks.length < 6 && (
+                            <button
+                              onClick={() => setIsCreatingNotebook(true)}
+                              className="w-full py-2 rounded-lg bg-[var(--hover)] text-[var(--text-secondary)] text-sm font-medium flex items-center justify-center gap-2 hover:bg-[var(--accent)]/10 transition-colors"
+                            >
+                              <Plus size={16} />
+                              {lang === 'ru' ? 'Создать блокнот' : 'Create notebook'}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="space-y-3">
+                  {/* Notebook header */}
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => setActiveNotebookId(null)}
                       className="p-1 rounded hover:bg-[var(--hover)] transition-colors"
                     >
-                      <X size={14} className="text-[var(--text-muted)]" />
+                      <ArrowLeft size={16} className="text-[var(--text-primary)]" />
                     </button>
-                  </>
-                )}
+                    <h4 className="flex-1 text-sm font-medium text-[var(--text-primary)]">
+                      {activeNotebook.name}
+                    </h4>
+                    <button
+                      onClick={() => deleteNotebook(activeNotebook.id)}
+                      className="p-1 rounded hover:bg-red-500/10 transition-colors"
+                    >
+                      <Trash2 size={16} className="text-red-400" />
+                    </button>
+                  </div>
+                  
+                  {/* Content area */}
+                  <textarea
+                    value={activeNotebook.content}
+                    onChange={(e) => updateNotebookContent(e.target.value)}
+                    placeholder={lang === 'ru' ? 'Начните писать...' : 'Start writing...'}
+                    className="w-full h-64 p-3 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] resize-none"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* List mode */}
+          {mode === 'list' && (
+            <div className="space-y-2">
+              {listItems.map(item => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)]"
+                >
+                  <button
+                    onClick={() => toggleListItem(item.id)}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                      item.completed
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'border-2 border-[var(--border)]'
+                    }`}
+                  >
+                    {item.completed && <Check size={12} />}
+                  </button>
+                  <span className={`flex-1 text-sm ${
+                    item.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'
+                  }`}>
+                    {item.text}
+                  </span>
+                  <button
+                    onClick={() => deleteListItem(item.id)}
+                    className="text-[var(--text-muted)] hover:text-red-400 transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newListItem}
+                  onChange={(e) => setNewListItem(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addListItem()}
+                  placeholder={lang === 'ru' ? 'Добавить пункт...' : 'Add item...'}
+                  className="flex-1 px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
+                />
+                <button
+                  onClick={addListItem}
+                  className="px-3 py-2 rounded-lg bg-[var(--accent)] text-white hover:opacity-90 transition-opacity"
+                >
+                  <Plus size={16} />
+                </button>
               </div>
-              
-              {/* Content area */}
-              <textarea
-                value={activeNotebook.content}
-                onChange={(e) => updateNotebookContent(e.target.value)}
-                placeholder={lang === 'ru' ? 'Начните писать...' : 'Start writing...'}
-                className="w-full h-64 p-3 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
-              />
             </div>
           )}
         </div>
