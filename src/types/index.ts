@@ -53,7 +53,7 @@ export interface Goal {
 
 export interface AppSettings {
   language: 'ru' | 'en';
-  theme: 'pink' | 'lavender' | 'dark';
+  theme: 'lavender' | 'dark';
 }
 
 export interface Stats {
@@ -72,6 +72,12 @@ export interface ToolsState {
   pomodoroBreakDuration: number;
 }
 
+export interface CompletionLog {
+  habits: Array<{ habitId: string; date: string; completed: boolean }>;
+  tasks: Array<{ taskId: string; date: string; completedAt: string }>;
+  goals: Array<{ goalId: string; date: string; progressAdded: number }>;
+}
+
 export interface AppState {
   profile: Profile | null;
   habits: Habit[];
@@ -81,4 +87,6 @@ export interface AppState {
   settings: AppSettings;
   stats: Stats;
   toolsState: ToolsState;
+  completionLog: CompletionLog;
+  toast: string | null;
 }

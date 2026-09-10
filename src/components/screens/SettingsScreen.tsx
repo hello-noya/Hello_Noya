@@ -38,8 +38,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
     }
   };
 
-  const themes: { id: 'pink' | 'lavender' | 'dark'; label: string; color: string }[] = [
-    { id: 'pink', label: t('themePink', lang), color: '#ff4d8d' },
+  const themes: { id: 'lavender' | 'dark'; label: string; color: string }[] = [
     { id: 'lavender', label: t('themeLavender', lang), color: '#8b5cf6' },
     { id: 'dark', label: t('themeDark', lang), color: '#a78bfa' },
   ];
@@ -113,9 +112,6 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
               }`}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={theme === th.id ? 'white' : th.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                {th.id === 'pink' && (
-                  <path d="M8 2C8 2 10 4 10 6C10 8 8 8 8 8C8 8 6 8 6 6C6 4 8 2 8 2Z"/>
-                )}
                 {th.id === 'lavender' && (
                   <circle cx="8" cy="8" r="5"/>
                 )}

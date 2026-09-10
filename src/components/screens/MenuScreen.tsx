@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { renderIcon } from '../../utils/icons';
 
-type MenuSection = 'profile' | 'settings' | 'tools';
+type MenuSection = 'profile' | 'settings' | 'tools' | 'manage' | 'statistics';
 
 interface MenuScreenProps {
   onNavigate: (section: MenuSection) => void;

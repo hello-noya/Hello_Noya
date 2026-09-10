@@ -40,7 +40,7 @@ export function getDefaultState(): AppState {
     tasks: [],
     events: [],
     goals: [],
-    settings: { language: 'ru', theme: 'pink' },
+    settings: { language: 'ru', theme: 'lavender' },
     stats: { habitsCompleted: 0, bestStreak: 0, tasksToday: 0, goalsAchieved: 0 },
     toolsState: {
       lofiPlaying: false,
@@ -50,6 +50,12 @@ export function getDefaultState(): AppState {
       pomodoroFocusDuration: 25,
       pomodoroBreakDuration: 5,
     },
+    completionLog: {
+      habits: [],
+      tasks: [],
+      goals: [],
+    },
+    toast: null,
   };
 }
 

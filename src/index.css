@@ -1,1 +1,137 @@
 @import "tailwindcss";
+
+/* 
+  K-pop стиль: две связанные темы в корейской эстетике
+  - Lavender Dream: светлая фиолетовая (по умолчанию)
+  - Midnight Seoul: тёмная (связана с лавандовой)
+*/
+
+/* Lavender Dream theme (default) — светлая фиолетовая */
+:root,
+[data-theme="lavender"] {
+  --bg-primary: #f8f5ff;
+  --bg-secondary: #f0ebff;
+  --card-bg: #ffffff;
+  --hover: #e8e0ff;
+  --border: #d4c8f5;
+  --accent: #a78bfa;
+  --accent-hover: #8b6ff0;
+  --text-primary: #2d1b4e;
+  --text-secondary: #5c3d8f;
+  --text-muted: #8b6bb5;
+}
+
+/* Midnight Seoul theme — тёмная */
+[data-theme="dark"] {
+  --bg-primary: #1a1625;
+  --bg-secondary: #241f35;
+  --card-bg: #2d2840;
+  --hover: #3d3855;
+  --border: #4d4865;
+  --accent: #c4b5fd;
+  --accent-hover: #a78bfa;
+  --text-primary: #f0ebff;
+  --text-secondary: #d4c8f5;
+  --text-muted: #8b7ba8;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+/* Utility classes */
+.border-dashed {
+  border-style: dashed;
+}
