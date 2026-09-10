@@ -5,202 +5,191 @@ interface IconProps {
   color?: string;
 }
 
-// Hand-drawn pencil style icons - тонкие линии, органичные формы
+// Hand-drawn pencil style icons - simple, clean, bright colors
 export const IconComponents: Record<string, React.FC<IconProps>> = {
-  // Habit icons
+  // Habits
   water: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3c-2 3-5 6-5 10a5 5 0 0 0 10 0c0-4-3-7-5-10z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L6 10C4.5 13 5 17 8 19C11 21 14 20 16 17C18 14 17 10 15 8L12 2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   book: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/>
-      <path d="M8 7h8M8 11h5"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M4 4C4 3 5 2 6 2H10L12 4L14 2H18C19 2 20 3 20 4V20C20 21 19 22 18 22H6C5 22 4 21 4 20V4Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="12" y1="4" x2="12" y2="22" stroke={color} strokeWidth="1.5"/>
     </svg>
   ),
   run: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="13" cy="4" r="2"/>
-      <path d="M7 22l3-8 4 4v6"/>
-      <path d="M7 14l-2 4"/>
-      <path d="M17 10l-5 2"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="14" cy="4" r="2.5" fill={color} stroke={color} strokeWidth="1.5"/>
+      <path d="M9 22L11 14L15 18V22" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9 14L7 19" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M18 10L13 13" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   ),
   sleep: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      <path d="M14 7l2 2M16 11l2 2"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" fill={color} stroke={color} strokeWidth="1.5"/>
+      <path d="M9 10L11 12L9 14" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M15 10L17 12L15 14" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   apple: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2c-1.5-1-3-1-4 0s-1 3 0 4c-3 0-6 3-6 7s3 9 7 9c1 0 2-1 3-1s2 1 3 1c4 0 7-5 7-9s-3-7-6-7c1-1 1-3 0-4s-2.5-1-4 0z"/>
-      <path d="M12 2c0-1 1-2 2-2"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 3C10 3 8 4 7 6C5 8 5 13 7 16C9 19 11 21 12 21C13 21 15 19 17 16C19 13 19 8 17 6C16 4 14 3 12 3Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 3C12 2 13 1 14 1" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   ),
   brain: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2a5 5 0 0 0-5 5c0 1 .3 2 .8 2.8A5 5 0 0 0 7 14a5 5 0 0 0 5 5 5 5 0 0 0 5-5c0-1.5-.5-2.9-1.3-4A5 5 0 0 0 17 7a5 5 0 0 0-5-5z"/>
-      <path d="M12 2v20"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2C9 2 7 4 7 7C5 7 4 9 4 12C4 15 5 17 7 17C7 20 9 22 12 22C15 22 17 20 17 17C19 17 20 15 20 12C20 9 19 7 17 7C17 4 15 2 12 2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 2V22" stroke={color} strokeWidth="1.5"/>
     </svg>
   ),
   music: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 18V5l12-2v13"/>
-      <circle cx="6" cy="18" r="3"/>
-      <circle cx="18" cy="16" r="3"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="8" cy="17" r="3" fill={color} stroke={color} strokeWidth="1.5"/>
+      <circle cx="16" cy="15" r="3" fill={color} stroke={color} strokeWidth="1.5"/>
+      <path d="M11 17V6L19 4V15" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   gym: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 5v14M18 5v14M6 12h12"/>
-      <rect x="2" y="8" width="4" height="8" rx="1"/>
-      <rect x="18" y="8" width="4" height="8" rx="1"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="9" width="4" height="6" rx="1" fill={color} stroke={color} strokeWidth="1.5"/>
+      <rect x="17" y="9" width="4" height="6" rx="1" fill={color} stroke={color} strokeWidth="1.5"/>
+      <rect x="7" y="10" width="10" height="4" rx="1" fill={color} stroke={color} strokeWidth="1.5"/>
     </svg>
   ),
   coffee: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
-      <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/>
-      <path d="M6 2v3M10 2v3"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M5 10H17V18C17 19.5 15.5 21 14 21H7C5.5 21 4 19.5 4 18V10Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M17 12H19C20 12 21 13 21 14V15C21 16 20 17 19 17H17" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M8 6C8 5 9 4 10 4" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M12 6C12 5 13 4 14 4" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   ),
   laptop: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="12" rx="2"/>
-      <path d="M2 20h20"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="5" width="16" height="11" rx="1" fill={color} stroke={color} strokeWidth="1.5"/>
+      <path d="M2 18H22V19C22 20 21 21 20 21H4C3 21 2 20 2 19V18Z" fill={color} stroke={color} strokeWidth="1.5"/>
     </svg>
   ),
-  // Profile icons
+  // Profile
   star: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L15 9L22 9.5L17 14.5L18 22L12 18L6 22L7 14.5L2 9.5L9 9L12 2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   crown: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 20h20l-2-12-4 4-4-8-4 8-4-4z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M3 18L5 10L9 13L12 8L15 13L19 10L21 18H3Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   flame: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2C12 2 8 7 8 12C8 16 10 20 12 20C14 20 16 16 16 12C16 7 12 2 12 2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   diamond: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 3h12l4 6-10 13L2 9z"/>
-      <path d="M11 3L8 9l4 13 4-13-3-6"/>
-      <path d="M2 9h20"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L20 9L12 22L4 9L12 2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   rocket: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-      <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
-      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2C12 2 8 6 8 12L6 16L10 14L12 22L14 14L18 16L16 12C16 6 12 2 12 2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   heart: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 21L10.55 19.7C5.4 15.1 2 12.1 2 8.5C2 5.4 4.4 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.6 3 22 5.4 22 8.5C22 12.1 18.6 15.1 13.45 19.7L12 21Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   leaf: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
-      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M17 8C17 8 21 12 21 17C21 20 18 22 15 22C12 22 8 18 8 18C8 18 4 14 4 11C4 8 7 6 10 6C13 6 17 8 17 8Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   zap: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M13 2L4 14H11L10 22L20 10H13L13 2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   sun: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="4"/>
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="5" fill={color} stroke={color} strokeWidth="1.5"/>
+      <line x1="12" y1="2" x2="12" y2="5" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="12" y1="19" x2="12" y2="22" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="2" y1="12" x2="5" y2="12" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="19" y1="12" x2="22" y2="12" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   ),
   moon: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   trophy: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-      <path d="M4 22h16"/>
-      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/>
-      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/>
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M8 21H16M12 17V21M7 4H17V10C17 13.31 14.76 16 12 16C9.24 16 7 13.31 7 10V4Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M17 6H19C20.1 6 21 6.9 21 8V9C21 10.1 20.1 11 19 11H17" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M7 6H5C3.9 6 3 6.9 3 8V9C3 10.1 3.9 11 5 11H7" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   ),
   sparkles: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-      <path d="M20 3v4M22 5h-4"/>
-      <path d="M4 17v2M5 18H3"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
-  // Event icons
+  // Events
   class: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="14" rx="2"/>
-      <path d="M3 9h18"/>
-      <path d="M8 21h8"/>
-      <path d="M12 17v4"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="14" rx="2" fill={color} stroke={color} strokeWidth="1.5"/>
+      <line x1="3" y1="10" x2="21" y2="10" stroke={color} strokeWidth="1.5"/>
     </svg>
   ),
   meeting: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="7" r="3"/>
-      <circle cx="17" cy="7" r="3"/>
-      <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-      <path d="M17 11a4 4 0 0 1 4 4v2"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="9" cy="7" r="3" fill={color} stroke={color} strokeWidth="1.5"/>
+      <circle cx="15" cy="7" r="3" fill={color} stroke={color} strokeWidth="1.5"/>
+      <path d="M4 21V19C4 16.79 5.79 15 8 15H10" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M20 21V19C20 16.79 18.21 15 16 15H14" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   ),
   workout: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 5v14"/>
-      <path d="M18 5v14"/>
-      <path d="M6 12h12"/>
-      <rect x="3" y="8" width="3" height="8" rx="1"/>
-      <rect x="18" y="8" width="3" height="8" rx="1"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="9" width="4" height="6" rx="1" fill={color} stroke={color} strokeWidth="1.5"/>
+      <rect x="17" y="9" width="4" height="6" rx="1" fill={color} stroke={color} strokeWidth="1.5"/>
+      <rect x="7" y="10" width="10" height="4" rx="1" fill={color} stroke={color} strokeWidth="1.5"/>
     </svg>
   ),
   lunch: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="M12 3v18"/>
-      <path d="M3 12h18"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" fill={color} stroke={color} strokeWidth="1.5"/>
+      <line x1="12" y1="3" x2="12" y2="21" stroke={color} strokeWidth="1.5"/>
+      <line x1="3" y1="12" x2="21" y2="12" stroke={color} strokeWidth="1.5"/>
     </svg>
   ),
   call: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M22 16.92V19.92C22 20.47 21.55 20.92 21 20.92C10.5 20.92 2 12.42 2 1.92C2 1.37 2.45 0.92 3 0.92H6C6.55 0.92 7 1.37 7 1.92C7 3.12 7.2 4.28 7.58 5.38L5.59 7.37C7.08 10.18 9.32 12.42 12.13 13.92L14.12 11.92C15.22 12.3 16.38 12.5 17.58 12.5C18.13 12.5 18.58 12.95 18.58 13.5V16.92H22Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   work: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2"/>
-      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="7" width="20" height="14" rx="2" fill={color} stroke={color} strokeWidth="1.5"/>
+      <path d="M16 21V5C16 3.88 15.12 3 14 3H10C8.88 3 8 3.88 8 5V21" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   ),
   rest: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
-      <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/>
-      <path d="M4 18v2"/>
-      <path d="M20 18v2"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M20 9V18C20 19.1 19.1 20 18 20H6C4.9 20 4 19.1 4 18V9" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2 11H22V15C22 16.1 21.1 17 20 17H4C2.9 17 2 16.1 2 15V11Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   travel: ({ size = 20, color = 'currentColor' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M17.8 19.2L16 11L19.5 7.5C21 6 21.5 4 21 3C20 2.5 18 3 16.5 4.5L13 8L4.8 6.2C4.3 6.1 3.9 6.3 3.7 6.7L3.4 7.2C3.2 7.7 3.3 8.2 3.7 8.5L9 12L7 15H4L3 16L6 18L8 20L9 19V16L12 14L17.3 19.7C17.6 20.1 18.1 20.2 18.5 19.9L19 19.4C19.4 19 19.5 18.5 19.2 18.1L17.8 19.2Z" fill={color} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
 };

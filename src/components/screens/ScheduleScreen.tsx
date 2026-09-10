@@ -99,8 +99,8 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
 
       {/* Events list */}
       {dayEvents.length === 0 ? (
-        <div className="p-8 rounded-2xl border-2 border-dashed border-[var(--border)] text-center">
-          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+        <div className="p-8 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
             <Calendar size={20} className="text-[var(--accent)]" />
           </div>
           <p className="text-sm font-medium text-[var(--text-primary)] mb-1">

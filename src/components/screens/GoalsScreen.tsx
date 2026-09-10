@@ -16,7 +16,12 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
   const { state, incrementGoal, decrementGoal } = useApp();
   const lang = state.settings.language;
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [showCompletedGoals, setShowCompletedGoals] = useState(false);
   const prevGoalsRef = useRef<Map<string, number>>(new Map());
+
+  // Разделяем цели на активные и завершенные
+  const activeGoals = state.goals.filter(g => g.current < g.target);
+  const completedGoals = state.goals.filter(g => g.current >= g.target);
 
   // Track goal completions for confetti
   useEffect(() => {
@@ -54,9 +59,9 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
         </div>
       </div>
 
-      {state.goals.length === 0 ? (
-        <div className="p-8 rounded-2xl border-2 border-dashed border-[var(--border)] text-center">
-          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+      {activeGoals.length === 0 && completedGoals.length === 0 ? (
+        <div className="p-8 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
             <Target size={20} className="text-[var(--accent)]" />
           </div>
           <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
@@ -64,10 +69,24 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {state.goals.map((goal) => {
+        <>
+          {activeGoals.length === 0 && completedGoals.length > 0 && (
+            <div className="p-6 rounded-2xl border-2 border-dashed border-green-500/30 bg-green-500/5 text-center mb-2">
+              <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/20 flex items-center justify-center">
+                <Check size={20} className="text-green-500" />
+              </div>
+              <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+                {lang === 'ru' ? 'Все цели достигнуты!' : 'All goals achieved!'}
+              </p>
+              <p className="text-xs text-[var(--text-muted)]">
+                {lang === 'ru' ? 'Отличная работа! Можешь отдохнуть' : 'Great job! Time to relax'}
+              </p>
+            </div>
+          )}
+          <div className="space-y-3">
+          {activeGoals.map((goal) => {
             const progress = Math.min(100, (goal.current / goal.target) * 100);
-            const isAchieved = goal.current >= goal.target;
+            const isAchieved = false; // Active goals are never achieved
 
             return (
               <div
@@ -127,7 +146,55 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
               </div>
             );
           })}
-        </div>
+          </div>
+
+          {/* Completed goals section */}
+          {completedGoals.length > 0 && (
+            <div className="mt-4">
+              <button
+                onClick={() => setShowCompletedGoals(!showCompletedGoals)}
+                className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <Check size={18} className="text-green-500" />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">
+                    {lang === 'ru' ? 'Завершенные' : 'Completed'}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)]">
+                    ({completedGoals.length})
+                  </span>
+                </div>
+                <Plus size={18} className={`text-[var(--text-muted)] transition-transform ${showCompletedGoals ? 'rotate-45' : ''}`} />
+              </button>
+              
+              {showCompletedGoals && (
+                <div className="space-y-2 mt-2">
+                  {completedGoals.map((goal) => (
+                    <div
+                      key={goal.id}
+                      className="p-3 rounded-2xl bg-[var(--card-bg)] border border-green-500/30"
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-[var(--text-muted)] line-through flex-1 truncate">
+                          {goal.name}
+                        </p>
+                        <button
+                          onClick={() => setDeleteConfirmId(goal.id)}
+                          className="text-[var(--text-muted)] hover:text-red-400 transition-colors ml-2"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      <p className="text-xs text-green-500 mt-1">
+                        {goal.current} {goal.unit ? `/ ${goal.target} ${goal.unit}` : `/ ${goal.target}`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       <ConfirmDialog
