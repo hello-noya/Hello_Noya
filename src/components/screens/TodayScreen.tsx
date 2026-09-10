@@ -160,15 +160,15 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
       </div>
 
       {/* Habits section */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <Target size={18} className="text-[var(--accent)]" />
             {t('habits', lang)} <span className="text-[var(--text-muted)] font-normal">({completedHabits.length}/{allDayHabits.length})</span>
           </h3>
           <button
             onClick={onAddHabit}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={14} />
             <span>{t('addHabit', lang).replace('+ ', '')}</span>
@@ -177,10 +177,10 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
         {activeHabits.length === 0 ? (
           <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center">
-            <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
               <Target size={20} className="text-[var(--accent)]" />
             </div>
-            <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+            <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
               {allDayHabits.length === 0 
                 ? (lang === 'ru' ? 'Дисциплина бьет рекорды' : 'Discipline breaks records')
                 : (lang === 'ru' ? 'Все привычки выполнены!' : 'All habits completed!')}
@@ -196,14 +196,14 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             )}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {activeHabits.map((habit) => {
               const isCompleted = false; // Active habits are never completed
               return (
                 <div
                   key={habit.id}
                   onClick={() => onEditHabit(habit)}
-                  className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
+                  className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
                     isCompleted 
                       ? 'bg-[var(--card-bg)] border-[var(--accent)]/30' 
                       : 'bg-[var(--card-bg)] border-[var(--border)]'
@@ -316,8 +316,8 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
       </div>
 
       {/* Tasks section */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <ListTodo size={18} className="text-[var(--accent)]" />
             {t('tasks', lang)} <span className="text-[var(--text-muted)] font-normal">({completedTasks.length}/{allDayTasks.length})</span>
@@ -325,11 +325,11 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         </div>
 
           {activeTasks.length === 0 && completedTasks.length === 0 && (
-            <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center mb-2">
-              <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
+            <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center mb-4">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
                 <ListTodo size={20} className="text-[var(--accent)]" />
               </div>
-              <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+              <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
                 {lang === 'ru' ? 'Список чист' : 'List is clean'}
               </p>
               <p className="text-xs text-[var(--text-muted)]">
@@ -338,11 +338,11 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             </div>
           )}
           {activeTasks.length === 0 && completedTasks.length > 0 && (
-            <div className="p-6 rounded-2xl border-2 border-dashed border-green-500/30 bg-green-500/5 text-center mb-2">
-              <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/20 flex items-center justify-center">
+            <div className="p-6 rounded-2xl border-2 border-dashed border-green-500/30 bg-green-500/5 text-center mb-4">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
                 <Check size={20} className="text-green-500" />
               </div>
-              <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+              <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
                 {lang === 'ru' ? 'Все задачи выполнены!' : 'All tasks completed!'}
               </p>
               <p className="text-xs text-[var(--text-muted)]">
@@ -350,11 +350,11 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               </p>
             </div>
           )}
-          <div className="space-y-2">
+          <div className="space-y-3">
           {activeTasks.map((task) => (
             <div 
               key={task.id} 
-              className={`flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
+              className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
                 task.completed 
                   ? 'bg-[var(--card-bg)] border-[var(--accent)]/30' 
                   : 'bg-[var(--card-bg)] border-[var(--border)]'

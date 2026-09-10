@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Убедимся что все слои Tailwind загружены */
+@layer base, components, utilities;
+
 /* 
   K-pop стиль: две связанные темы в корейской эстетике
   - Lavender Dream: светлая фиолетовая (по умолчанию)
@@ -35,13 +38,7 @@
   --text-muted: #8b7ba8;
 }
 
-/* Base styles */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* Base styles - Tailwind v4 включает свой reset, не переопределяем */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
