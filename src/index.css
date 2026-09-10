@@ -15,27 +15,27 @@
   --bg-primary: #f8f5ff;
   --bg-secondary: #f0ebff;
   --card-bg: #ffffff;
-  --hover: #e8e0ff;
-  --border: #d4c8f5;
-  --accent: #a78bfa;
-  --accent-hover: #8b6ff0;
-  --text-primary: #2d1b4e;
-  --text-secondary: #5c3d8f;
-  --text-muted: #8b6bb5;
+  --hover: #ede5ff;
+  --border: #c4b5fd;
+  --accent: #8b5cf6;
+  --accent-hover: #7c3aed;
+  --text-primary: #1e1b4b;
+  --text-secondary: #4c1d95;
+  --text-muted: #6d28d9;
 }
 
 /* Midnight Seoul theme — тёмная */
 [data-theme="dark"] {
-  --bg-primary: #1a1625;
-  --bg-secondary: #241f35;
-  --card-bg: #2d2840;
-  --hover: #3d3855;
-  --border: #4d4865;
-  --accent: #c4b5fd;
-  --accent-hover: #a78bfa;
-  --text-primary: #f0ebff;
-  --text-secondary: #d4c8f5;
-  --text-muted: #8b7ba8;
+  --bg-primary: #0f0a1a;
+  --bg-secondary: #1a1625;
+  --card-bg: #1e1b4b;
+  --hover: #312e81;
+  --border: #4c1d95;
+  --accent: #a78bfa;
+  --accent-hover: #8b5cf6;
+  --text-primary: #f5f3ff;
+  --text-secondary: #ddd6fe;
+  --text-muted: #a78bfa;
 }
 
 /* Base styles - Tailwind v4 включает свой reset, не переопределяем */
