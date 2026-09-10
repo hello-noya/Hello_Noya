@@ -189,6 +189,92 @@ export function StudentTemplates({ onBack }: StudentTemplatesProps) {
         { name: lang === 'ru' ? 'Потерять 10 кг' : 'Lose 10 kg', target: 10, unit: 'kg' },
       ],
     },
+    // Time management templates
+    {
+      id: 'deep-work',
+      category: 'study',
+      name: lang === 'ru' ? 'Глубокая работа' : 'Deep Work',
+      icon: <BookOpen size={32} />,
+      description: lang === 'ru'
+        ? '4 часа фокуса без отвлечений'
+        : '4 hours of focused work without distractions',
+      habits: [
+        { name: lang === 'ru' ? 'Отключить уведомления' : 'Turn off notifications', icon: 'brain', startTime: '09:00', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Фокус 90 мин' : 'Focus 90 min', icon: 'brain', startTime: '09:15', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Перерыв 15 мин' : 'Break 15 min', icon: 'coffee', startTime: '10:45', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Фокус 90 мин' : 'Focus 90 min', icon: 'brain', startTime: '11:00', days: [1, 2, 3, 4, 5] },
+      ],
+      tasks: [
+        { text: lang === 'ru' ? 'Определить главную задачу' : 'Define main task', time: '09:00' },
+        { text: lang === 'ru' ? 'Записать результаты' : 'Document results', time: '12:30' },
+      ],
+      goals: [
+        { name: lang === 'ru' ? '100 часов глубокой работы' : '100 hours of deep work', target: 100, unit: lang === 'ru' ? 'часов' : 'hours' },
+      ],
+    },
+    {
+      id: 'time-blocking',
+      category: 'work',
+      name: lang === 'ru' ? 'Time Blocking' : 'Time Blocking',
+      icon: <Briefcase size={32} />,
+      description: lang === 'ru'
+        ? 'Планирование дня по блокам времени'
+        : 'Planning the day in time blocks',
+      habits: [
+        { name: lang === 'ru' ? 'Планирование утром' : 'Morning planning', icon: 'book', startTime: '08:00', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Блок фокуса 2ч' : 'Focus block 2h', icon: 'brain', startTime: '09:00', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Блок встреч 1ч' : 'Meeting block 1h', icon: 'book', startTime: '14:00', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Обзор дня' : 'Daily review', icon: 'book', startTime: '17:00', days: [1, 2, 3, 4, 5] },
+      ],
+      tasks: [
+        { text: lang === 'ru' ? 'Создать блоки в календаре' : 'Create calendar blocks', time: '08:15' },
+        { text: lang === 'ru' ? 'Проверить прогресс' : 'Check progress', time: '12:00' },
+      ],
+      events: [
+        { name: lang === 'ru' ? 'Блок глубокой работы' : 'Deep work block', startTime: '09:00', endTime: '11:00', note: '', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Обед' : 'Lunch', startTime: '12:00', endTime: '13:00', note: '', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Блок коммуникации' : 'Communication block', startTime: '14:00', endTime: '15:00', note: '', days: [1, 2, 3, 4, 5] },
+      ],
+    },
+    {
+      id: 'morning-routine',
+      category: 'life',
+      name: lang === 'ru' ? 'Утренний ритуал' : 'Morning Routine',
+      icon: <Heart size={32} />,
+      description: lang === 'ru'
+        ? 'Продуктивное начало дня за 90 минут'
+        : 'Productive start of the day in 90 minutes',
+      habits: [
+        { name: lang === 'ru' ? 'Подъем в 6:00' : 'Wake up at 6:00', icon: 'sleep', startTime: '06:00', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Стакан воды' : 'Glass of water', icon: 'water', startTime: '06:05', days: [0, 1, 2, 3, 4, 5, 6] },
+        { name: lang === 'ru' ? 'Медитация 10 мин' : 'Meditation 10 min', icon: 'brain', startTime: '06:10', days: [0, 1, 2, 3, 4, 5, 6] },
+        { name: lang === 'ru' ? 'Зарядка 20 мин' : 'Exercise 20 min', icon: 'gym', startTime: '06:20', days: [1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Здоровый завтрак' : 'Healthy breakfast', icon: 'apple', startTime: '06:40', days: [0, 1, 2, 3, 4, 5, 6] },
+        { name: lang === 'ru' ? 'Чтение 30 мин' : 'Reading 30 min', icon: 'book', startTime: '07:00', days: [0, 1, 2, 3, 4, 5, 6] },
+      ],
+      goals: [
+        { name: lang === 'ru' ? '30 дней ритуала подряд' : '30 days of routine in a row', target: 30, unit: lang === 'ru' ? 'дней' : 'days' },
+      ],
+    },
+    {
+      id: 'evening-routine',
+      category: 'life',
+      name: lang === 'ru' ? 'Вечерний ритуал' : 'Evening Routine',
+      icon: <Heart size={32} />,
+      description: lang === 'ru'
+        ? 'Подготовка ко сну и планирование завтра'
+        : 'Sleep preparation and planning tomorrow',
+      habits: [
+        { name: lang === 'ru' ? 'Отключить экраны' : 'Turn off screens', icon: 'brain', startTime: '21:00', days: [0, 1, 2, 3, 4, 5, 6] },
+        { name: lang === 'ru' ? 'Планирование завтра' : 'Plan tomorrow', icon: 'book', startTime: '21:15', days: [0, 1, 2, 3, 4, 5] },
+        { name: lang === 'ru' ? 'Чтение 20 мин' : 'Reading 20 min', icon: 'book', startTime: '21:30', days: [0, 1, 2, 3, 4, 5, 6] },
+        { name: lang === 'ru' ? 'Медитация 10 мин' : 'Meditation 10 min', icon: 'brain', startTime: '21:50', days: [0, 1, 2, 3, 4, 5, 6] },
+        { name: lang === 'ru' ? 'Сон в 22:30' : 'Sleep at 22:30', icon: 'sleep', startTime: '22:30', days: [0, 1, 2, 3, 4, 5, 6] },
+      ],
+      goals: [
+        { name: lang === 'ru' ? '7 дней ритуала' : '7 days of routine', target: 7, unit: lang === 'ru' ? 'дней' : 'days' },
+      ],
+    },
   ];
 
   const applyTemplate = (template: Template) => {

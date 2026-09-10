@@ -131,20 +131,18 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
                 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  {/* Time - first line */}
-                  <p className={`text-base font-bold ${active ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>
-                    {event.startTime}
+                  {/* First line: start time + name */}
+                  <p className={`text-sm ${active ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>
+                    <span className="font-bold">{lang === 'ru' ? 'с ' : 'from '}{event.startTime}</span>
+                    <span className="font-semibold ml-2">{event.name}</span>
                   </p>
-                  {/* Time - second line */}
-                  <p className="text-sm text-[var(--text-muted)]">
-                    {lang === 'ru' ? 'до' : 'until'} {event.endTime}
+                  {/* Second line: end time + note */}
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    <span className="font-medium">{lang === 'ru' ? 'до ' : 'to '}{event.endTime}</span>
+                    {event.note && (
+                      <span className="ml-2 line-clamp-1">{event.note}</span>
+                    )}
                   </p>
-                  {/* Name */}
-                  <p className="text-sm font-semibold text-[var(--text-primary)] mt-1">{event.name}</p>
-                  {/* Note */}
-                  {event.note && (
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">{event.note}</p>
-                  )}
                   {active && (
                     <span className="text-[10px] font-semibold text-[var(--accent)] mt-1 inline-block">● {t('now', lang)}</span>
                   )}

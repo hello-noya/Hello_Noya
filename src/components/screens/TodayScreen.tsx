@@ -251,27 +251,26 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               );
             })}
             
-            {/* Completed habits section */}
-            {completedHabits.length > 0 && (
-              <div className="mt-3">
-                <button
-                  onClick={() => setShowCompletedHabits(!showCompletedHabits)}
-                  className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <Check size={18} className="text-[var(--accent)]" />
-                    <span className="text-sm font-medium text-[var(--text-primary)]">
-                      {lang === 'ru' ? 'Завершенные' : 'Completed'}
-                    </span>
-                    <span className="text-xs text-[var(--text-muted)]">
-                      ({completedHabits.length})
-                    </span>
-                  </div>
-                  <ChevronDown 
-                    size={18} 
-                    className={`text-[var(--text-muted)] transition-transform ${showCompletedHabits ? 'rotate-180' : ''}`}
-                  />
-                </button>
+            {/* Completed habits section - always visible */}
+            <div className="mt-3">
+              <button
+                onClick={() => setShowCompletedHabits(!showCompletedHabits)}
+                className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <Check size={18} className="text-[var(--accent)]" />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">
+                    {lang === 'ru' ? 'Завершенные' : 'Completed'}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)]">
+                    ({completedHabits.length})
+                  </span>
+                </div>
+                <ChevronDown 
+                  size={18} 
+                  className={`text-[var(--text-muted)] transition-transform ${showCompletedHabits ? 'rotate-180' : ''}`}
+                />
+              </button>
                 
                 {showCompletedHabits && (
                   <div className="space-y-2 mt-2">
@@ -313,7 +312,6 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                   </div>
                 )}
               </div>
-            )}
           </div>
         )}
       </div>

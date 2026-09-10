@@ -18,6 +18,7 @@ export function MenuScreen({ onNavigate }: MenuScreenProps) {
     { id: 'profile' as MenuSection, icon: <User size={20} />, label: t('profile', lang), desc: t('profileDesc', lang) },
     { id: 'statistics' as MenuSection, icon: <Settings size={20} />, label: lang === 'ru' ? 'Статистика' : 'Statistics', desc: lang === 'ru' ? 'Анализ продуктивности' : 'Productivity analysis' },
     { id: 'templates' as MenuSection, icon: <Settings size={20} />, label: lang === 'ru' ? 'Шаблоны' : 'Templates', desc: lang === 'ru' ? 'Готовые наборы для быстрого старта' : 'Ready-made sets for quick start' },
+    { id: 'settings' as MenuSection, icon: <Settings size={20} />, label: t('settings', lang), desc: t('settingsDesc', lang) },
     { id: 'tools' as MenuSection, icon: <Wrench size={20} />, label: t('tools', lang), desc: t('toolsDesc', lang) },
   ];
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, List, Plus, Trash2, ArrowLeft, X, Check } from 'lucide-react';
+import { FileText, List, Plus, Trash2, ArrowLeft, X, Check, ChevronRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 type NoteMode = 'notebook' | 'list';
@@ -100,6 +100,12 @@ export function QuickNotes() {
             {lang === 'ru' ? 'Заметки' : 'Notes'}
           </h3>
         </div>
+        {!activeNotebookId && (
+          <ChevronRight 
+            size={20} 
+            className={`text-[var(--text-muted)] transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+          />
+        )}
       </button>
 
       {/* Expanded content */}
@@ -187,7 +193,7 @@ export function QuickNotes() {
                             <button
                               key={notebook.id}
                               onClick={() => setActiveNotebookId(notebook.id)}
-                              className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)]/50 transition-colors text-left"
+                              className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)]/50 transition-colors text-left group"
                             >
                               <FileText size={16} className="text-[var(--accent)] flex-shrink-0" />
                               <div className="flex-1 min-w-0">
@@ -195,6 +201,7 @@ export function QuickNotes() {
                                   {notebook.name}
                                 </p>
                               </div>
+                              <ChevronRight size={16} className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors flex-shrink-0" />
                             </button>
                           ))}
                           {notebooks.length < 6 && (
@@ -226,9 +233,9 @@ export function QuickNotes() {
                     </h4>
                     <button
                       onClick={() => deleteNotebook(activeNotebook.id)}
-                      className="p-1 rounded hover:bg-red-500/10 transition-colors"
+                      className="p-1.5 rounded-full hover:bg-red-500/10 transition-colors"
                     >
-                      <Trash2 size={16} className="text-red-400" />
+                      <X size={18} className="text-red-400" />
                     </button>
                   </div>
                   
