@@ -6,6 +6,7 @@ import { getDayOfWeek } from '../../utils/storage';
 import { Habit, Task, DayOfWeek } from '../../types';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { renderIcon } from '../../utils/icons';
+import { QuickNotes } from './QuickNotes';
 
 interface TodayScreenProps {
   onEditHabit: (habit: Habit) => void;
@@ -129,6 +130,8 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   return (
     <div className="space-y-5">
+      {/* Quick Notes */}
+      <QuickNotes />
 
       {/* Week selector */}
       <div className="flex gap-1.5 justify-between">

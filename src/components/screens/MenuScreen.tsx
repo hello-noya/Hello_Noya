@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { renderIcon } from '../../utils/icons';
 
-type MenuSection = 'profile' | 'settings' | 'tools' | 'manage' | 'statistics';
+type MenuSection = 'profile' | 'settings' | 'tools' | 'manage' | 'statistics' | 'templates';
 
 interface MenuScreenProps {
   onNavigate: (section: MenuSection) => void;
@@ -16,7 +16,9 @@ export function MenuScreen({ onNavigate }: MenuScreenProps) {
 
   const items = [
     { id: 'profile' as MenuSection, icon: <User size={20} />, label: t('profile', lang), desc: t('profileDesc', lang) },
-    { id: 'settings' as MenuSection, icon: <Settings size={20} />, label: t('settings', lang), desc: t('settingsDesc', lang) },
+    { id: 'manage' as MenuSection, icon: <Settings size={20} />, label: lang === 'ru' ? 'Управление' : 'Manage', desc: lang === 'ru' ? 'Привычки, задачи, расписание' : 'Habits, tasks, schedule' },
+    { id: 'statistics' as MenuSection, icon: <Settings size={20} />, label: lang === 'ru' ? 'Статистика' : 'Statistics', desc: lang === 'ru' ? 'Анализ продуктивности' : 'Productivity analysis' },
+    { id: 'templates' as MenuSection, icon: <Settings size={20} />, label: lang === 'ru' ? 'Шаблоны' : 'Templates', desc: lang === 'ru' ? 'Готовые наборы для быстрого старта' : 'Ready-made sets for quick start' },
     { id: 'tools' as MenuSection, icon: <Wrench size={20} />, label: t('tools', lang), desc: t('toolsDesc', lang) },
   ];
 
