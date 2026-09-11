@@ -190,7 +190,7 @@ export function EventModal({ isOpen, onClose, event }: EventModalProps) {
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder={t('notePlaceholder', lang)}
+              placeholder={lang === 'ru' ? 'Добавить заметку...' : 'Add note...'}
               className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
             />
           </div>
