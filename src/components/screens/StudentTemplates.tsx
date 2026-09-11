@@ -42,8 +42,8 @@ interface StudentTemplatesProps {
 }
 
 export function StudentTemplates({ onBack }: StudentTemplatesProps) {
-  const { addHabit, addTask, addGoal, addEvent, showToast } = useApp();
-  const lang = useApp().state.settings.language;
+  const { state, addHabit, addTask, addGoal, addEvent, showToast } = useApp();
+  const lang = state.settings.language;
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 

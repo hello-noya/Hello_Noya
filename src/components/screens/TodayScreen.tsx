@@ -498,7 +498,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
               value={newTaskText}
               onChange={(e) => setNewTaskText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-              placeholder={t('newTask', lang)}
+              placeholder={lang === 'ru' ? 'Введите текст задачи' : 'Enter task text'}
               className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] px-2 py-1 focus:outline-none"
             />
             <button
@@ -535,7 +535,8 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                   type="text"
                   value={editTaskText}
                   onChange={(e) => setEditTaskText(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                  placeholder={lang === 'ru' ? 'Введите текст задачи' : 'Enter task text'}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
                 />
               </div>
               <div>
