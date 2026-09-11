@@ -45,24 +45,32 @@ function AppContent() {
 
   // Check if profile exists after splash
   const handleSplashComplete = () => {
+    console.log('Splash complete, profile:', state.profile);
     if (state.profile) {
+      console.log('Profile exists, going to main');
       setAppPhase('main');
     } else {
+      console.log('No profile, going to onboarding');
       setAppPhase('onboarding');
     }
   };
 
   const handleOnboardingComplete = () => {
+    console.log('Onboarding complete, going to main');
     setAppPhase('main');
   };
 
   if (appPhase === 'splash') {
+    console.log('Rendering splash screen');
     return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   if (appPhase === 'onboarding') {
+    console.log('Rendering onboarding screen');
     return <OnboardingScreen onComplete={handleOnboardingComplete} />;
   }
+
+  console.log('Rendering main app');
 
   // Main app
   const renderContent = () => {
