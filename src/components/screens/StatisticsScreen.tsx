@@ -42,11 +42,16 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     return { start, end };
   };
 
+  // Helper function to format date as YYYY-MM-DD using local time
+  const formatDateLocal = (date: Date): string => {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
+
   // Calculate statistics for the period
   const stats = useMemo(() => {
     const { start, end } = getDateRange();
-    const startStr = start.toISOString().split('T')[0];
-    const endStr = end.toISOString().split('T')[0];
+    const startStr = formatDateLocal(start);
+    const endStr = formatDateLocal(end);
 
     const habitsCompleted = state.completionLog?.habits?.filter(h => 
       h.date >= startStr && h.date <= endStr && h.completed
@@ -69,8 +74,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     const duration = end.getTime() - start.getTime();
     const prevStart = new Date(start.getTime() - duration);
     const prevEnd = new Date(start.getTime() - 1);
-    const startStr = prevStart.toISOString().split('T')[0];
-    const endStr = prevEnd.toISOString().split('T')[0];
+    const startStr = formatDateLocal(prevStart);
+    const endStr = formatDateLocal(prevEnd);
 
     const habitsCompleted = state.completionLog?.habits?.filter(h => 
       h.date >= startStr && h.date <= endStr && h.completed
@@ -91,7 +96,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
   const streak = useMemo(() => {
     let count = 0;
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = formatDateLocal(today);
     
     const todayHasActivity = 
       state.completionLog?.habits?.some(h => h.date === todayStr && h.completed) ||
@@ -104,7 +109,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     for (let i = 1; i < 365; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatDateLocal(date);
       
       const hasActivity = 
         state.completionLog?.habits?.some(h => h.date === dateStr && h.completed) ||
@@ -164,7 +169,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatDateLocal(date);
       
       let value = 0;
       if (selectedHabit) {
@@ -206,7 +211,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     const data: Array<{ date: string; day: number; value: number; isToday: boolean; isEmpty: boolean }> = [];
     
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
     // Add empty cells for days before first day
     for (let i = 0; i < firstDayOfWeek; i++) {
@@ -216,7 +221,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     // Add actual days
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       
       let value = 0;
       if (selectedHabit) {
@@ -289,11 +294,10 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Period selector */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {([
                 { id: 'week' as Period, label: lang === 'ru' ? 'Неделя' : 'Week' },
                 { id: 'month' as Period, label: lang === 'ru' ? 'Месяц' : 'Month' },
-                { id: 'year' as Period, label: lang === 'ru' ? 'Год' : 'Year' },
               ]).map((p) => (
                 <button
                   key={p.id}
@@ -401,7 +405,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                         }`}
                         style={{
                           backgroundColor: `var(--accent)`,
-                          opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
+                          opacity: day.value === 0 ? 0.4 : Math.max(0.6, intensity),
                         }}
                       >
                         <span className="text-xs font-bold text-white">{day.day}</span>
@@ -409,46 +413,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                           <span className="text-[8px] text-white/80">{day.value}</span>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {period === 'year' && (
-              <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-                <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-                  {lang === 'ru' ? 'Обзор по месяцам' : 'Monthly Overview'}
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {monthlyData.map((month, i) => {
-                    const maxValue = Math.max(...monthlyData.map(m => m.value), 1);
-                    const height = (month.value / maxValue) * 60;
-                    
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
-                          setPeriod('month');
-                        }}
-                        className="flex flex-col items-center p-3 rounded-lg bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
-                      >
-                        <div 
-                          className="w-full rounded-full mb-2"
-                          style={{
-                            height: `${height}px`,
-                            backgroundColor: 'var(--accent)',
-                            minHeight: month.value > 0 ? '4px' : '0px',
-                          }}
-                        />
-                        <span className="text-xs font-medium text-[var(--text-primary)] capitalize">
-                          {month.label}
-                        </span>
-                        <span className="text-xs text-[var(--text-muted)]">
-                          {month.value}
-                        </span>
-                      </button>
                     );
                   })}
                 </div>
@@ -593,7 +557,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                         className="w-full aspect-square rounded-lg flex items-center justify-center"
                         style={{
                           backgroundColor: `var(--accent)`,
-                          opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
+                          opacity: day.value === 0 ? 0.4 : Math.max(0.6, intensity),
                         }}
                       >
                         <span className="text-xs font-bold text-white">{day.value}</span>
@@ -633,7 +597,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                       }`}
                       style={{
                         backgroundColor: `var(--accent)`,
-                        opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
+                        opacity: day.value === 0 ? 0.4 : Math.max(0.6, intensity),
                       }}
                     >
                       <span className="text-xs font-bold text-white">{day.day}</span>
@@ -641,46 +605,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                         <span className="text-[8px] text-white/80">{day.value}</span>
                       )}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {period === 'year' && (
-            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-                {lang === 'ru' ? 'Обзор по месяцам' : 'Monthly Overview'}
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {monthlyData.map((month, i) => {
-                  const maxValue = Math.max(...monthlyData.map(m => m.value), 1);
-                  const height = (month.value / maxValue) * 60;
-                  
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
-                        setPeriod('month');
-                      }}
-                      className="flex flex-col items-center p-3 rounded-lg bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
-                    >
-                      <div 
-                        className="w-full rounded-full mb-2"
-                        style={{
-                          height: `${height}px`,
-                          backgroundColor: 'var(--accent)',
-                          minHeight: month.value > 0 ? '4px' : '0px',
-                        }}
-                      />
-                      <span className="text-xs font-medium text-[var(--text-primary)] capitalize">
-                        {month.label}
-                      </span>
-                      <span className="text-xs text-[var(--text-muted)]">
-                        {month.value}
-                      </span>
-                    </button>
                   );
                 })}
               </div>
@@ -696,8 +620,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
               <div className="space-y-2">
                 {state.habits.map((habit) => {
                   const { start, end } = getDateRange();
-                  const startStr = start.toISOString().split('T')[0];
-                  const endStr = end.toISOString().split('T')[0];
+                  const startStr = formatDateLocal(start);
+                  const endStr = formatDateLocal(end);
                   
                   const completed = state.completionLog?.habits?.filter(h => 
                     h.habitId === habit.id && h.date >= startStr && h.date <= endStr && h.completed
@@ -715,6 +639,71 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                       <span className="text-sm text-[var(--text-primary)]">{habit.name}</span>
                       <span className="text-sm font-medium text-[var(--accent)]">{percentage}%</span>
                     </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Tasks list with completion % */}
+          {metric === 'tasks' && state.tasks.length > 0 && (
+            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                {lang === 'ru' ? 'Задачи' : 'Tasks'}
+              </h3>
+              <div className="space-y-2">
+                {state.tasks.map((task) => {
+                  const { start, end } = getDateRange();
+                  const startStr = formatDateLocal(start);
+                  const endStr = formatDateLocal(end);
+                  
+                  const completed = state.completionLog?.tasks?.filter(t => 
+                    t.taskId === task.id && t.date >= startStr && t.date <= endStr
+                  ).length || 0;
+                  
+                  const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+                  const percentage = totalDays > 0 ? Math.round((completed / totalDays) * 100) : 0;
+                  
+                  return (
+                    <div
+                      key={task.id}
+                      className="w-full flex items-center justify-between p-3 rounded-lg bg-[var(--bg-primary)]"
+                    >
+                      <span className="text-sm text-[var(--text-primary)]">{task.text}</span>
+                      <span className="text-sm font-medium text-[var(--accent)]">{percentage}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Goals list with progress % */}
+          {metric === 'goals' && state.goals.length > 0 && (
+            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                {lang === 'ru' ? 'Цели' : 'Goals'}
+              </h3>
+              <div className="space-y-2">
+                {state.goals.map((goal) => {
+                  const { start, end } = getDateRange();
+                  const startStr = formatDateLocal(start);
+                  const endStr = formatDateLocal(end);
+                  
+                  const progressAdded = state.completionLog?.goals?.filter(g => 
+                    g.goalId === goal.id && g.date >= startStr && g.date <= endStr
+                  ).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+                  
+                  const percentage = goal.target > 0 ? Math.round((progressAdded / goal.target) * 100) : 0;
+                  
+                  return (
+                    <div
+                      key={goal.id}
+                      className="w-full flex items-center justify-between p-3 rounded-lg bg-[var(--bg-primary)]"
+                    >
+                      <span className="text-sm text-[var(--text-primary)]">{goal.name}</span>
+                      <span className="text-sm font-medium text-[var(--accent)]">{percentage}%</span>
+                    </div>
                   );
                 })}
               </div>
