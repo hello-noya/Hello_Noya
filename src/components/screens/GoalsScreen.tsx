@@ -153,58 +153,12 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
             );
           })}
 
-          {/* Completed goals section */}
-          {completedGoals.length > 0 && (
-            <div className="mt-4">
-              <button
-                onClick={() => setShowCompletedGoals(!showCompletedGoals)}
-                className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
-              >
-                <div className="flex items-center gap-2">
-                  <Check size={18} className="text-green-500" />
-                  <span className="text-sm font-medium text-[var(--text-primary)]">
-                    {lang === 'ru' ? 'Завершенные' : 'Completed'}
-                  </span>
-                  <span className="text-xs text-[var(--text-muted)]">
-                    ({completedGoals.length})
-                  </span>
-                </div>
-                <Plus size={18} className={`text-[var(--text-muted)] transition-transform ${showCompletedGoals ? 'rotate-45' : ''}`} />
-              </button>
-              
-              {showCompletedGoals && (
-                <div className="space-y-2 mt-2">
-                  {completedGoals.map((goal) => (
-                    <div
-                      key={goal.id}
-                      className="p-3 rounded-2xl bg-[var(--card-bg)] border border-green-500/30"
-                    >
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-[var(--text-muted)] line-through flex-1 truncate">
-                          {goal.name}
-                        </p>
-                        <button
-                          onClick={() => setDeleteConfirmId(goal.id)}
-                          className="text-[var(--text-muted)] hover:text-red-400 transition-colors ml-2"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                      <p className="text-xs text-green-500 mt-1">
-                        {goal.current} {goal.unit ? `/ ${goal.target} ${goal.unit}` : `/ ${goal.target}`}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
         </>
       )}
 
       {/* Completed goals section - всегда показывается когда есть завершенные цели */}
-      {completedGoals.length > 0 && activeGoals.length > 0 && (
+      {completedGoals.length > 0 && (
         <div className="mt-4">
           <button
             onClick={() => setShowCompletedGoals(!showCompletedGoals)}
