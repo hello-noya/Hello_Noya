@@ -147,77 +147,79 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     return change;
   };
 
-  // Level 2: Habit detail view
-  if (selectedHabit) {
-    // Calculate habit-specific stats
-    const habitStats = useMemo(() => {
-      const { start, end } = getDateRange();
-      const startStr = formatDateLocal(start);
-      const endStr = formatDateLocal(end);
+  // Calculate habit-specific stats (moved to top level)
+  const habitStats = useMemo(() => {
+    if (!selectedHabit) return null;
+    
+    const { start, end } = getDateRange();
+    const startStr = formatDateLocal(start);
+    const endStr = formatDateLocal(end);
+    
+    // Get completion data for this specific habit
+    const completions = state.completionLog?.habits?.filter(h => 
+      h.habitId === selectedHabit.id && h.date >= startStr && h.date <= endStr && h.completed
+    ) || [];
+    
+    // Calculate total days in period
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    // Calculate completion percentage
+    const completionRate = totalDays > 0 ? Math.round((completions.length / totalDays) * 100) : 0;
+    
+    // Calculate current streak
+    let currentStreak = 0;
+    const today = new Date();
+    for (let i = 0; i < 365; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = formatDateLocal(date);
       
-      // Get completion data for this specific habit
-      const completions = state.completionLog?.habits?.filter(h => 
-        h.habitId === selectedHabit.id && h.date >= startStr && h.date <= endStr && h.completed
-      ) || [];
+      const wasCompleted = state.completionLog?.habits?.some(h => 
+        h.habitId === selectedHabit.id && h.date === dateStr && h.completed
+      );
       
-      // Calculate total days in period
-      const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      
-      // Calculate completion percentage
-      const completionRate = totalDays > 0 ? Math.round((completions.length / totalDays) * 100) : 0;
-      
-      // Calculate current streak
-      let currentStreak = 0;
-      const today = new Date();
-      for (let i = 0; i < 365; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const dateStr = formatDateLocal(date);
-        
-        const wasCompleted = state.completionLog?.habits?.some(h => 
-          h.habitId === selectedHabit.id && h.date === dateStr && h.completed
-        );
-        
-        if (wasCompleted) {
-          currentStreak++;
-        } else {
-          break;
-        }
+      if (wasCompleted) {
+        currentStreak++;
+      } else {
+        break;
       }
-      
-      // Calculate best streak
-      let bestStreak = 0;
-      let tempStreak = 0;
-      const allDates = state.completionLog?.habits
-        ?.filter(h => h.habitId === selectedHabit.id && h.completed)
-        .map(h => h.date)
-        .sort() || [];
-      
-      for (let i = 0; i < allDates.length; i++) {
-        if (i === 0) {
+    }
+    
+    // Calculate best streak
+    let bestStreak = 0;
+    let tempStreak = 0;
+    const allDates = state.completionLog?.habits
+      ?.filter(h => h.habitId === selectedHabit.id && h.completed)
+      .map(h => h.date)
+      .sort() || [];
+    
+    for (let i = 0; i < allDates.length; i++) {
+      if (i === 0) {
+        tempStreak = 1;
+      } else {
+        const prevDate = new Date(allDates[i - 1]);
+        const currDate = new Date(allDates[i]);
+        const diffDays = Math.ceil((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+          tempStreak++;
+        } else {
           tempStreak = 1;
-        } else {
-          const prevDate = new Date(allDates[i - 1]);
-          const currDate = new Date(allDates[i]);
-          const diffDays = Math.ceil((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
-          
-          if (diffDays === 1) {
-            tempStreak++;
-          } else {
-            tempStreak = 1;
-          }
         }
-        bestStreak = Math.max(bestStreak, tempStreak);
       }
-      
-      return {
-        completionRate,
-        currentStreak,
-        bestStreak,
-        completions,
-      };
-    }, [selectedHabit, period, state.completionLog]);
+      bestStreak = Math.max(bestStreak, tempStreak);
+    }
+    
+    return {
+      completionRate,
+      currentStreak,
+      bestStreak,
+      completions,
+    };
+  }, [selectedHabit, period, state.completionLog]);
 
+  // Level 2: Habit detail view (conditional render)
+  if (selectedHabit && habitStats) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3">
