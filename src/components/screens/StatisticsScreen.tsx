@@ -7,7 +7,7 @@ interface StatisticsScreenProps {
   onBack: () => void;
 }
 
-type Period = 'week' | 'month' | 'year';
+type Period = 'week' | 'month';
 type Metric = 'habits' | 'tasks' | 'goals';
 
 export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
@@ -30,9 +30,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     if (period === 'month') {
       start = new Date(selectedMonth);
       end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-    } else if (period === 'year') {
-      start = new Date(now.getFullYear(), 0, 1);
-      end = new Date(now.getFullYear(), 11, 31);
     } else {
       // Week starts from Sunday
       const dayOfWeek = now.getDay();
@@ -246,38 +243,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     return data;
   }, [period, selectedMonth, metric, selectedHabit, state.completionLog]);
 
-  // Generate monthly data for year view
-  const monthlyData = useMemo(() => {
-    if (period !== 'year') return [];
-    
-    const year = new Date().getFullYear();
-    const data: Array<{ month: number; label: string; value: number }> = [];
-    
-    for (let month = 0; month < 12; month++) {
-      const start = new Date(year, month, 1);
-      const end = new Date(year, month + 1, 0);
-      const startStr = start.toISOString().split('T')[0];
-      const endStr = end.toISOString().split('T')[0];
-      
-      let value = 0;
-      if (selectedHabit) {
-        value = state.completionLog?.habits?.filter(h => 
-          h.habitId === selectedHabit.id && h.date >= startStr && h.date <= endStr && h.completed
-        ).length || 0;
-      } else if (metric === 'habits') {
-        value = state.completionLog?.habits?.filter(h => h.date >= startStr && h.date <= endStr && h.completed).length || 0;
-      } else if (metric === 'tasks') {
-        value = state.completionLog?.tasks?.filter(t => t.date >= startStr && t.date <= endStr).length || 0;
-      } else if (metric === 'goals') {
-        value = state.completionLog?.goals?.filter(g => g.date >= startStr && g.date <= endStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
-      }
-      
-      const label = start.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { month: 'short' });
-      data.push({ month, label, value });
-    }
-    
-    return data;
-  }, [period, metric, selectedHabit, state.completionLog, lang]);
+
 
   // Navigation for month view
   const prevMonth = () => {
