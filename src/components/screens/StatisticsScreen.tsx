@@ -476,20 +476,18 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
 
   // Level 1: Overview
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--bg-primary)] flex flex-col">
-      <div className="max-w-[420px] mx-auto w-full flex flex-col h-full">
-        {/* Section Header */}
-        <div className="flex items-center gap-3 p-4 border-b border-[var(--border)] bg-[var(--card-bg)]">
-          <button onClick={onBack} className="p-1.5 rounded-full hover:bg-[var(--hover)] transition-colors">
-            <ArrowLeft size={20} className="text-[var(--text-primary)]" />
-          </button>
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-            {lang === 'ru' ? 'Статистика' : 'Statistics'}
-          </h2>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="p-1.5 rounded-full hover:bg-[var(--hover)] transition-colors">
+          <ArrowLeft size={20} className="text-[var(--text-primary)]" />
+        </button>
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+          {lang === 'ru' ? 'Статистика' : 'Statistics'}
+        </h2>
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Content */}
+      <div className="space-y-4">
           {/* Period selector */}
           <div className="grid grid-cols-2 gap-2">
             {([
@@ -759,7 +757,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }

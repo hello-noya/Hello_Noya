@@ -36,6 +36,13 @@ function AppContent() {
     root.setAttribute('data-theme', state.settings.theme);
   }, [state.settings.theme]);
 
+  // Auto-redirect to onboarding when profile is deleted (logout)
+  useEffect(() => {
+    if (appPhase === 'main' && !state.profile) {
+      setAppPhase('onboarding');
+    }
+  }, [state.profile, appPhase]);
+
   // Check if profile exists after splash
   const handleSplashComplete = () => {
     if (state.profile) {
