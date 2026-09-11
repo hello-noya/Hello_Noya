@@ -1,8 +1,9 @@
-import React from 'react';
-import { User, Settings, Wrench, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Settings, Wrench, ChevronRight, TrendingUp, BookOpen } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { renderIcon } from '../../utils/icons';
+import { BottomSheet } from '../ui/BottomSheet';
 
 type MenuSection = 'profile' | 'settings' | 'tools' | 'statistics' | 'templates';
 
@@ -13,14 +14,40 @@ interface MenuScreenProps {
 export function MenuScreen({ onNavigate }: MenuScreenProps) {
   const { state } = useApp();
   const lang = state.settings.language;
+  const [openSheet, setOpenSheet] = useState<MenuSection | null>(null);
 
   const items = [
     { id: 'profile' as MenuSection, icon: <User size={20} />, label: t('profile', lang), desc: t('profileDesc', lang) },
-    { id: 'statistics' as MenuSection, icon: <Settings size={20} />, label: lang === 'ru' ? 'Статистика' : 'Statistics', desc: lang === 'ru' ? 'Анализ продуктивности' : 'Productivity analysis' },
-    { id: 'templates' as MenuSection, icon: <Settings size={20} />, label: lang === 'ru' ? 'Шаблоны' : 'Templates', desc: lang === 'ru' ? 'Готовые наборы для быстрого старта' : 'Ready-made sets for quick start' },
+    { id: 'statistics' as MenuSection, icon: <TrendingUp size={20} />, label: lang === 'ru' ? 'Статистика' : 'Statistics', desc: lang === 'ru' ? 'Анализ продуктивности' : 'Productivity analysis' },
+    { id: 'templates' as MenuSection, icon: <BookOpen size={20} />, label: lang === 'ru' ? 'Шаблоны' : 'Templates', desc: lang === 'ru' ? 'Готовые наборы для быстрого старта' : 'Ready-made sets for quick start' },
     { id: 'settings' as MenuSection, icon: <Settings size={20} />, label: t('settings', lang), desc: t('settingsDesc', lang) },
     { id: 'tools' as MenuSection, icon: <Wrench size={20} />, label: t('tools', lang), desc: t('toolsDesc', lang) },
   ];
+
+  const handleItemClick = (id: MenuSection) => {
+    setOpenSheet(id);
+  };
+
+  const handleCloseSheet = () => {
+    setOpenSheet(null);
+  };
+
+  const renderSheetContent = (section: MenuSection) => {
+    switch (section) {
+      case 'profile':
+        return <ProfileContent lang={lang} state={state} onClose={handleCloseSheet} />;
+      case 'statistics':
+        return <StatisticsContent lang={lang} state={state} onClose={handleCloseSheet} />;
+      case 'templates':
+        return <TemplatesContent lang={lang} onClose={handleCloseSheet} />;
+      case 'settings':
+        return <SettingsContent lang={lang} state={state} onClose={handleCloseSheet} />;
+      case 'tools':
+        return <ToolsContent lang={lang} onClose={handleCloseSheet} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-2">

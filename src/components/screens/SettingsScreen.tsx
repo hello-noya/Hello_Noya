@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Download, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Bell, BellOff, Trash2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -13,7 +13,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
   const { state, updateSettings, resetAll } = useApp();
   const lang = state.settings.language;
   const theme = state.settings.theme;
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   // Check notification permission on mount
@@ -43,27 +43,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
     { id: 'dark', label: t('themeDark', lang), color: '#a78bfa' },
   ];
 
-  const handleExport = () => {
-    const data = {
-      profile: state.profile,
-      habits: state.habits,
-      tasks: state.tasks,
-      events: state.events,
-      goals: state.goals,
-      stats: state.stats,
-      exportDate: new Date().toISOString(),
-    };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `bloom-export-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="space-y-4">
@@ -158,28 +138,20 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
         </div>
       </div>
 
-      {/* Export data */}
+      {/* Clear all data */}
       <button
-        onClick={handleExport}
-        className="w-full py-2.5 rounded-xl bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-primary)] text-sm font-medium flex items-center justify-center gap-2 transition-all hover:border-[var(--accent)]/50"
+        onClick={() => setShowClearConfirm(true)}
+        className="w-full py-2.5 rounded-xl bg-red-500/10 text-red-400 text-sm font-medium flex items-center justify-center gap-2 transition-all hover:bg-red-500/20"
       >
-        <Download size={16} />
-        {lang === 'ru' ? 'Экспорт данных' : 'Export Data'}
-      </button>
-
-      {/* Logout */}
-      <button
-        onClick={() => setShowConfirm(true)}
-        className="w-full py-2.5 rounded-xl bg-red-500/10 text-red-400 text-sm font-medium transition-all hover:bg-red-500/20"
-      >
-        {t('logout', lang)}
+        <Trash2 size={16} />
+        {lang === 'ru' ? 'Стереть все данные' : 'Clear All Data'}
       </button>
 
       <ConfirmDialog
-        isOpen={showConfirm}
-        message={t('logoutConfirm', lang)}
-        onConfirm={() => { resetAll(); setShowConfirm(false); }}
-        onCancel={() => setShowConfirm(false)}
+        isOpen={showClearConfirm}
+        message={lang === 'ru' ? 'Вы уверены? Все данные будут удалены навсегда.' : 'Are you sure? All data will be permanently deleted.'}
+        onConfirm={() => { resetAll(); setShowClearConfirm(false); onBack(); }}
+        onCancel={() => setShowClearConfirm(false)}
       />
     </div>
   );
