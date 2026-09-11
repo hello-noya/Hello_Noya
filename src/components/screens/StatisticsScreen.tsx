@@ -9,7 +9,7 @@ interface StatisticsScreenProps {
   onBack: () => void;
 }
 
-type Period = 'day' | 'week' | 'month' | 'halfYear' | 'year';
+type Period = 'week' | 'month';
 type Metric = 'habits' | 'tasks' | 'goals';
 
 export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
@@ -34,10 +34,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     let start: Date;
     let end: Date = new Date(now);
 
-    if (period === 'day') {
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-    } else if (period === 'week') {
+    if (period === 'week') {
       // Week starts from Sunday
       const dayOfWeek = now.getDay();
       start = new Date(now);
@@ -47,12 +44,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     } else if (period === 'month') {
       start = new Date(selectedMonth);
       end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-    } else if (period === 'halfYear') {
-      start = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-      end = new Date(now);
-    } else if (period === 'year') {
-      start = new Date(now.getFullYear(), 0, 1);
-      end = new Date(now.getFullYear(), 11, 31);
     } else {
       start = new Date(now);
       end = new Date(now);
@@ -286,20 +277,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
           <p className="text-5xl font-bold text-[var(--text-primary)]">
             {habitStats.completionRate}%
           </p>
-          <div className="flex items-center gap-4 mt-4">
-            <div>
-              <p className="text-2xl font-bold text-[var(--accent)]">🔥 {habitStats.currentStreak}</p>
-              <p className="text-xs text-[var(--text-muted)]">
-                {lang === 'ru' ? 'Текущий стрик' : 'Current streak'}
-              </p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-[var(--text-primary)]">🏆 {habitStats.bestStreak}</p>
-              <p className="text-xs text-[var(--text-muted)]">
-                {lang === 'ru' ? 'Лучший стрик' : 'Best streak'}
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Activity calendar */}
@@ -427,21 +404,23 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
       </div>
 
       {/* Period selector */}
-      <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-        <label className="text-sm font-medium text-[var(--text-primary)] mb-2 block">
-          {lang === 'ru' ? 'Выбор периода' : 'Select Period'}
-        </label>
-        <select
-          value={period}
-          onChange={(e) => setPeriod(e.target.value as Period)}
-          className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-        >
-          <option value="day">{lang === 'ru' ? 'День' : 'Day'}</option>
-          <option value="week">{lang === 'ru' ? 'Неделя' : 'Week'}</option>
-          <option value="month">{lang === 'ru' ? 'Месяц' : 'Month'}</option>
-          <option value="halfYear">{lang === 'ru' ? 'Полгода' : 'Half Year'}</option>
-          <option value="year">{lang === 'ru' ? 'Год' : 'Year'}</option>
-        </select>
+      <div className="grid grid-cols-2 gap-2">
+        {([
+          { id: 'week' as Period, label: lang === 'ru' ? 'Неделя' : 'Week' },
+          { id: 'month' as Period, label: lang === 'ru' ? 'Месяц' : 'Month' },
+        ]).map((p) => (
+          <button
+            key={p.id}
+            onClick={() => setPeriod(p.id)}
+            className={`py-2.5 rounded-xl text-xs font-medium transition-all ${
+              period === p.id
+                ? 'bg-[var(--accent)] text-white shadow-md'
+                : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
       </div>
 
       {/* Productivity card */}
@@ -511,7 +490,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             {lang === 'ru' ? 'Привычки' : 'Habits'}
           </h3>
           <div className="space-y-2">
-            {state.habits.map((habit) => {
+            {state.habits.slice(0, 6).map((habit) => {
               const { start, end } = getDateRange();
               const startStr = formatDateLocal(start);
               const endStr = formatDateLocal(end);
@@ -539,6 +518,96 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                 </button>
               );
             })}
+            {state.habits.length > 6 && (
+              <button className="w-full py-2 text-sm text-[var(--accent)] hover:underline">
+                {lang === 'ru' ? `Показать все (${state.habits.length})` : `Show all (${state.habits.length})`}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tasks list */}
+      {metric === 'tasks' && state.tasks.length > 0 && (
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+            {lang === 'ru' ? 'Задачи' : 'Tasks'}
+          </h3>
+          <div className="space-y-2">
+            {state.tasks.slice(0, 6).map((task) => {
+              const { start, end } = getDateRange();
+              const startStr = formatDateLocal(start);
+              const endStr = formatDateLocal(end);
+              
+              const completed = state.completionLog?.tasks?.filter(t => 
+                t.taskId === task.id && t.date >= startStr && t.date <= endStr
+              ).length || 0;
+              
+              const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              const percentage = totalDays > 0 ? Math.round((completed / totalDays) * 100) : 0;
+              
+              return (
+                <div
+                  key={task.id}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center">
+                    <span className="text-[var(--accent)]">✓</span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{task.text}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{percentage}%</p>
+                  </div>
+                </div>
+              );
+            })}
+            {state.tasks.length > 6 && (
+              <button className="w-full py-2 text-sm text-[var(--accent)] hover:underline">
+                {lang === 'ru' ? `Показать все (${state.tasks.length})` : `Show all (${state.tasks.length})`}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Goals list */}
+      {metric === 'goals' && state.goals.length > 0 && (
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+            {lang === 'ru' ? 'Цели' : 'Goals'}
+          </h3>
+          <div className="space-y-2">
+            {state.goals.slice(0, 6).map((goal) => {
+              const { start, end } = getDateRange();
+              const startStr = formatDateLocal(start);
+              const endStr = formatDateLocal(end);
+              
+              const completed = state.completionLog?.goals?.filter(g => 
+                g.goalId === goal.id && g.date >= startStr && g.date <= endStr
+              ).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+              
+              const percentage = goal.target > 0 ? Math.round((completed / goal.target) * 100) : 0;
+              
+              return (
+                <div
+                  key={goal.id}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center">
+                    <span className="text-[var(--accent)]">🎯</span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{goal.name}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{percentage}%</p>
+                  </div>
+                </div>
+              );
+            })}
+            {state.goals.length > 6 && (
+              <button className="w-full py-2 text-sm text-[var(--accent)] hover:underline">
+                {lang === 'ru' ? `Показать все (${state.goals.length})` : `Show all (${state.goals.length})`}
+              </button>
+            )}
           </div>
         </div>
       )}
