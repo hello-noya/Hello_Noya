@@ -67,8 +67,12 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   // Get habits for selected day (separate active and completed)
   const dayOfWeek = getDayOfWeek(selectedDate) as DayOfWeek;
   const allDayHabits = state.habits.filter(h => h.days.includes(dayOfWeek));
-  const activeHabits = allDayHabits.filter(h => !h.completedDates.includes(selectedISO));
-  const completedHabits = allDayHabits.filter(h => h.completedDates.includes(selectedISO));
+  
+  // Если нет привычек для этого дня, показываем все привычки
+  const habitsToShow = allDayHabits.length > 0 ? allDayHabits : state.habits;
+  
+  const activeHabits = habitsToShow.filter(h => !h.completedDates.includes(selectedISO));
+  const completedHabits = habitsToShow.filter(h => h.completedDates.includes(selectedISO));
   
   // Get tasks for selected day (separate active and completed)
   const allDayTasks = state.tasks.filter(t => t.date === selectedISO);

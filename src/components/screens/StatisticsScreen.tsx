@@ -9,7 +9,7 @@ interface StatisticsScreenProps {
   onBack: () => void;
 }
 
-type Period = 'week' | 'month';
+type Period = 'day' | 'week' | 'month' | 'halfYear' | 'year';
 type Metric = 'habits' | 'tasks' | 'goals';
 
 export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
@@ -34,16 +34,28 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     let start: Date;
     let end: Date = new Date(now);
 
-    if (period === 'month') {
-      start = new Date(selectedMonth);
-      end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-    } else {
+    if (period === 'day') {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    } else if (period === 'week') {
       // Week starts from Sunday
       const dayOfWeek = now.getDay();
       start = new Date(now);
       start.setDate(now.getDate() - dayOfWeek);
       end = new Date(start);
       end.setDate(start.getDate() + 6);
+    } else if (period === 'month') {
+      start = new Date(selectedMonth);
+      end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+    } else if (period === 'halfYear') {
+      start = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+      end = new Date(now);
+    } else if (period === 'year') {
+      start = new Date(now.getFullYear(), 0, 1);
+      end = new Date(now.getFullYear(), 11, 31);
+    } else {
+      start = new Date(now);
+      end = new Date(now);
     }
 
     return { start, end };
@@ -415,23 +427,21 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
       </div>
 
       {/* Period selector */}
-      <div className="grid grid-cols-2 gap-2">
-        {([
-          { id: 'week' as Period, label: lang === 'ru' ? 'Неделя' : 'Week' },
-          { id: 'month' as Period, label: lang === 'ru' ? 'Месяц' : 'Month' },
-        ]).map((p) => (
-          <button
-            key={p.id}
-            onClick={() => setPeriod(p.id)}
-            className={`py-2.5 rounded-xl text-xs font-medium transition-all ${
-              period === p.id
-                ? 'bg-[var(--accent)] text-white shadow-md'
-                : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
+      <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+        <label className="text-sm font-medium text-[var(--text-primary)] mb-2 block">
+          {lang === 'ru' ? 'Выбор периода' : 'Select Period'}
+        </label>
+        <select
+          value={period}
+          onChange={(e) => setPeriod(e.target.value as Period)}
+          className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+        >
+          <option value="day">{lang === 'ru' ? 'День' : 'Day'}</option>
+          <option value="week">{lang === 'ru' ? 'Неделя' : 'Week'}</option>
+          <option value="month">{lang === 'ru' ? 'Месяц' : 'Month'}</option>
+          <option value="halfYear">{lang === 'ru' ? 'Полгода' : 'Half Year'}</option>
+          <option value="year">{lang === 'ru' ? 'Год' : 'Year'}</option>
+        </select>
       </div>
 
       {/* Productivity card */}
