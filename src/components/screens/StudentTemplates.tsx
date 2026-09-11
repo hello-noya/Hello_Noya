@@ -3,6 +3,7 @@ import { ArrowLeft, BookOpen, Briefcase, Heart, GraduationCap, Coffee, Dumbbell,
 import { useApp } from '../../context/AppContext';
 import { createHabit, createTask, createEvent, createGoal } from '../../utils/storage';
 import { DayOfWeek } from '../../types';
+import { renderIcon } from '../../utils/icons';
 
 type Category = 'study' | 'work' | 'life';
 
@@ -384,7 +385,7 @@ export function StudentTemplates({ onBack }: StudentTemplatesProps) {
                 <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
-                      <span className="text-2xl">{state.profile.icon}</span>
+                      {renderIcon(state.profile.icon, 24, 'var(--accent)')}
                     </div>
                     <div className="flex-1">
                       <p className="text-base font-semibold text-[var(--text-primary)]">{state.profile.name}</p>

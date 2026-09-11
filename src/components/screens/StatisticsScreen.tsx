@@ -323,7 +323,38 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
           )}
 
           {period === 'month' && (
-            <div className="grid grid-cols-7 gap-1">
+            <>
+              {/* Month navigation */}
+              <div className="flex items-center justify-between mb-3">
+                <button
+                  onClick={() => {
+                    const newDate = new Date(selectedMonth);
+                    newDate.setMonth(newDate.getMonth() - 1);
+                    setSelectedMonth(newDate);
+                  }}
+                  className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors"
+                >
+                  <ArrowLeft size={20} className="text-[var(--text-primary)]" />
+                </button>
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+                  {selectedMonth.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                  })}
+                </h3>
+                <button
+                  onClick={() => {
+                    const newDate = new Date(selectedMonth);
+                    newDate.setMonth(newDate.getMonth() + 1);
+                    setSelectedMonth(newDate);
+                  }}
+                  className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors"
+                >
+                  <ArrowLeft size={20} className="text-[var(--text-primary)] rotate-180" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1">
               {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day, i) => (
                 <div key={i} className="text-center text-[10px] text-[var(--text-muted)] py-1">
                   {day}
@@ -364,6 +395,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                 return days;
               })()}
             </div>
+            </>
           )}
         </div>
       </div>
