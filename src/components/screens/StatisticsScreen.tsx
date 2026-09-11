@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { Habit } from '../../types';
 
 interface StatisticsScreenProps {
   onBack: () => void;
 }
 
-type Period = 'week' | 'month' | 'year';
+type Period = 'week' | 'month';
 type Metric = 'habits' | 'tasks' | 'goals';
 
 export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
@@ -18,6 +19,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
 
   // Get date range for selected period
   const getDateRange = () => {
@@ -28,26 +30,28 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     if (period === 'month') {
       start = new Date(selectedMonth);
       end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-    } else if (period === 'year') {
-      start = new Date(now.getFullYear(), 0, 1);
-      end = new Date(now.getFullYear(), 11, 31);
     } else {
       // Week starts from Sunday
-      const dayOfWeek = now.getDay(); // 0 = Sunday
+      const dayOfWeek = now.getDay();
       start = new Date(now);
-      start.setDate(now.getDate() - dayOfWeek); // Go back to Sunday
+      start.setDate(now.getDate() - dayOfWeek);
       end = new Date(start);
-      end.setDate(start.getDate() + 6); // Saturday
+      end.setDate(start.getDate() + 6);
     }
 
     return { start, end };
   };
 
+  // Helper function to format date as YYYY-MM-DD using local time
+  const formatDateLocal = (date: Date): string => {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
+
   // Calculate statistics for the period
   const stats = useMemo(() => {
     const { start, end } = getDateRange();
-    const startStr = start.toISOString().split('T')[0];
-    const endStr = end.toISOString().split('T')[0];
+    const startStr = formatDateLocal(start);
+    const endStr = formatDateLocal(end);
 
     const habitsCompleted = state.completionLog?.habits?.filter(h => 
       h.date >= startStr && h.date <= endStr && h.completed
@@ -70,8 +74,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     const duration = end.getTime() - start.getTime();
     const prevStart = new Date(start.getTime() - duration);
     const prevEnd = new Date(start.getTime() - 1);
-    const startStr = prevStart.toISOString().split('T')[0];
-    const endStr = prevEnd.toISOString().split('T')[0];
+    const startStr = formatDateLocal(prevStart);
+    const endStr = formatDateLocal(prevEnd);
 
     const habitsCompleted = state.completionLog?.habits?.filter(h => 
       h.date >= startStr && h.date <= endStr && h.completed
@@ -92,7 +96,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
   const streak = useMemo(() => {
     let count = 0;
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = formatDateLocal(today);
     
     const todayHasActivity = 
       state.completionLog?.habits?.some(h => h.date === todayStr && h.completed) ||
@@ -105,7 +109,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     for (let i = 1; i < 365; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatDateLocal(date);
       
       const hasActivity = 
         state.completionLog?.habits?.some(h => h.date === dateStr && h.completed) ||
@@ -165,10 +169,14 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatDateLocal(date);
       
       let value = 0;
-      if (metric === 'habits') {
+      if (selectedHabit) {
+        value = state.completionLog?.habits?.filter(h => 
+          h.habitId === selectedHabit.id && h.date === dateStr && h.completed
+        ).length || 0;
+      } else if (metric === 'habits') {
         value = state.completionLog?.habits?.filter(h => h.date === dateStr && h.completed).length || 0;
       } else if (metric === 'tasks') {
         value = state.completionLog?.tasks?.filter(t => t.date === dateStr).length || 0;
@@ -184,24 +192,43 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     }
     
     return data;
-  }, [period, metric, state.completionLog, lang]);
+  }, [period, metric, selectedHabit, state.completionLog, lang]);
 
-  // Generate calendar data for month
+  // Generate calendar data for month with proper day alignment
   const calendarData = useMemo(() => {
     if (period !== 'month') return [];
-    const { start, end } = getDateRange();
-    const data: Array<{ date: string; day: number; value: number; isToday: boolean }> = [];
+    
+    const year = selectedMonth.getFullYear();
+    const month = selectedMonth.getMonth();
+    
+    // Get first day of month and its day of week
+    const firstDay = new Date(year, month, 1);
+    const firstDayOfWeek = firstDay.getDay(); // 0 = Sunday
+    
+    // Get number of days in month
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    const data: Array<{ date: string; day: number; value: number; isToday: boolean; isEmpty: boolean }> = [];
     
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     
-    const current = new Date(start);
-    while (current <= end) {
-      const dateStr = current.toISOString().split('T')[0];
-      const day = current.getDate();
+    // Add empty cells for days before first day
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      data.push({ date: '', day: 0, value: 0, isToday: false, isEmpty: true });
+    }
+    
+    // Add actual days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       
       let value = 0;
-      if (metric === 'habits') {
+      if (selectedHabit) {
+        value = state.completionLog?.habits?.filter(h => 
+          h.habitId === selectedHabit.id && h.date === dateStr && h.completed
+        ).length || 0;
+      } else if (metric === 'habits') {
         value = state.completionLog?.habits?.filter(h => h.date === dateStr && h.completed).length || 0;
       } else if (metric === 'tasks') {
         value = state.completionLog?.tasks?.filter(t => t.date === dateStr).length || 0;
@@ -213,42 +240,15 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
         date: dateStr,
         day,
         value,
-        isToday: dateStr === todayStr
+        isToday: dateStr === todayStr,
+        isEmpty: false
       });
-      current.setDate(current.getDate() + 1);
     }
     
     return data;
-  }, [period, selectedMonth, metric, state.completionLog]);
+  }, [period, selectedMonth, metric, selectedHabit, state.completionLog]);
 
-  // Generate monthly data for year view
-  const monthlyData = useMemo(() => {
-    if (period !== 'year') return [];
-    
-    const year = new Date().getFullYear();
-    const data: Array<{ month: number; label: string; value: number }> = [];
-    
-    for (let month = 0; month < 12; month++) {
-      const start = new Date(year, month, 1);
-      const end = new Date(year, month + 1, 0);
-      const startStr = start.toISOString().split('T')[0];
-      const endStr = end.toISOString().split('T')[0];
-      
-      let value = 0;
-      if (metric === 'habits') {
-        value = state.completionLog?.habits?.filter(h => h.date >= startStr && h.date <= endStr && h.completed).length || 0;
-      } else if (metric === 'tasks') {
-        value = state.completionLog?.tasks?.filter(t => t.date >= startStr && t.date <= endStr).length || 0;
-      } else if (metric === 'goals') {
-        value = state.completionLog?.goals?.filter(g => g.date >= startStr && g.date <= endStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
-      }
-      
-      const label = start.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { month: 'short' });
-      data.push({ month, label, value });
-    }
-    
-    return data;
-  }, [period, metric, state.completionLog, lang]);
+
 
   // Navigation for month view
   const prevMonth = () => {
@@ -276,6 +276,196 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
   const productivity = getProductivity();
   const trend = getTrend();
 
+  // Level 2: Habit detail view
+  if (selectedHabit) {
+    return (
+      <div className="fixed inset-0 z-50 bg-[var(--bg-primary)] flex flex-col">
+        <div className="max-w-[420px] mx-auto w-full flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center gap-3 p-4 border-b border-[var(--border)] bg-[var(--card-bg)]">
+            <button onClick={() => setSelectedHabit(null)} className="p-1.5 rounded-full hover:bg-[var(--hover)] transition-colors">
+              <ArrowLeft size={20} className="text-[var(--text-primary)]" />
+            </button>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+              {selectedHabit.name}
+            </h2>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Profile and date block */}
+            {state.profile && (
+              <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
+                    <span className="text-2xl">{state.profile.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-base font-semibold text-[var(--text-primary)]">{state.profile.name}</p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {new Date().toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Period selector */}
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { id: 'week' as Period, label: lang === 'ru' ? 'Неделя' : 'Week' },
+                { id: 'month' as Period, label: lang === 'ru' ? 'Месяц' : 'Month' },
+              ]).map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPeriod(p.id)}
+                  className={`py-2.5 rounded-xl text-xs font-medium transition-all ${
+                    period === p.id
+                      ? 'bg-[var(--accent)] text-white shadow-md'
+                      : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            {/* Period selector */}
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { id: 'week' as Period, label: lang === 'ru' ? 'Неделя' : 'Week' },
+                { id: 'month' as Period, label: lang === 'ru' ? 'Месяц' : 'Month' },
+              ]).map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPeriod(p.id)}
+                  className={`py-2.5 rounded-xl text-xs font-medium transition-all ${
+                    period === p.id
+                      ? 'bg-[var(--accent)] text-white shadow-md'
+                      : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Habit stats */}
+            <div className="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+              <p className="text-xs text-[var(--text-muted)] mb-1">
+                {lang === 'ru' ? 'Выполнение' : 'Completion'}
+              </p>
+              <p className="text-5xl font-bold text-[var(--text-primary)]">
+                {productivity}%
+              </p>
+              <div className="flex items-center gap-1 mt-2">
+                {trend > 0 ? (
+                  <TrendingUp size={20} className="text-green-500" />
+                ) : trend < 0 ? (
+                  <TrendingDown size={20} className="text-red-500" />
+                ) : null}
+                <span className={`text-sm font-medium ${
+                  trend > 0 ? 'text-green-500' : trend < 0 ? 'text-red-500' : 'text-[var(--text-muted)]'
+                }`}>
+                  {trend > 0 ? '+' : ''}{trend}%
+                </span>
+              </div>
+              {streak > 0 && (
+                <p className="text-sm text-[var(--text-secondary)] mt-2">
+                  🔥 {streak} {lang === 'ru' ? 'дней подряд' : 'days in a row'}
+                </p>
+              )}
+            </div>
+
+            {/* Activity calendar based on period */}
+            {period === 'week' && (
+              <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+                <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                  {lang === 'ru' ? 'Активность по дням' : 'Daily Activity'}
+                </h3>
+                <div className="grid grid-cols-7 gap-2">
+                  {weekData.map((day, i) => {
+                    const maxValue = Math.max(...weekData.map(d => d.value), 1);
+                    const intensity = day.value / maxValue;
+                    
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-1">
+                        <div 
+                          className="w-full aspect-square rounded-lg flex items-center justify-center"
+                          style={{
+                            backgroundColor: `var(--accent)`,
+                            opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
+                          }}
+                        >
+                          <span className="text-xs font-bold text-white">{day.value}</span>
+                        </div>
+                        <span className="text-[10px] text-[var(--text-muted)]">{day.dayName}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {period === 'month' && (
+              <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+                <div className="flex items-center justify-between mb-3">
+                  <button onClick={prevMonth} className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors">
+                    <ChevronLeft size={20} className="text-[var(--text-primary)]" />
+                  </button>
+                  <span className="text-sm font-semibold text-[var(--text-primary)] capitalize">
+                    {monthTitle}
+                  </span>
+                  <button onClick={nextMonth} className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors">
+                    <ChevronRight size={20} className="text-[var(--text-primary)]" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-7 gap-1">
+                  {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day, i) => (
+                    <div key={i} className="text-center text-[10px] text-[var(--text-muted)] py-1">
+                      {day}
+                    </div>
+                  ))}
+                  {calendarData.map((day, i) => {
+                    if (day.isEmpty) {
+                      return <div key={i} className="aspect-square" />;
+                    }
+                    
+                    const maxValue = Math.max(...calendarData.filter(d => !d.isEmpty).map(d => d.value), 1);
+                    const intensity = day.value / maxValue;
+                    
+                    return (
+                      <div 
+                        key={i}
+                        className={`aspect-square rounded flex flex-col items-center justify-center relative ${
+                          day.isToday ? 'ring-2 ring-[var(--accent)]' : ''
+                        }`}
+                        style={{
+                          backgroundColor: `var(--accent)`,
+                          opacity: day.value === 0 ? 0.4 : Math.max(0.6, intensity),
+                        }}
+                      >
+                        <span className="text-xs font-bold text-white">{day.day}</span>
+                        {day.value > 0 && (
+                          <span className="text-[8px] text-white/80">{day.value}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Level 1: Overview
   return (
     <div className="fixed inset-0 z-50 bg-[var(--bg-primary)] flex flex-col">
       <div className="max-w-[420px] mx-auto w-full flex flex-col h-full">
@@ -391,7 +581,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             </div>
           </div>
 
-          {/* Week view (Sunday to Saturday) */}
+          {/* Activity calendar based on period */}
           {period === 'week' && (
             <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
               <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
@@ -408,7 +598,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                         className="w-full aspect-square rounded-lg flex items-center justify-center"
                         style={{
                           backgroundColor: `var(--accent)`,
-                          opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
+                          opacity: day.value === 0 ? 0.4 : Math.max(0.6, intensity),
                         }}
                       >
                         <span className="text-xs font-bold text-white">{day.value}</span>
@@ -421,22 +611,23 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             </div>
           )}
 
-          {/* Month view with calendar */}
           {period === 'month' && (
             <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
               <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
                 {lang === 'ru' ? 'Календарь активности' : 'Activity Calendar'}
               </h3>
               <div className="grid grid-cols-7 gap-1">
-                {/* Day labels */}
                 {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day, i) => (
-                  <div key={i} className="text-center-center text-[10px] text-[var(--text-muted)] py-1">
+                  <div key={i} className="text-center text-[10px] text-[var(--text-muted)] py-1">
                     {day}
                   </div>
                 ))}
-                {/* Calendar days */}
                 {calendarData.map((day, i) => {
-                  const maxValue = Math.max(...calendarData.map(d => d.value), 1);
+                  if (day.isEmpty) {
+                    return <div key={i} className="aspect-square" />;
+                  }
+                  
+                  const maxValue = Math.max(...calendarData.filter(d => !d.isEmpty).map(d => d.value), 1);
                   const intensity = day.value / maxValue;
                   
                   return (
@@ -447,8 +638,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                       }`}
                       style={{
                         backgroundColor: `var(--accent)`,
-                          opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
-                        }}
+                        opacity: day.value === 0 ? 0.4 : Math.max(0.6, intensity),
+                      }}
                     >
                       <span className="text-xs font-bold text-white">{day.day}</span>
                       {day.value > 0 && (
@@ -461,43 +652,99 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
             </div>
           )}
 
-          {/* Year view with two blocks */}
-          {period === 'year' && (
+          {/* Habits list with completion % */}
+          {metric === 'habits' && state.habits.length > 0 && (
             <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
               <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-                {lang === 'ru' ? 'Обзор по месяцам' : 'Monthly Overview'}
+                {lang === 'ru' ? 'Привычки' : 'Habits'}
               </h3>
-              
-              {/* Two blocks layout */}
-              <div className="grid grid-cols-2 gap-3">
-                {monthlyData.map((month, i) => {
-                  const maxValue = Math.max(...monthlyData.map(m => m.value), 1);
-                  const height = (month.value / maxValue) * 60;
+              <div className="space-y-2">
+                {state.habits.map((habit) => {
+                  const { start, end } = getDateRange();
+                  const startStr = formatDateLocal(start);
+                  const endStr = formatDateLocal(end);
+                  
+                  const completed = state.completionLog?.habits?.filter(h => 
+                    h.habitId === habit.id && h.date >= startStr && h.date <= endStr && h.completed
+                  ).length || 0;
+                  
+                  const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+                  const percentage = totalDays > 0 ? Math.round((completed / totalDays) * 100) : 0;
                   
                   return (
                     <button
-                      key={i}
-                      onClick={() => {
-                        setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
-                        setPeriod('month');
-                      }}
-                      className="flex flex-col items-center p-3 rounded-lg bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
+                      key={habit.id}
+                      onClick={() => setSelectedHabit(habit)}
+                      className="w-full flex items-center justify-between p-3 rounded-lg bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
                     >
-                      <div 
-                        className="w-full rounded-full mb-2"
-                        style={{
-                          height: `${height}px`,
-                          backgroundColor: 'var(--accent)',
-                          minHeight: month.value > 0 ? '4px' : '0px',
-                        }}
-                      />
-                      <span className="text-xs font-medium text-[var(--text-primary)] capitalize">
-                        {month.label}
-                      </span>
-                      <span className="text-xs text-[var(--text-muted)]">
-                        {month.value}
-                      </span>
+                      <span className="text-sm text-[var(--text-primary)]">{habit.name}</span>
+                      <span className="text-sm font-medium text-[var(--accent)]">{percentage}%</span>
                     </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Tasks list with completion % */}
+          {metric === 'tasks' && state.tasks.length > 0 && (
+            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                {lang === 'ru' ? 'Задачи' : 'Tasks'}
+              </h3>
+              <div className="space-y-2">
+                {state.tasks.map((task) => {
+                  const { start, end } = getDateRange();
+                  const startStr = formatDateLocal(start);
+                  const endStr = formatDateLocal(end);
+                  
+                  const completed = state.completionLog?.tasks?.filter(t => 
+                    t.taskId === task.id && t.date >= startStr && t.date <= endStr
+                  ).length || 0;
+                  
+                  const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+                  const percentage = totalDays > 0 ? Math.round((completed / totalDays) * 100) : 0;
+                  
+                  return (
+                    <div
+                      key={task.id}
+                      className="w-full flex items-center justify-between p-3 rounded-lg bg-[var(--bg-primary)]"
+                    >
+                      <span className="text-sm text-[var(--text-primary)]">{task.text}</span>
+                      <span className="text-sm font-medium text-[var(--accent)]">{percentage}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Goals list with progress % */}
+          {metric === 'goals' && state.goals.length > 0 && (
+            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                {lang === 'ru' ? 'Цели' : 'Goals'}
+              </h3>
+              <div className="space-y-2">
+                {state.goals.map((goal) => {
+                  const { start, end } = getDateRange();
+                  const startStr = formatDateLocal(start);
+                  const endStr = formatDateLocal(end);
+                  
+                  const progressAdded = state.completionLog?.goals?.filter(g => 
+                    g.goalId === goal.id && g.date >= startStr && g.date <= endStr
+                  ).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+                  
+                  const percentage = goal.target > 0 ? Math.round((progressAdded / goal.target) * 100) : 0;
+                  
+                  return (
+                    <div
+                      key={goal.id}
+                      className="w-full flex items-center justify-between p-3 rounded-lg bg-[var(--bg-primary)]"
+                    >
+                      <span className="text-sm text-[var(--text-primary)]">{goal.name}</span>
+                      <span className="text-sm font-medium text-[var(--accent)]">{percentage}%</span>
+                    </div>
                   );
                 })}
               </div>

@@ -42,8 +42,8 @@ interface StudentTemplatesProps {
 }
 
 export function StudentTemplates({ onBack }: StudentTemplatesProps) {
-  const { addHabit, addTask, addGoal, addEvent, showToast } = useApp();
-  const lang = useApp().state.settings.language;
+  const { state, addHabit, addTask, addGoal, addEvent, showToast } = useApp();
+  const lang = state.settings.language;
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
@@ -381,6 +381,28 @@ export function StudentTemplates({ onBack }: StudentTemplatesProps) {
             </>
           ) : !selected ? (
             <>
+              {/* Profile and date block */}
+              {state.profile && (
+                <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
+                      <span className="text-2xl">{state.profile.icon}</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-base font-semibold text-[var(--text-primary)]">{state.profile.name}</p>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {new Date().toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <button
                 onClick={() => setSelectedCategory(null)}
                 className="text-sm text-[var(--accent)] hover:underline"

@@ -59,7 +59,8 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
         </div>
       </div>
 
-      {activeGoals.length === 0 && completedGoals.length === 0 ? (
+      {/* Empty state */}
+      {activeGoals.length === 0 && completedGoals.length === 0 && (
         <div className="p-8 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center">
           <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
             <Target size={20} className="text-[var(--accent)]" />
@@ -68,22 +69,27 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
             {lang === 'ru' ? 'Сделайте цель, которая будет зажигать вас каждое утро' : 'Set a goal that will ignite you every morning'}
           </p>
         </div>
-      ) : (
+      )}
+
+      {/* All completed state */}
+      {activeGoals.length === 0 && completedGoals.length > 0 && (
+        <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center mb-2">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
+            <Check size={20} className="text-[var(--accent)]" />
+          </div>
+          <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+            {lang === 'ru' ? 'Все цели достигнуты!' : 'All goals achieved!'}
+          </p>
+          <p className="text-xs text-[var(--text-muted)]">
+            {lang === 'ru' ? 'Отличная работа! Можешь отдохнуть' : 'Great job! Time to relax'}
+          </p>
+        </div>
+      )}
+
+      {/* Active goals list */}
+      {activeGoals.length > 0 && (
         <>
-          {activeGoals.length === 0 && completedGoals.length > 0 && (
-            <div className="p-6 rounded-2xl border-2 border-dashed border-green-500/30 bg-green-500/5 text-center mb-2">
-              <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/20 flex items-center justify-center">
-                <Check size={20} className="text-green-500" />
-              </div>
-              <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
-                {lang === 'ru' ? 'Все цели достигнуты!' : 'All goals achieved!'}
-              </p>
-              <p className="text-xs text-[var(--text-muted)]">
-                {lang === 'ru' ? 'Отличная работа! Можешь отдохнуть' : 'Great job! Time to relax'}
-              </p>
-            </div>
-          )}
-          <div className="space-y-3">
+        <div className="space-y-3">
           {activeGoals.map((goal) => {
             const progress = Math.min(100, (goal.current / goal.target) * 100);
             const isAchieved = false; // Active goals are never achieved
@@ -146,7 +152,6 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
               </div>
             );
           })}
-          </div>
 
           {/* Completed goals section */}
           {completedGoals.length > 0 && (
@@ -194,6 +199,7 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
               )}
             </div>
           )}
+        </div>
         </>
       )}
 
