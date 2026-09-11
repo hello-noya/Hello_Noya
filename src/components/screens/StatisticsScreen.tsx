@@ -28,12 +28,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const timeStr = time.toLocaleTimeString(lang === 'ru' ? 'ru-RU' : 'en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 
-  const dateStr = formatDate(time, lang);
 
   // Get date range for selected period
   const getDateRange = () => {
@@ -482,28 +477,9 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
   // Level 1: Overview
   return (
     <div className="fixed inset-0 z-50 bg-[var(--bg-primary)] flex flex-col">
-      {/* Global Header */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-[var(--bg-primary)]/95 backdrop-blur-sm border-b border-[var(--border)]">
-        <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-[var(--text-primary)] text-lg">{t('appName', lang)}</span>
-              <Sparkles size={14} className="text-[var(--accent)] animate-pulse" />
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] capitalize">{dateStr}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-[var(--card-bg)] border border-[var(--border)] rounded-full px-3 py-1.5">
-              <Clock size={14} className="text-[var(--text-secondary)]" />
-              <span className="text-sm font-medium text-[var(--text-primary)]">{timeStr}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-[420px] mx-auto w-full flex flex-col h-full">
         {/* Section Header */}
-        <div className="flex items-center gap-3 p-4 pt-20 border-b border-[var(--border)] bg-[var(--card-bg)]">
+        <div className="flex items-center gap-3 p-4 border-b border-[var(--border)] bg-[var(--card-bg)]">
           <button onClick={onBack} className="p-1.5 rounded-full hover:bg-[var(--hover)] transition-colors">
             <ArrowLeft size={20} className="text-[var(--text-primary)]" />
           </button>

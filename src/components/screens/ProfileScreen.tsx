@@ -109,6 +109,7 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
         message={t('logoutConfirm', lang)}
         onConfirm={() => {
           logout();
+          window.location.reload(); // Перезагрузка для возврата на экран входа
         }}
         onCancel={() => setShowLogoutConfirm(false)}
       />
