@@ -5,7 +5,7 @@ import { t, formatDate } from '../utils/i18n';
 import { pomodoroTimer } from '../utils/pomodoroTimer';
 
 interface HeaderProps {
-  onToolsClick: (tool: 'lofi' | 'pomodoro') => void;
+  onToolsClick?: (tool: 'lofi' | 'pomodoro') => void;
 }
 
 export function Header({ onToolsClick }: HeaderProps) {
@@ -59,7 +59,7 @@ export function Header({ onToolsClick }: HeaderProps) {
         </div>
         <div className="flex items-center gap-2">
           {/* Lo-fi badge */}
-          {lofiPlaying && (
+          {lofiPlaying && onToolsClick && (
             <button
               onClick={() => onToolsClick('lofi')}
               className="flex items-center gap-1.5 bg-[var(--card-bg)] border border-[var(--border)] rounded-full px-3 py-1.5 hover:border-[var(--accent)]/50 transition-colors"
@@ -70,7 +70,7 @@ export function Header({ onToolsClick }: HeaderProps) {
           )}
 
           {/* Pomodoro badge */}
-          {pomodoroRunning && (
+          {pomodoroRunning && onToolsClick && (
             <button
               onClick={() => onToolsClick('pomodoro')}
               className={`flex items-center gap-1.5 bg-[var(--card-bg)] border rounded-full px-3 py-1.5 hover:border-[var(--accent)]/50 transition-colors ${

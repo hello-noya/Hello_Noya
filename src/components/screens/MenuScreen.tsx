@@ -4,6 +4,12 @@ import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { renderIcon } from '../../utils/icons';
 import { BottomSheet } from '../ui/BottomSheet';
+import { ProfileContent } from './ProfileContent';
+import { StatisticsContent } from './StatisticsContent';
+import { TemplatesContent } from './TemplatesContent';
+import { SettingsContent } from './SettingsContent';
+import { ToolsContent } from './ToolsContent';
+import { Header } from '../Header';
 
 type MenuSection = 'profile' | 'settings' | 'tools' | 'statistics' | 'templates';
 
@@ -51,6 +57,8 @@ export function MenuScreen({ onNavigate }: MenuScreenProps) {
 
   return (
     <div className="space-y-2">
+      <Header />
+      
       {/* Profile card */}
       {state.profile && (
         <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] mb-4 flex items-center gap-3">
