@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+/* Убедимся что все слои Tailwind загружены */
+@layer base, components, utilities;
+
+/* 
+  K-pop стиль: две связанные темы в корейской эстетике
+  - Lavender Dream: светлая фиолетовая (по умолчанию)
+  - Midnight Seoul: тёмная (связана с лавандовой)
+*/
+
+/* Lavender Dream theme (default) — светлая фиолетовая */
+:root,
+[data-theme="lavender"] {
+  --bg-primary: #f8f5ff;
+  --bg-secondary: #f0ebff;
+  --card-bg: #ffffff;
+  --hover: #ede5ff;
+  --border: #c4b5fd;
+  --accent: #8b5cf6;
+  --accent-hover: #7c3aed;
+  --text-primary: #1e1b4b;
+  --text-secondary: #4c1d95;
+  --text-muted: #6d28d9;
+}
+
+/* Midnight Seoul theme — тёмная */
+[data-theme="dark"] {
+  --bg-primary: #0f0a1a;
+  --bg-secondary: #1a1625;
+  --card-bg: #1e1b4b;
+  --hover: #312e81;
+  --border: #4c1d95;
+  --accent: #6d28d9;
+  --accent-hover: #5b21b6;
+  --text-primary: #f5f3ff;
+  --text-secondary: #ddd6fe;
+  --text-muted: #a78bfa;
+}
+
+/* Base styles - Tailwind v4 включает свой reset, не переопределяем */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+/* Utility classes */
+.border-dashed {
+  border-style: dashed;
+}
