@@ -293,14 +293,19 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                 const dateStr = formatDateLocal(date);
                 const wasCompleted = habitStats.completions.some(c => c.date === dateStr);
                 
+                const isToday = date.toDateString() === new Date().toDateString();
                 return (
                   <div key={i} className="flex flex-col items-center gap-1">
                     <div 
-                      className={`w-full aspect-square rounded-lg flex items-center justify-center ${
-                        wasCompleted ? 'bg-[var(--accent)]' : 'bg-[var(--hover)]'
+                      className={`w-full aspect-square rounded-lg flex items-center justify-center transition-all ${
+                        wasCompleted
+                          ? 'bg-[var(--accent)] text-white'
+                          : isToday
+                          ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
+                          : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
                       }`}
                     >
-                      <span className="text-xs font-bold text-white">{date.getDate()}</span>
+                      <span className="text-xs font-bold">{date.getDate()}</span>
                     </div>
                     <span className="text-[10px] text-[var(--text-muted)]">
                       {date.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { weekday: 'short' })}
@@ -369,14 +374,19 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                   const dateStr = formatDateLocal(date);
                   const wasCompleted = habitStats.completions.some(c => c.date === dateStr);
                   
+                  const isToday = date.toDateString() === new Date().toDateString();
                   days.push(
                     <div 
                       key={day}
-                      className={`aspect-square rounded flex items-center justify-center ${
-                        wasCompleted ? 'bg-[var(--accent)]' : 'bg-[var(--hover)]'
+                      className={`aspect-square rounded flex items-center justify-center transition-all ${
+                        wasCompleted
+                          ? 'bg-[var(--accent)] text-white'
+                          : isToday
+                          ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
+                          : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
                       }`}
                     >
-                      <span className="text-xs font-bold text-white">{day}</span>
+                      <span className="text-xs font-bold">{day}</span>
                     </div>
                   );
                 }

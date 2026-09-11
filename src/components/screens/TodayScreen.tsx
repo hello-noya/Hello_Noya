@@ -27,11 +27,20 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
 
   const today = new Date();
-  const selectedISO = selectedDate.toISOString().split('T')[0];
+  
+  // Helper function to get local date in ISO format (YYYY-MM-DD)
+  const getLocalISO = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const selectedISO = getLocalISO(selectedDate);
 
   // Clean up completed habits and tasks from previous days
   useEffect(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalISO(new Date());
     
     // Clean up old habit completions
     state.habits.forEach(habit => {
@@ -122,7 +131,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   // Check if all habits completed for a day
   const isDayComplete = (date: Date) => {
-    const iso = date.toISOString().split('T')[0];
+    const iso = getLocalISO(date);
     const dow = getDayOfWeek(date) as DayOfWeek;
     const habits = state.habits.filter(h => h.days.includes(dow));
     if (habits.length === 0) return false;
