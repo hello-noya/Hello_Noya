@@ -136,6 +136,12 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
     return lang === 'ru' ? quote.ru : quote.en;
   };
 
+  // Helper function to get day names for a habit
+  const getDayNames = (days: DayOfWeek[]) => {
+    const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    return days.map(d => t(dayKeys[d], lang)).join(', ');
+  };
+
   // Прогресс дня
   const totalHabits = allDayHabits.length;
   const completedHabitsCount = completedHabits.length;
@@ -249,6 +255,9 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                       <p className="text-xs text-[var(--text-muted)]">
                         {habit.startTime || 'Без времени'}
                       </p>
+                      <span className="text-xs text-[var(--text-muted)]">
+                        · {getDayNames(habit.days)}
+                      </span>
                       {habit.note && (
                         <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
                           · {habit.note}
