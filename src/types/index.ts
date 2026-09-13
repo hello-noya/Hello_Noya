@@ -36,6 +36,7 @@ export interface Task {
   deadline?: string; // ISO date
   priority?: 'low' | 'medium' | 'high';
   description?: string;
+  reminderEnabled?: boolean;
 }
 
 export interface ScheduleEvent {

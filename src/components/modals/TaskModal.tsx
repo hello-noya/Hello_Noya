@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Bell } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { BottomSheet } from '../ui/BottomSheet';
@@ -21,6 +21,7 @@ export function TaskModal({ isOpen, onClose, task, date }: TaskModalProps) {
   const [note, setNote] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [description, setDescription] = useState('');
+  const [reminderEnabled, setReminderEnabled] = useState(false);
 
   useEffect(() => {
     if (task) {
@@ -29,12 +30,14 @@ export function TaskModal({ isOpen, onClose, task, date }: TaskModalProps) {
       setNote(task.note || '');
       setPriority(task.priority || 'medium');
       setDescription(task.description || '');
+      setReminderEnabled(task.reminderEnabled || false);
     } else {
       setText('');
       setTime('');
       setNote('');
       setPriority('medium');
       setDescription('');
+      setReminderEnabled(false);
     }
   }, [task, isOpen]);
 
@@ -48,6 +51,7 @@ export function TaskModal({ isOpen, onClose, task, date }: TaskModalProps) {
       note: note || undefined,
       priority,
       description: description || undefined,
+      reminderEnabled,
     };
     if (task) {
       updateTask({ ...task, ...taskData });
@@ -78,27 +82,46 @@ export function TaskModal({ isOpen, onClose, task, date }: TaskModalProps) {
           />
         </div>
 
-        {/* Time */}
-        <div>
-          <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">
-            {lang === 'ru' ? 'Время' : 'Time'}
-          </label>
-          <div className="relative">
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-            />
-            {time && (
-              <button
-                onClick={() => setTime('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-              >
-                <X size={16} />
-              </button>
-            )}
+        {/* Reminder */}
+        <div className="p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Bell size={18} className="text-[var(--text-secondary)]" />
+              <label className="text-sm text-[var(--text-secondary)]">
+                {lang === 'ru' ? 'Напоминание' : 'Reminder'}
+              </label>
+            </div>
+            <button
+              onClick={() => setReminderEnabled(!reminderEnabled)}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                reminderEnabled ? 'bg-[var(--accent)]' : 'bg-[var(--hover)]'
+              }`}
+            >
+              <div
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
+                  reminderEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
           </div>
+          {reminderEnabled && (
+            <div className="relative">
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+              />
+              {time && (
+                <button
+                  onClick={() => setTime('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Priority */}

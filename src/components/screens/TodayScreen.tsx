@@ -160,33 +160,50 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   return (
     <div className="space-y-5">
-      {/* Week selector */}
-      <div className="flex gap-1.5 justify-between">
-        {weekDays.map((day, i) => {
-          const isSelected = day.toDateString() === selectedDate.toDateString();
-          const isToday = day.toDateString() === today.toDateString();
-          const complete = isDayComplete(day);
-          const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-          
-          return (
+      {/* Date card */}
+      <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-lg font-semibold text-[var(--text-primary)]">
+              {selectedDate.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long' 
+              })}
+            </p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              {getDailyQuote()}
+            </p>
+          </div>
+          <div className="flex gap-1">
             <button
-              key={i}
-              onClick={() => setSelectedDate(day)}
-              className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-all ${
-                isSelected
-                  ? 'bg-[var(--accent)] text-white'
-                  : isToday
-                  ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
-                  : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
-              }`}
+              onClick={() => {
+                const prev = new Date(selectedDate);
+                prev.setDate(prev.getDate() - 1);
+                setSelectedDate(prev);
+              }}
+              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
             >
-              <span className="text-[10px] font-medium uppercase">{t(dayKeys[day.getDay()], lang)}</span>
-              <span className="text-sm font-bold mt-0.5">
-                {complete ? <Check size={14} /> : day.getDate()}
-              </span>
+              ←
             </button>
-          );
-        })}
+            <button
+              onClick={() => setSelectedDate(today)}
+              className="px-3 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors text-xs"
+            >
+              {lang === 'ru' ? 'Сегодня' : 'Today'}
+            </button>
+            <button
+              onClick={() => {
+                const next = new Date(selectedDate);
+                next.setDate(next.getDate() + 1);
+                setSelectedDate(next);
+              }}
+              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+            >
+              →
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Quick Notes */}
