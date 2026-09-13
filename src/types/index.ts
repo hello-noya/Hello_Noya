@@ -19,6 +19,11 @@ export interface Habit {
   days: DayOfWeek[];
   completedDates: string[]; // ISO date strings when completed
   note?: string;
+  repeatMode?: 'daily' | 'weekdays' | 'weekends' | 'custom';
+  targetCount?: number; // Цель выполнения (например 8 стаканов)
+  targetUnit?: string; // Единица измерения (стаканов, минут)
+  reminderEnabled?: boolean;
+  currentCount?: number; // Текущее выполнение за день
 }
 
 export interface Task {
@@ -29,6 +34,8 @@ export interface Task {
   completed: boolean;
   note?: string;
   deadline?: string; // ISO date
+  priority?: 'low' | 'medium' | 'high';
+  description?: string;
 }
 
 export interface ScheduleEvent {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Minus, Plus, Bell } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { t } from '../../utils/i18n';
 import { BottomSheet } from '../ui/BottomSheet';
@@ -24,6 +24,10 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
   const [days, setDays] = useState<DayOfWeek[]>([1, 2, 3, 4, 5]);
   const [note, setNote] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<'daily' | 'weekdays' | 'weekends' | 'custom'>('daily');
+  const [targetCount, setTargetCount] = useState<number>(1);
+  const [targetUnit, setTargetUnit] = useState<string>('');
+  const [reminderEnabled, setReminderEnabled] = useState(false);
 
   useEffect(() => {
     if (habit) {
@@ -32,25 +36,63 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
       setStartTime(habit.startTime);
       setDays(habit.days);
       setNote(habit.note || '');
+      setRepeatMode(habit.repeatMode || 'custom');
+      setTargetCount(habit.targetCount || 1);
+      setTargetUnit(habit.targetUnit || '');
+      setReminderEnabled(habit.reminderEnabled || false);
     } else {
       setName('');
       setIcon('water');
       setStartTime('');
       setDays([1, 2, 3, 4, 5]);
       setNote('');
+      setRepeatMode('daily');
+      setTargetCount(1);
+      setTargetUnit('');
+      setReminderEnabled(false);
     }
   }, [habit, isOpen]);
 
   const toggleDay = (day: DayOfWeek) => {
     setDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]);
+    setRepeatMode('custom');
+  };
+
+  const applyRepeatMode = (mode: 'daily' | 'weekdays' | 'weekends' | 'custom') => {
+    setRepeatMode(mode);
+    switch (mode) {
+      case 'daily':
+        setDays([0, 1, 2, 3, 4, 5, 6]);
+        break;
+      case 'weekdays':
+        setDays([1, 2, 3, 4, 5]);
+        break;
+      case 'weekends':
+        setDays([0, 6]);
+        break;
+      case 'custom':
+        // Оставляем текущие дни
+        break;
+    }
   };
 
   const handleSave = () => {
     if (!name.trim()) return;
+    const habitData = {
+      name,
+      icon,
+      startTime,
+      days,
+      note: note || undefined,
+      repeatMode,
+      targetCount,
+      targetUnit: targetUnit || undefined,
+      reminderEnabled,
+    };
     if (habit) {
-      updateHabit({ ...habit, name, icon, startTime, days, note: note || undefined });
+      updateHabit({ ...habit, ...habitData });
     } else {
-      addHabit(createHabit({ name, icon, startTime, days, note: note || undefined }));
+      addHabit(createHabit(habitData));
     }
     showToast(t('saved', lang));
     onClose();
@@ -103,24 +145,127 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
             </div>
           </div>
 
-          {/* Days */}
+          {/* Repeat mode */}
           <div>
-            <label className="text-sm text-[var(--text-secondary)] mb-2 block">{t('daysOfWeek', lang)}</label>
-            <div className="flex gap-1">
-              {dayKeys.map((key, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => toggleDay(idx as DayOfWeek)}
-                  className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
-                    days.includes(idx as DayOfWeek)
-                      ? 'bg-[var(--accent)] text-white'
-                      : 'bg-[var(--hover)] text-[var(--text-muted)]'
-                  }`}
-                >
-                  {t(key, lang)}
-                </button>
-              ))}
+            <label className="text-sm text-[var(--text-secondary)] mb-2 block">
+              {lang === 'ru' ? 'Повторение' : 'Repeat'}
+            </label>
+            <div className="grid grid-cols-4 gap-1 mb-2">
+              <button
+                onClick={() => applyRepeatMode('daily')}
+                className={`py-2 rounded-lg text-xs font-medium transition-all ${
+                  repeatMode === 'daily'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                }`}
+              >
+                {lang === 'ru' ? 'Ежедневно' : 'Daily'}
+              </button>
+              <button
+                onClick={() => applyRepeatMode('weekdays')}
+                className={`py-2 rounded-lg text-xs font-medium transition-all ${
+                  repeatMode === 'weekdays'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                }`}
+              >
+                {lang === 'ru' ? 'Будни' : 'Weekdays'}
+              </button>
+              <button
+                onClick={() => applyRepeatMode('weekends')}
+                className={`py-2 rounded-lg text-xs font-medium transition-all ${
+                  repeatMode === 'weekends'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                }`}
+              >
+                {lang === 'ru' ? 'Выходные' : 'Weekends'}
+              </button>
+              <button
+                onClick={() => applyRepeatMode('custom')}
+                className={`py-2 rounded-lg text-xs font-medium transition-all ${
+                  repeatMode === 'custom'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                }`}
+              >
+                {lang === 'ru' ? 'Свои' : 'Custom'}
+              </button>
             </div>
+            {repeatMode === 'custom' && (
+              <div className="flex gap-1">
+                {dayKeys.map((key, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => toggleDay(idx as DayOfWeek)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
+                      days.includes(idx as DayOfWeek)
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                    }`}
+                  >
+                    {t(key, lang)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Target count */}
+          <div>
+            <label className="text-sm text-[var(--text-secondary)] mb-2 block">
+              {lang === 'ru' ? 'Количество выполнения' : 'Target count'}
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setTargetCount(Math.max(1, targetCount - 1))}
+                className="w-10 h-10 rounded-xl bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+              >
+                <Minus size={16} />
+              </button>
+              <input
+                type="number"
+                value={targetCount}
+                onChange={(e) => setTargetCount(Math.max(1, Number(e.target.value)))}
+                min={1}
+                className="flex-1 px-3 py-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-center text-base font-bold focus:outline-none focus:border-[var(--accent)] transition-colors"
+              />
+              <button
+                onClick={() => setTargetCount(targetCount + 1)}
+                className="w-10 h-10 rounded-xl bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+              >
+                <Plus size={16} />
+              </button>
+              <input
+                type="text"
+                value={targetUnit}
+                onChange={(e) => setTargetUnit(e.target.value)}
+                placeholder={lang === 'ru' ? 'раз' : 'times'}
+                className="w-24 px-3 py-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Reminder toggle */}
+          <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+            <div className="flex items-center gap-2">
+              <Bell size={18} className="text-[var(--text-secondary)]" />
+              <span className="text-sm text-[var(--text-secondary)]">
+                {lang === 'ru' ? 'Напоминание' : 'Reminder'}
+              </span>
+            </div>
+            <button
+              onClick={() => setReminderEnabled(!reminderEnabled)}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                reminderEnabled ? 'bg-[var(--accent)]' : 'bg-[var(--hover)]'
+              }`}
+            >
+              <div
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
+                  reminderEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
           </div>
 
           {/* Icon */}

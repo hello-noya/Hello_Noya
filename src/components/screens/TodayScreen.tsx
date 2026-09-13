@@ -7,6 +7,7 @@ import { Habit, Task, DayOfWeek } from '../../types';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { renderIcon } from '../../utils/icons';
 import { QuickNotes } from './QuickNotes';
+import { TaskModal } from '../modals/TaskModal';
 
 interface TodayScreenProps {
   onEditHabit: (habit: Habit) => void;
@@ -25,6 +26,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const [editTaskNote, setEditTaskNote] = useState('');
   const [showCompletedHabits, setShowCompletedHabits] = useState(false);
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
+  const [taskModal, setTaskModal] = useState<{ open: boolean; task: Task | null }>({ open: false, task: null });
 
   const today = new Date();
   
@@ -254,6 +256,11 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                     <div className="mt-0.5">
                       <p className="text-xs text-[var(--text-muted)]">
                         {habit.startTime || 'Без времени'}
+                        {habit.targetCount && habit.targetCount > 1 && (
+                          <span className="ml-2 text-[var(--accent)]">
+                            {habit.currentCount || 0} / {habit.targetCount} {habit.targetUnit || ''}
+                          </span>
+                        )}
                       </p>
                       {habit.note && (
                         <p className="text-xs text-[var(--text-muted)] italic mt-0.5">
@@ -521,23 +528,16 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             </div>
           )}
           
-          {/* Add task input */}
-          <div className="flex items-center gap-2 p-2 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-            <input
-              type="text"
-              value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-              placeholder={lang === 'ru' ? 'Введите текст задачи' : 'Enter task text'}
-              className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] px-2 py-1 focus:outline-none"
-            />
-            <button
-              onClick={handleAddTask}
-              className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
+          {/* Create task button */}
+          <button
+            onClick={() => setTaskModal({ open: true, task: null })}
+            className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] hover:border-[var(--accent)]/50 transition-all"
+          >
+            <Plus size={18} className="text-[var(--accent)]" />
+            <span className="text-sm font-medium text-[var(--accent)]">
+              {lang === 'ru' ? 'Создать задачу' : 'Create task'}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -610,6 +610,14 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </div>
         </div>
       )}
+
+      {/* Task Modal */}
+      <TaskModal
+        isOpen={taskModal.open}
+        onClose={() => setTaskModal({ open: false, task: null })}
+        task={taskModal.task}
+        date={selectedISO}
+      />
     </div>
   );
 }

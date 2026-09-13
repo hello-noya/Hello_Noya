@@ -11,6 +11,7 @@ import { SettingsScreen } from './components/screens/SettingsScreen';
 import { ToolsScreen } from './components/screens/ToolsScreen';
 import { StatisticsScreen } from './components/screens/StatisticsScreen';
 import { StudentTemplates } from './components/screens/StudentTemplates';
+import { ManageAllScreen } from './components/screens/ManageAllScreen';
 import { TaskDetailScreen } from './components/screens/TaskDetailScreen';
 import { GoalDetailScreen } from './components/screens/GoalDetailScreen';
 import { Header } from './components/Header';
@@ -107,6 +108,8 @@ function AppContent() {
           );
         case 'templates':
           return <StudentTemplates onBack={() => setMenuSection(null)} />;
+        case 'manage-all':
+          return <ManageAllScreen onBack={() => setMenuSection(null)} />;
       }
     }
 
