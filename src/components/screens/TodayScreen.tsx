@@ -377,6 +377,19 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             <ListTodo size={18} className="text-[var(--accent)]" />
             {t('tasks', lang)} <span className="text-[var(--text-muted)] font-normal">({completedTasks.length}/{allDayTasks.length})</span>
           </h3>
+          <button
+            onClick={() => {
+              setEditingTask(null);
+              setEditTaskText('');
+              setEditTaskTime('');
+              setEditTaskNote('');
+              setTaskModal({ open: true, task: null });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+          >
+            <Plus size={14} />
+            <span>{t('addTask', lang).replace('+ ', '')}</span>
+          </button>
         </div>
 
           {activeTasks.length === 0 && completedTasks.length === 0 && (
