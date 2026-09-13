@@ -159,59 +159,49 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   };
 
   return (
-    <div className="space-y-5">
-      {/* Date card */}
+    <div className="space-y-4">
+      {/* Quote card */}
       <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-lg font-semibold text-[var(--text-primary)]">
-              {selectedDate.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long' 
-              })}
-            </p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
-              {getDailyQuote()}
-            </p>
-          </div>
-          <div className="flex gap-1">
+        <p className="text-xs text-[var(--text-muted)] italic text-center">
+          {getDailyQuote()}
+        </p>
+      </div>
+
+      {/* Week buttons */}
+      <div className="grid grid-cols-7 gap-2">
+        {weekDays.map((day, idx) => {
+          const isSelected = day.toDateString() === selectedDate.toDateString();
+          const isToday = day.toDateString() === today.toDateString();
+          const complete = isDayComplete(day);
+          const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          
+          return (
             <button
-              onClick={() => {
-                const prev = new Date(selectedDate);
-                prev.setDate(prev.getDate() - 1);
-                setSelectedDate(prev);
-              }}
-              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+              key={idx}
+              onClick={() => setSelectedDate(day)}
+              className={`flex flex-col items-center py-2 rounded-xl transition-all ${
+                isSelected
+                  ? 'bg-[var(--accent)] text-white'
+                  : isToday
+                  ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
+                  : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
+              }`}
             >
-              ←
+              <span className="text-[10px] font-medium uppercase">{t(dayKeys[day.getDay()], lang)}</span>
+              <span className="text-sm font-bold mt-0.5">
+                {complete ? <Check size={14} /> : day.getDate()}
+              </span>
             </button>
-            <button
-              onClick={() => setSelectedDate(today)}
-              className="px-3 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors text-xs"
-            >
-              {lang === 'ru' ? 'Сегодня' : 'Today'}
-            </button>
-            <button
-              onClick={() => {
-                const next = new Date(selectedDate);
-                next.setDate(next.getDate() + 1);
-                setSelectedDate(next);
-              }}
-              className="w-8 h-8 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
-            >
-              →
-            </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
       {/* Quick Notes */}
       <QuickNotes />
 
       {/* Habits section */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <Target size={18} className="text-[var(--accent)]" />
             {t('habits', lang)} <span className="text-[var(--text-muted)] font-normal">({completedHabits.length}/{allDayHabits.length})</span>
@@ -248,34 +238,41 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         ) : (
           <div className="space-y-3">
             {activeHabits.map((habit) => {
-              const isCompleted = false; // Active habits are never completed
+              // Проверяем завершена ли привычка
+              const isFullyCompleted = habit.completedDates.includes(selectedISO);
+              const currentCount = habit.currentCount || 0;
+              const targetCount = habit.targetCount || 1;
+              const isPartiallyCompleted = !isFullyCompleted && currentCount > 0 && targetCount > 1;
+              
               return (
                 <div
                   key={habit.id}
                   onClick={() => onEditHabit(habit)}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
-                    isCompleted 
+                  className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
+                    isFullyCompleted 
                       ? 'bg-[var(--card-bg)] border-[var(--accent)]/30' 
                       : 'bg-[var(--card-bg)] border-[var(--border)]'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center ${
-                    isCompleted 
+                    isFullyCompleted 
                       ? 'border-[var(--accent)] text-[var(--accent)]' 
+                      : isPartiallyCompleted
+                      ? 'border-[var(--accent)]/50 text-[var(--accent)]/70'
                       : 'border-[var(--border)] text-[var(--text-secondary)]'
                   }`}>
-                    {renderIcon(habit.icon, 20, isCompleted ? 'var(--accent)' : 'var(--text-secondary)')}
+                    {renderIcon(habit.icon, 20, isFullyCompleted ? 'var(--accent)' : isPartiallyCompleted ? 'var(--accent)' : 'var(--text-secondary)')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
+                    <p className={`text-sm font-medium truncate ${isFullyCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
                       {habit.name}
                     </p>
                     <div className="mt-0.5">
                       <p className="text-xs text-[var(--text-muted)]">
                         {habit.startTime || 'Без времени'}
-                        {habit.targetCount && habit.targetCount > 1 && (
-                          <span className="ml-2 text-[var(--accent)]">
-                            {habit.currentCount || 0} / {habit.targetCount} {habit.targetUnit || ''}
+                        {targetCount > 1 && (
+                          <span className="ml-2 text-[var(--accent)] font-medium">
+                            {currentCount}/{targetCount}
                           </span>
                         )}
                       </p>
@@ -292,12 +289,15 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                       toggleHabitCompletion(habit.id, selectedISO);
                     }}
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      isCompleted
+                      isFullyCompleted
                         ? 'bg-[var(--accent)] text-white'
+                        : isPartiallyCompleted
+                        ? 'border-2 border-[var(--accent)]/50 text-[var(--accent)]/70'
                         : 'border-2 border-[var(--border)] hover:border-[var(--accent)]'
                     }`}
                   >
-                    {isCompleted && <Check size={14} />}
+                    {isFullyCompleted && <Check size={14} />}
+                    {isPartiallyCompleted && <span className="text-xs font-bold">{currentCount}</span>}
                   </button>
                 </div>
               );
