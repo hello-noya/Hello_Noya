@@ -22,7 +22,6 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
   const [icon, setIcon] = useState('water');
   const [startTime, setStartTime] = useState('');
   const [days, setDays] = useState<DayOfWeek[]>([1, 2, 3, 4, 5]);
-  const [note, setNote] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [repeatMode, setRepeatMode] = useState<'daily' | 'weekdays' | 'weekends' | 'custom'>('daily');
   const [targetCount, setTargetCount] = useState<number>(1);
@@ -35,7 +34,6 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
       setIcon(habit.icon);
       setStartTime(habit.startTime);
       setDays(habit.days);
-      setNote(habit.note || '');
       setRepeatMode(habit.repeatMode || 'custom');
       setTargetCount(habit.targetCount || 1);
       setTargetUnit(habit.targetUnit || '');
@@ -45,7 +43,6 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
       setIcon('water');
       setStartTime('');
       setDays([1, 2, 3, 4, 5]);
-      setNote('');
       setRepeatMode('daily');
       setTargetCount(1);
       setTargetUnit('');
@@ -83,7 +80,6 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
       icon,
       startTime,
       days,
-      note: note || undefined,
       repeatMode,
       targetCount,
       targetUnit: targetUnit || undefined,
@@ -119,20 +115,20 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={lang === 'ru' ? 'Введите название привычки' : 'Enter habit name'}
+              placeholder={lang === 'ru' ? 'Введите название...' : 'Enter name...'}
               className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
             />
           </div>
 
           {/* Start time */}
-          <div>
+          <div className="p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
             <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('startTime', lang)}</label>
             <div className="relative">
               <input
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                className="w-full px-4 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
               />
               {startTime && (
                 <button
@@ -146,80 +142,55 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
           </div>
 
           {/* Repeat mode */}
-          <div>
-            <label className="text-sm text-[var(--text-secondary)] mb-2 block">
-              {lang === 'ru' ? 'Повторение' : 'Repeat'}
-            </label>
-            <div className="grid grid-cols-4 gap-1 mb-2">
-              <button
-                onClick={() => applyRepeatMode('daily')}
-                className={`py-2 rounded-lg text-xs font-medium transition-all ${
-                  repeatMode === 'daily'
-                    ? 'bg-[var(--accent)] text-white'
-                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
-                }`}
-              >
-                {lang === 'ru' ? 'Ежедневно' : 'Daily'}
-              </button>
-              <button
-                onClick={() => applyRepeatMode('weekdays')}
-                className={`py-2 rounded-lg text-xs font-medium transition-all ${
-                  repeatMode === 'weekdays'
-                    ? 'bg-[var(--accent)] text-white'
-                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
-                }`}
-              >
-                {lang === 'ru' ? 'Будни' : 'Weekdays'}
-              </button>
-              <button
-                onClick={() => applyRepeatMode('weekends')}
-                className={`py-2 rounded-lg text-xs font-medium transition-all ${
-                  repeatMode === 'weekends'
-                    ? 'bg-[var(--accent)] text-white'
-                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
-                }`}
-              >
-                {lang === 'ru' ? 'Выходные' : 'Weekends'}
-              </button>
-              <button
-                onClick={() => applyRepeatMode('custom')}
-                className={`py-2 rounded-lg text-xs font-medium transition-all ${
-                  repeatMode === 'custom'
-                    ? 'bg-[var(--accent)] text-white'
-                    : 'bg-[var(--hover)] text-[var(--text-muted)]'
-                }`}
-              >
-                {lang === 'ru' ? 'Свои' : 'Custom'}
-              </button>
-            </div>
-            {repeatMode === 'custom' && (
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
+            <div className="flex-1">
+              <label className="text-sm text-[var(--text-secondary)] mb-1 block">
+                {lang === 'ru' ? 'Повторение' : 'Repeat'}
+              </label>
               <div className="flex gap-1">
-                {dayKeys.map((key, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => toggleDay(idx as DayOfWeek)}
-                    className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
-                      days.includes(idx as DayOfWeek)
-                        ? 'bg-[var(--accent)] text-white'
-                        : 'bg-[var(--hover)] text-[var(--text-muted)]'
-                    }`}
-                  >
-                    {t(key, lang)}
-                  </button>
-                ))}
+                <button
+                  onClick={() => applyRepeatMode('daily')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    repeatMode === 'daily'
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                  }`}
+                >
+                  {lang === 'ru' ? 'Ежедневно' : 'Daily'}
+                </button>
+                <button
+                  onClick={() => applyRepeatMode('weekdays')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    repeatMode === 'weekdays'
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                  }`}
+                >
+                  {lang === 'ru' ? 'Будни' : 'Weekdays'}
+                </button>
+                <button
+                  onClick={() => applyRepeatMode('weekends')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    repeatMode === 'weekends'
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--hover)] text-[var(--text-muted)]'
+                  }`}
+                >
+                  {lang === 'ru' ? 'Выходные' : 'Weekends'}
+                </button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Target count */}
-          <div>
+          <div className="p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]">
             <label className="text-sm text-[var(--text-secondary)] mb-2 block">
               {lang === 'ru' ? 'Количество выполнения' : 'Target count'}
             </label>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setTargetCount(Math.max(1, targetCount - 1))}
-                className="w-10 h-10 rounded-xl bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+                className="w-10 h-10 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
               >
                 <Minus size={16} />
               </button>
@@ -228,11 +199,11 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
                 value={targetCount}
                 onChange={(e) => setTargetCount(Math.max(1, Number(e.target.value)))}
                 min={1}
-                className="flex-1 px-3 py-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-center text-base font-bold focus:outline-none focus:border-[var(--accent)] transition-colors"
+                className="flex-1 px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-center text-base font-bold focus:outline-none focus:border-[var(--accent)] transition-colors"
               />
               <button
                 onClick={() => setTargetCount(targetCount + 1)}
-                className="w-10 h-10 rounded-xl bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
+                className="w-10 h-10 rounded-lg bg-[var(--hover)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 transition-colors"
               >
                 <Plus size={16} />
               </button>
@@ -241,7 +212,7 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
                 value={targetUnit}
                 onChange={(e) => setTargetUnit(e.target.value)}
                 placeholder={lang === 'ru' ? 'раз' : 'times'}
-                className="w-24 px-3 py-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                className="w-24 px-3 py-2 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
               />
             </div>
           </div>
@@ -287,18 +258,6 @@ export function HabitModal({ isOpen, onClose, habit }: HabitModalProps) {
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Note */}
-          <div>
-            <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('note', lang)}</label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder={lang === 'ru' ? 'Добавить заметку...' : 'Add note...'}
-              rows={2}
-              className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
-            />
           </div>
 
           {/* Actions */}

@@ -160,9 +160,6 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   return (
     <div className="space-y-5">
-      {/* Quick Notes */}
-      <QuickNotes />
-
       {/* Week selector */}
       <div className="flex gap-1.5 justify-between">
         {weekDays.map((day, i) => {
@@ -191,6 +188,9 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           );
         })}
       </div>
+
+      {/* Quick Notes */}
+      <QuickNotes />
 
       {/* Habits section */}
       <div className="mb-6">
@@ -291,7 +291,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         
       {/* Completed habits section - only visible when there are completed habits */}
       {completedHabits.length > 0 && (
-          <div className="mt-3">
+          <div className="mt-4">
             <button
               onClick={() => setShowCompletedHabits(!showCompletedHabits)}
               className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
@@ -453,7 +453,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           
           {/* Completed tasks section */}
           {completedTasks.length > 0 && (
-            <div className="mt-3">
+            <div className="mt-4">
               <button
                 onClick={() => setShowCompletedTasks(!showCompletedTasks)}
                 className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
@@ -528,15 +528,13 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             </div>
           )}
           
-          {/* Create task button */}
+          {/* Add task button */}
           <button
             onClick={() => setTaskModal({ open: true, task: null })}
-            className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] hover:border-[var(--accent)]/50 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
           >
-            <Plus size={18} className="text-[var(--accent)]" />
-            <span className="text-sm font-medium text-[var(--accent)]">
-              {lang === 'ru' ? 'Создать задачу' : 'Create task'}
-            </span>
+            <Plus size={14} />
+            <span>{lang === 'ru' ? 'Задача' : 'Task'}</span>
           </button>
         </div>
       </div>

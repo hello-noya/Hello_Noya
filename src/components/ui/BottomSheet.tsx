@@ -30,13 +30,14 @@ export function BottomSheet({ isOpen, onClose, title, children }: BottomSheetPro
       />
       <div className="relative w-full max-w-[420px] bg-[var(--card-bg)] rounded-t-3xl animate-slide-up max-h-[85vh] overflow-y-auto">
         <div className="sticky top-0 bg-[var(--card-bg)] border-b border-[var(--border)] p-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h3>
           <button
             onClick={onClose}
             className="p-1.5 rounded-full hover:bg-[var(--hover)] transition-colors"
           >
             <X size={20} className="text-[var(--text-secondary)]" />
           </button>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h3>
+          <div className="w-8"></div>
         </div>
         <div className="p-4">
           {children}
