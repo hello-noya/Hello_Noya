@@ -165,7 +165,7 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
             className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
           >
             <div className="flex items-center gap-2">
-              <Check size={18} className="text-green-500" />
+              <Check size={18} className="text-[var(--accent)]" />
               <span className="text-sm font-medium text-[var(--text-primary)]">
                 {lang === 'ru' ? 'Завершенные' : 'Completed'}
               </span>
