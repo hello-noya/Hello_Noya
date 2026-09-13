@@ -75,7 +75,19 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   // Get habits for selected day (separate active and completed)
   const dayOfWeek = getDayOfWeek(selectedDate) as DayOfWeek;
-  const allDayHabits = state.habits.filter(h => h.days.length === 0 || h.days.includes(dayOfWeek));
+  
+  // Debug: log to see what's happening
+  console.log('TodayScreen - dayOfWeek:', dayOfWeek, 'selectedISO:', selectedISO);
+  console.log('TodayScreen - all habits:', state.habits);
+  
+  const allDayHabits = state.habits.filter(h => {
+    const hasNoDays = h.days.length === 0;
+    const includesDay = h.days.includes(dayOfWeek);
+    console.log('Habit:', h.name, 'days:', h.days, 'hasNoDays:', hasNoDays, 'includesDay:', includesDay);
+    return hasNoDays || includesDay;
+  });
+  
+  console.log('TodayScreen - allDayHabits after filter:', allDayHabits);
   
   const activeHabits = allDayHabits.filter(h => !h.completedDates.includes(selectedISO));
   const completedHabits = allDayHabits.filter(h => h.completedDates.includes(selectedISO));

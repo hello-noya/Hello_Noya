@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { Habit } from '../../types';
+import { Habit, Task, Goal } from '../../types';
 import { t } from '../../utils/i18n';
 import { renderIcon } from '../../utils/icons';
 
@@ -22,6 +22,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
 
   // Helper function to format date as YYYY-MM-DD using local time
   const formatDateLocal = (date: Date): string => {
@@ -557,9 +559,10 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
               const percentage = totalDays > 0 ? Math.round((completed / totalDays) * 100) : 0;
               
               return (
-                <div
+                <button
                   key={task.id}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)]"
+                  onClick={() => setSelectedTask(task)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
                 >
                   <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center">
                     <span className="text-[var(--accent)]">✓</span>
@@ -568,7 +571,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                     <p className="text-sm font-medium text-[var(--text-primary)]">{task.text}</p>
                     <p className="text-xs text-[var(--text-muted)]">{percentage}%</p>
                   </div>
-                </div>
+                </button>
               );
             })}
             {state.tasks.length > 6 && (
@@ -599,9 +602,10 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
               const percentage = goal.target > 0 ? Math.round((completed / goal.target) * 100) : 0;
               
               return (
-                <div
+                <button
                   key={goal.id}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)]"
+                  onClick={() => setSelectedGoal(goal)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
                 >
                   <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center">
                     <span className="text-[var(--accent)]">🎯</span>
@@ -610,7 +614,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                     <p className="text-sm font-medium text-[var(--text-primary)]">{goal.name}</p>
                     <p className="text-xs text-[var(--text-muted)]">{percentage}%</p>
                   </div>
-                </div>
+                </button>
               );
             })}
             {state.goals.length > 6 && (
@@ -618,6 +622,70 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
                 {lang === 'ru' ? `Показать все (${state.goals.length})` : `Show all (${state.goals.length})`}
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Task detail view */}
+      {selectedTask && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSelectedTask(null)}>
+          <div className="bg-[var(--card-bg)] rounded-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">{lang === 'ru' ? 'Детали задачи' : 'Task Details'}</h2>
+              <button onClick={() => setSelectedTask(null)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm text-[var(--text-muted)]">{lang === 'ru' ? 'Название' : 'Title'}</p>
+                <p className="text-lg font-semibold text-[var(--text-primary)]">{selectedTask.text}</p>
+              </div>
+              {selectedTask.note && (
+                <div>
+                  <p className="text-sm text-[var(--text-muted)]">{lang === 'ru' ? 'Описание' : 'Description'}</p>
+                  <p className="text-[var(--text-primary)]">{selectedTask.note}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-[var(--text-muted)]">{lang === 'ru' ? 'Дата' : 'Date'}</p>
+                <p className="text-[var(--text-primary)]">{formatDateLocal(new Date(selectedTask.date))}</p>
+              </div>
+              <div>
+                <p className="text-sm text-[var(--text-muted)]">{lang === 'ru' ? 'Статус' : 'Status'}</p>
+                <p className={`text-[var(--text-primary)] ${selectedTask.completed ? 'text-green-500' : 'text-orange-500'}`}>
+                  {selectedTask.completed ? (lang === 'ru' ? 'Выполнено' : 'Completed') : (lang === 'ru' ? 'В процессе' : 'In Progress')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Goal detail view */}
+      {selectedGoal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSelectedGoal(null)}>
+          <div className="bg-[var(--card-bg)] rounded-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">{lang === 'ru' ? 'Детали цели' : 'Goal Details'}</h2>
+              <button onClick={() => setSelectedGoal(null)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm text-[var(--text-muted)]">{lang === 'ru' ? 'Название' : 'Title'}</p>
+                <p className="text-lg font-semibold text-[var(--text-primary)]">{selectedGoal.name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-[var(--text-muted)]">{lang === 'ru' ? 'Цель' : 'Target'}</p>
+                <p className="text-[var(--text-primary)]">{selectedGoal.target} {selectedGoal.unit}</p>
+              </div>
+              <div>
+                <p className="text-sm text-[var(--text-muted)]">{lang === 'ru' ? 'Прогресс' : 'Progress'}</p>
+                <p className="text-[var(--text-primary)]">{selectedGoal.current} / {selectedGoal.target} {selectedGoal.unit}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
