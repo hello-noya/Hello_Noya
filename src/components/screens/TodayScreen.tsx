@@ -251,17 +251,14 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                     <p className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
                       {habit.name}
                     </p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="mt-0.5">
                       <p className="text-xs text-[var(--text-muted)]">
                         {habit.startTime || 'Без времени'}
                       </p>
-                      <span className="text-xs text-[var(--text-muted)]">
-                        · {getDayNames(habit.days)}
-                      </span>
                       {habit.note && (
-                        <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
-                          · {habit.note}
-                        </span>
+                        <p className="text-xs text-[var(--text-muted)] italic mt-0.5">
+                          {habit.note}
+                        </p>
                       )}
                     </div>
                   </div>
