@@ -388,7 +388,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={14} />
-            <span>{t('addTask', lang).replace('+ ', '')}</span>
+            <span>Задача</span>
           </button>
         </div>
 
