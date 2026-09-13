@@ -7,6 +7,7 @@ import { Habit, Task, DayOfWeek } from '../../types';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { renderIcon } from '../../utils/icons';
 import { QuickNotes } from './QuickNotes';
+import { TaskModal } from '../modals/TaskModal';
 
 interface TodayScreenProps {
   onEditHabit: (habit: Habit) => void;
@@ -25,13 +26,23 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   const [editTaskNote, setEditTaskNote] = useState('');
   const [showCompletedHabits, setShowCompletedHabits] = useState(false);
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
+  const [taskModal, setTaskModal] = useState<{ open: boolean; task: Task | null }>({ open: false, task: null });
 
   const today = new Date();
-  const selectedISO = selectedDate.toISOString().split('T')[0];
+  
+  // Helper function to get local date in ISO format (YYYY-MM-DD)
+  const getLocalISO = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const selectedISO = getLocalISO(selectedDate);
 
   // Clean up completed habits and tasks from previous days
   useEffect(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalISO(new Date());
     
     // Clean up old habit completions
     state.habits.forEach(habit => {
@@ -66,7 +77,20 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   // Get habits for selected day (separate active and completed)
   const dayOfWeek = getDayOfWeek(selectedDate) as DayOfWeek;
-  const allDayHabits = state.habits.filter(h => h.days.includes(dayOfWeek));
+  
+  // Debug: log to see what's happening
+  console.log('TodayScreen - dayOfWeek:', dayOfWeek, 'selectedISO:', selectedISO);
+  console.log('TodayScreen - all habits:', state.habits);
+  
+  const allDayHabits = state.habits.filter(h => {
+    const hasNoDays = h.days.length === 0;
+    const includesDay = h.days.includes(dayOfWeek);
+    console.log('Habit:', h.name, 'days:', h.days, 'hasNoDays:', hasNoDays, 'includesDay:', includesDay);
+    return hasNoDays || includesDay;
+  });
+  
+  console.log('TodayScreen - allDayHabits after filter:', allDayHabits);
+  
   const activeHabits = allDayHabits.filter(h => !h.completedDates.includes(selectedISO));
   const completedHabits = allDayHabits.filter(h => h.completedDates.includes(selectedISO));
   
@@ -114,6 +138,12 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
     return lang === 'ru' ? quote.ru : quote.en;
   };
 
+  // Helper function to get day names for a habit
+  const getDayNames = (days: DayOfWeek[]) => {
+    const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    return days.map(d => t(dayKeys[d], lang)).join(', ');
+  };
+
   // Прогресс дня
   const totalHabits = allDayHabits.length;
   const completedHabitsCount = completedHabits.length;
@@ -121,7 +151,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
 
   // Check if all habits completed for a day
   const isDayComplete = (date: Date) => {
-    const iso = date.toISOString().split('T')[0];
+    const iso = getLocalISO(date);
     const dow = getDayOfWeek(date) as DayOfWeek;
     const habits = state.habits.filter(h => h.days.includes(dow));
     if (habits.length === 0) return false;
@@ -129,13 +159,17 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
   };
 
   return (
-    <div className="space-y-5">
-      {/* Quick Notes */}
-      <QuickNotes />
+    <div className="space-y-4">
+      {/* Quote card */}
+      <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+        <p className="text-xs text-[var(--text-muted)] italic text-center">
+          {getDailyQuote()}
+        </p>
+      </div>
 
-      {/* Week selector */}
-      <div className="flex gap-1.5 justify-between">
-        {weekDays.map((day, i) => {
+      {/* Week buttons */}
+      <div className="grid grid-cols-7 gap-2">
+        {weekDays.map((day, idx) => {
           const isSelected = day.toDateString() === selectedDate.toDateString();
           const isToday = day.toDateString() === today.toDateString();
           const complete = isDayComplete(day);
@@ -143,14 +177,14 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           
           return (
             <button
-              key={i}
+              key={idx}
               onClick={() => setSelectedDate(day)}
-              className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-all ${
+              className={`flex flex-col items-center py-2 rounded-xl transition-all ${
                 isSelected
                   ? 'bg-[var(--accent)] text-white'
                   : isToday
-                  ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
-                  : 'text-[var(--text-secondary)]'
+                  ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
+                  : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
               }`}
             >
               <span className="text-[10px] font-medium uppercase">{t(dayKeys[day.getDay()], lang)}</span>
@@ -162,9 +196,12 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         })}
       </div>
 
+      {/* Quick Notes */}
+      <QuickNotes />
+
       {/* Habits section */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
             <Target size={18} className="text-[var(--accent)]" />
             {t('habits', lang)} <span className="text-[var(--text-muted)] font-normal">({completedHabits.length}/{allDayHabits.length})</span>
@@ -201,36 +238,48 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
         ) : (
           <div className="space-y-3">
             {activeHabits.map((habit) => {
-              const isCompleted = false; // Active habits are never completed
+              // Проверяем завершена ли привычка
+              const isFullyCompleted = habit.completedDates.includes(selectedISO);
+              const currentCount = habit.currentCount || 0;
+              const targetCount = habit.targetCount || 1;
+              const isPartiallyCompleted = !isFullyCompleted && currentCount > 0 && targetCount > 1;
+              
               return (
                 <div
                   key={habit.id}
                   onClick={() => onEditHabit(habit)}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
-                    isCompleted 
+                  className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent)]/30 ${
+                    isFullyCompleted 
                       ? 'bg-[var(--card-bg)] border-[var(--accent)]/30' 
                       : 'bg-[var(--card-bg)] border-[var(--border)]'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center ${
-                    isCompleted 
+                    isFullyCompleted 
                       ? 'border-[var(--accent)] text-[var(--accent)]' 
+                      : isPartiallyCompleted
+                      ? 'border-[var(--accent)]/50 text-[var(--accent)]/70'
                       : 'border-[var(--border)] text-[var(--text-secondary)]'
                   }`}>
-                    {renderIcon(habit.icon, 20, isCompleted ? 'var(--accent)' : 'var(--text-secondary)')}
+                    {renderIcon(habit.icon, 20, isFullyCompleted ? 'var(--accent)' : isPartiallyCompleted ? 'var(--accent)' : 'var(--text-secondary)')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
+                    <p className={`text-sm font-medium truncate ${isFullyCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
                       {habit.name}
                     </p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="mt-0.5">
                       <p className="text-xs text-[var(--text-muted)]">
                         {habit.startTime || 'Без времени'}
+                        {targetCount > 1 && (
+                          <span className="ml-2 text-[var(--accent)] font-medium">
+                            {currentCount}/{targetCount}
+                          </span>
+                        )}
                       </p>
                       {habit.note && (
-                        <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
-                          · {habit.note}
-                        </span>
+                        <p className="text-xs text-[var(--text-muted)] italic mt-0.5">
+                          {habit.note}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -240,81 +289,86 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                       toggleHabitCompletion(habit.id, selectedISO);
                     }}
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      isCompleted
+                      isFullyCompleted
                         ? 'bg-[var(--accent)] text-white'
+                        : isPartiallyCompleted
+                        ? 'border-2 border-[var(--accent)]/50 text-[var(--accent)]/70'
                         : 'border-2 border-[var(--border)] hover:border-[var(--accent)]'
                     }`}
                   >
-                    {isCompleted && <Check size={14} />}
+                    {isFullyCompleted && <Check size={14} />}
+                    {isPartiallyCompleted && <span className="text-xs font-bold">{currentCount}</span>}
                   </button>
                 </div>
               );
             })}
           </div>
         )}
-        
-        {/* Completed habits section - always visible */}
-        <div className="mt-3">
-          <button
-            onClick={() => setShowCompletedHabits(!showCompletedHabits)}
-            className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
-          >
-            <div className="flex items-center gap-2">
-              <Check size={18} className="text-[var(--accent)]" />
-              <span className="text-sm font-medium text-[var(--text-primary)]">
-                {lang === 'ru' ? 'Завершенные' : 'Completed'}
-              </span>
-              <span className="text-xs text-[var(--text-muted)]">
-                ({completedHabits.length})
-              </span>
-            </div>
-            <ChevronDown 
-              size={18} 
-              className={`text-[var(--text-muted)] transition-transform ${showCompletedHabits ? 'rotate-180' : ''}`}
-            />
-          </button>
-            
-          {showCompletedHabits && (
-            <div className="space-y-2 mt-2">
-              {completedHabits.map((habit) => (
-                <div
-                  key={habit.id}
-                  onClick={() => onEditHabit(habit)}
-                  className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 cursor-pointer transition-all hover:border-[var(--accent)]/50"
-                >
-                  <div className="w-10 h-10 rounded-xl border-2 border-[var(--accent)] flex items-center justify-center text-[var(--accent)]">
-                    {renderIcon(habit.icon, 20, 'var(--accent)')}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate line-through text-[var(--text-muted)]">
-                      {habit.name}
-                    </p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <p className="text-xs text-[var(--text-muted)]">
-                        {habit.startTime || 'Без времени'}
-                      </p>
-                      {habit.note && (
-                        <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
-                          · {habit.note}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleHabitCompletion(habit.id, selectedISO);
-                    }}
-                    className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center"
-                  >
-                    <Check size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
+        
+      {/* Completed habits section - only visible when there are completed habits */}
+      {completedHabits.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowCompletedHabits(!showCompletedHabits)}
+              className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <Check size={18} className="text-[var(--accent)]" />
+                <span className="text-sm font-medium text-[var(--text-primary)]">
+                  {lang === 'ru' ? 'Завершенные' : 'Completed'}
+                </span>
+                <span className="text-xs text-[var(--text-muted)]">
+                  ({completedHabits.length})
+                </span>
+              </div>
+              <ChevronDown 
+                size={18} 
+                className={`text-[var(--text-muted)] transition-transform ${showCompletedHabits ? 'rotate-180' : ''}`}
+              />
+            </button>
+            
+            {showCompletedHabits && (
+              <div className="space-y-2 mt-2">
+                {completedHabits.map((habit) => (
+                  <div
+                    key={habit.id}
+                    onClick={() => onEditHabit(habit)}
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 cursor-pointer transition-all hover:border-[var(--accent)]/50"
+                  >
+                    <div className="w-10 h-10 rounded-xl border-2 border-[var(--accent)] flex items-center justify-center text-[var(--accent)]">
+                      {renderIcon(habit.icon, 20, 'var(--accent)')}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate line-through text-[var(--text-muted)]">
+                        {habit.name}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-[var(--text-muted)]">
+                          {habit.startTime || 'Без времени'}
+                        </p>
+                        {habit.note && (
+                          <span className="text-xs text-[var(--text-muted)] italic truncate max-w-[150px]">
+                            · {habit.note}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleHabitCompletion(habit.id, selectedISO);
+                      }}
+                      className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center"
+                    >
+                      <Check size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
       {/* Tasks section */}
       <div className="mb-6">
@@ -323,6 +377,19 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             <ListTodo size={18} className="text-[var(--accent)]" />
             {t('tasks', lang)} <span className="text-[var(--text-muted)] font-normal">({completedTasks.length}/{allDayTasks.length})</span>
           </h3>
+          <button
+            onClick={() => {
+              setEditingTask(null);
+              setEditTaskText('');
+              setEditTaskTime('');
+              setEditTaskNote('');
+              setTaskModal({ open: true, task: null });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+          >
+            <Plus size={14} />
+            <span>Задача</span>
+          </button>
         </div>
 
           {activeTasks.length === 0 && completedTasks.length === 0 && (
@@ -416,7 +483,7 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           
           {/* Completed tasks section */}
           {completedTasks.length > 0 && (
-            <div className="mt-3">
+            <div className="mt-4">
               <button
                 onClick={() => setShowCompletedTasks(!showCompletedTasks)}
                 className="w-full flex items-center justify-between p-3 rounded-2xl bg-[var(--card-bg)] border border-[var(--accent)]/30 hover:border-[var(--accent)]/50 transition-all"
@@ -491,23 +558,14 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
             </div>
           )}
           
-          {/* Add task input */}
-          <div className="flex items-center gap-2 p-2 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-            <input
-              type="text"
-              value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-              placeholder={t('newTask', lang)}
-              className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] px-2 py-1 focus:outline-none"
-            />
-            <button
-              onClick={handleAddTask}
-              className="w-8 h-8 rounded-full bg-[var(--accent)] text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
+          {/* Add task button */}
+          <button
+            onClick={() => setTaskModal({ open: true, task: null })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+          >
+            <Plus size={14} />
+            <span>{lang === 'ru' ? 'Задача' : 'Task'}</span>
+          </button>
         </div>
       </div>
 
@@ -535,7 +593,8 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                   type="text"
                   value={editTaskText}
                   onChange={(e) => setEditTaskText(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                  placeholder={lang === 'ru' ? 'Введите текст задачи' : 'Enter task text'}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
                 />
               </div>
               <div>
@@ -579,6 +638,14 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
           </div>
         </div>
       )}
+
+      {/* Task Modal */}
+      <TaskModal
+        isOpen={taskModal.open}
+        onClose={() => setTaskModal({ open: false, task: null })}
+        task={taskModal.task}
+        date={selectedISO}
+      />
     </div>
   );
 }

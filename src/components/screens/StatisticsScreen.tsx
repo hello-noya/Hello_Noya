@@ -1,15 +1,20 @@
-import React, { useState, useMemo } from 'react';
-import { ArrowLeft, TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ArrowLeft, TrendingUp, TrendingDown, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { Habit, Task, Goal } from '../../types';
+import { t } from '../../utils/i18n';
+import { renderIcon } from '../../utils/icons';
 
 interface StatisticsScreenProps {
   onBack: () => void;
+  onTaskClick?: (taskId: string) => void;
+  onGoalClick?: (goalId: string) => void;
 }
 
-type Period = 'week' | 'month' | 'year';
+type Period = 'week' | 'month';
 type Metric = 'habits' | 'tasks' | 'goals';
 
-export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
+export function StatisticsScreen({ onBack, onTaskClick, onGoalClick }: StatisticsScreenProps) {
   const { state } = useApp();
   const lang = state.settings.language;
   const [period, setPeriod] = useState<Period>('week');
@@ -18,6 +23,12 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+
+  // Helper function to format date as YYYY-MM-DD using local time
+  const formatDateLocal = (date: Date): string => {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
 
   // Get date range for selected period
   const getDateRange = () => {
@@ -25,19 +36,19 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     let start: Date;
     let end: Date = new Date(now);
 
-    if (period === 'month') {
+    if (period === 'week') {
+      // Week starts from Sunday
+      const dayOfWeek = now.getDay();
+      start = new Date(now);
+      start.setDate(now.getDate() - dayOfWeek);
+      end = new Date(start);
+      end.setDate(start.getDate() + 6);
+    } else if (period === 'month') {
       start = new Date(selectedMonth);
       end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-    } else if (period === 'year') {
-      start = new Date(now.getFullYear(), 0, 1);
-      end = new Date(now.getFullYear(), 11, 31);
     } else {
-      // Week starts from Sunday
-      const dayOfWeek = now.getDay(); // 0 = Sunday
       start = new Date(now);
-      start.setDate(now.getDate() - dayOfWeek); // Go back to Sunday
-      end = new Date(start);
-      end.setDate(start.getDate() + 6); // Saturday
+      end = new Date(now);
     }
 
     return { start, end };
@@ -46,8 +57,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
   // Calculate statistics for the period
   const stats = useMemo(() => {
     const { start, end } = getDateRange();
-    const startStr = start.toISOString().split('T')[0];
-    const endStr = end.toISOString().split('T')[0];
+    const startStr = formatDateLocal(start);
+    const endStr = formatDateLocal(end);
 
     const habitsCompleted = state.completionLog?.habits?.filter(h => 
       h.date >= startStr && h.date <= endStr && h.completed
@@ -70,8 +81,8 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     const duration = end.getTime() - start.getTime();
     const prevStart = new Date(start.getTime() - duration);
     const prevEnd = new Date(start.getTime() - 1);
-    const startStr = prevStart.toISOString().split('T')[0];
-    const endStr = prevEnd.toISOString().split('T')[0];
+    const startStr = formatDateLocal(prevStart);
+    const endStr = formatDateLocal(prevEnd);
 
     const habitsCompleted = state.completionLog?.habits?.filter(h => 
       h.date >= startStr && h.date <= endStr && h.completed
@@ -92,7 +103,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
   const streak = useMemo(() => {
     let count = 0;
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = formatDateLocal(today);
     
     const todayHasActivity = 
       state.completionLog?.habits?.some(h => h.date === todayStr && h.completed) ||
@@ -105,7 +116,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     for (let i = 1; i < 365; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatDateLocal(date);
       
       const hasActivity = 
         state.completionLog?.habits?.some(h => h.date === dateStr && h.completed) ||
@@ -130,17 +141,6 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     }
   };
 
-  // Calculate productivity percentage
-  const getProductivity = () => {
-    const current = getMetricValue();
-    const prev = prevStats[metric];
-    
-    if (prev === 0) return current > 0 ? 100 : 0;
-    
-    const percentage = Math.round((current / prev) * 100);
-    return Math.min(percentage, 999);
-  };
-
   // Get trend
   const getTrend = () => {
     const current = getMetricValue();
@@ -152,359 +152,479 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
     return change;
   };
 
-  // Generate week data (Sunday to Saturday)
-  const weekData = useMemo(() => {
-    if (period !== 'week') return [];
-    const { start } = getDateRange();
-    const data: Array<{ date: string; dayName: string; value: number }> = [];
+  // Calculate habit-specific stats (moved to top level)
+  const habitStats = useMemo(() => {
+    if (!selectedHabit) return null;
     
-    const dayLabels = lang === 'ru' 
-      ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
-      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(start);
-      date.setDate(start.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      
-      let value = 0;
-      if (metric === 'habits') {
-        value = state.completionLog?.habits?.filter(h => h.date === dateStr && h.completed).length || 0;
-      } else if (metric === 'tasks') {
-        value = state.completionLog?.tasks?.filter(t => t.date === dateStr).length || 0;
-      } else if (metric === 'goals') {
-        value = state.completionLog?.goals?.filter(g => g.date === dateStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
-      }
-      
-      data.push({ 
-        date: dateStr, 
-        dayName: dayLabels[i],
-        value
-      });
-    }
-    
-    return data;
-  }, [period, metric, state.completionLog, lang]);
-
-  // Generate calendar data for month
-  const calendarData = useMemo(() => {
-    if (period !== 'month') return [];
     const { start, end } = getDateRange();
-    const data: Array<{ date: string; day: number; value: number; isToday: boolean }> = [];
+    const startStr = formatDateLocal(start);
+    const endStr = formatDateLocal(end);
     
+    // Get completion data for this specific habit
+    const completions = state.completionLog?.habits?.filter(h => 
+      h.habitId === selectedHabit.id && h.date >= startStr && h.date <= endStr && h.completed
+    ) || [];
+    
+    // Calculate total days in period
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    // Calculate completion percentage
+    const completionRate = totalDays > 0 ? Math.round((completions.length / totalDays) * 100) : 0;
+    
+    // Calculate current streak
+    let currentStreak = 0;
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    
-    const current = new Date(start);
-    while (current <= end) {
-      const dateStr = current.toISOString().split('T')[0];
-      const day = current.getDate();
+    for (let i = 0; i < 365; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = formatDateLocal(date);
       
-      let value = 0;
-      if (metric === 'habits') {
-        value = state.completionLog?.habits?.filter(h => h.date === dateStr && h.completed).length || 0;
-      } else if (metric === 'tasks') {
-        value = state.completionLog?.tasks?.filter(t => t.date === dateStr).length || 0;
-      } else if (metric === 'goals') {
-        value = state.completionLog?.goals?.filter(g => g.date === dateStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+      const wasCompleted = state.completionLog?.habits?.some(h => 
+        h.habitId === selectedHabit.id && h.date === dateStr && h.completed
+      );
+      
+      if (wasCompleted) {
+        currentStreak++;
+      } else {
+        break;
       }
-      
-      data.push({ 
-        date: dateStr,
-        day,
-        value,
-        isToday: dateStr === todayStr
-      });
-      current.setDate(current.getDate() + 1);
     }
     
-    return data;
-  }, [period, selectedMonth, metric, state.completionLog]);
-
-  // Generate monthly data for year view
-  const monthlyData = useMemo(() => {
-    if (period !== 'year') return [];
+    // Calculate best streak
+    let bestStreak = 0;
+    let tempStreak = 0;
+    const allDates = state.completionLog?.habits
+      ?.filter(h => h.habitId === selectedHabit.id && h.completed)
+      .map(h => h.date)
+      .sort() || [];
     
-    const year = new Date().getFullYear();
-    const data: Array<{ month: number; label: string; value: number }> = [];
-    
-    for (let month = 0; month < 12; month++) {
-      const start = new Date(year, month, 1);
-      const end = new Date(year, month + 1, 0);
-      const startStr = start.toISOString().split('T')[0];
-      const endStr = end.toISOString().split('T')[0];
-      
-      let value = 0;
-      if (metric === 'habits') {
-        value = state.completionLog?.habits?.filter(h => h.date >= startStr && h.date <= endStr && h.completed).length || 0;
-      } else if (metric === 'tasks') {
-        value = state.completionLog?.tasks?.filter(t => t.date >= startStr && t.date <= endStr).length || 0;
-      } else if (metric === 'goals') {
-        value = state.completionLog?.goals?.filter(g => g.date >= startStr && g.date <= endStr).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+    for (let i = 0; i < allDates.length; i++) {
+      if (i === 0) {
+        tempStreak = 1;
+      } else {
+        const prevDate = new Date(allDates[i - 1]);
+        const currDate = new Date(allDates[i]);
+        const diffDays = Math.ceil((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+          tempStreak++;
+        } else {
+          tempStreak = 1;
+        }
       }
-      
-      const label = start.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { month: 'short' });
-      data.push({ month, label, value });
+      bestStreak = Math.max(bestStreak, tempStreak);
     }
     
-    return data;
-  }, [period, metric, state.completionLog, lang]);
+    return {
+      completionRate,
+      currentStreak,
+      bestStreak,
+      completions,
+    };
+  }, [selectedHabit, period, state.completionLog]);
 
-  // Navigation for month view
-  const prevMonth = () => {
-    setSelectedMonth(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() - 1);
-      return newDate;
-    });
-  };
-
-  const nextMonth = () => {
-    setSelectedMonth(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() + 1);
-      return newDate;
-    });
-  };
-
-  // Month title
-  const monthTitle = selectedMonth.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { 
-    month: 'long', 
-    year: 'numeric' 
-  });
-
-  const productivity = getProductivity();
-  const trend = getTrend();
-
-  return (
-    <div className="fixed inset-0 z-50 bg-[var(--bg-primary)] flex flex-col">
-      <div className="max-w-[420px] mx-auto w-full flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center gap-3 p-4 border-b border-[var(--border)] bg-[var(--card-bg)]">
-          <button onClick={onBack} className="p-1.5 rounded-full hover:bg-[var(--hover)] transition-colors">
+  // Level 2: Habit detail view (conditional render)
+  if (selectedHabit && habitStats) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setSelectedHabit(null)} className="p-1.5 rounded-full hover:bg-[var(--hover)] transition-colors">
             <ArrowLeft size={20} className="text-[var(--text-primary)]" />
           </button>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-            {lang === 'ru' ? 'Статистика' : 'Statistics'}
+            {selectedHabit.name}
           </h2>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {/* Period selector */}
-          <div className="grid grid-cols-3 gap-2">
-            {([
-              { id: 'week' as Period, label: lang === 'ru' ? 'Неделя' : 'Week' },
-              { id: 'month' as Period, label: lang === 'ru' ? 'Месяц' : 'Month' },
-              { id: 'year' as Period, label: lang === 'ru' ? 'Год' : 'Year' },
-            ]).map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setPeriod(p.id)}
-                className={`py-2.5 rounded-xl text-xs font-medium transition-all ${
-                  period === p.id
-                    ? 'bg-[var(--accent)] text-white shadow-md'
-                    : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Month navigation for month view */}
-          {period === 'month' && (
-            <div className="flex items-center justify-between">
-              <button onClick={prevMonth} className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors">
-                <ChevronLeft size={20} className="text-[var(--text-primary)]" />
-              </button>
-              <span className="text-sm font-semibold text-[var(--text-primary)] capitalize">
-                {monthTitle}
-              </span>
-              <button onClick={nextMonth} className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors">
-                <ChevronRight size={20} className="text-[var(--text-primary)]" />
-              </button>
+        {/* Habit card */}
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center">
+              {renderIcon(selectedHabit.icon, 24, 'var(--accent)')}
             </div>
-          )}
-
-          {/* Productivity card */}
-          <div className="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <p className="text-xs text-[var(--text-muted)] mb-1">
-                  {lang === 'ru' ? 'Продуктивность' : 'Productivity'}
-                </p>
-                <p className="text-5xl font-bold text-[var(--text-primary)]">
-                  {productivity}%
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                {trend > 0 ? (
-                  <TrendingUp size={20} className="text-green-500" />
-                ) : trend < 0 ? (
-                  <TrendingDown size={20} className="text-red-500" />
-                ) : null}
-                <span className={`text-sm font-medium ${
-                  trend > 0 ? 'text-green-500' : trend < 0 ? 'text-red-500' : 'text-[var(--text-muted)]'
-                }`}>
-                  {trend > 0 ? '+' : ''}{trend}%
-                </span>
-              </div>
-            </div>
-            {streak > 0 && (
-              <p className="text-sm text-[var(--text-secondary)]">
-                🔥 {streak} {lang === 'ru' ? 'дней подряд' : 'days in a row'}
+            <div className="flex-1">
+              <p className="text-base font-semibold text-[var(--text-primary)]">{selectedHabit.name}</p>
+              <p className="text-xs text-[var(--text-muted)]">
+                {selectedHabit.startTime || (lang === 'ru' ? 'Без времени' : 'No time set')}
               </p>
-            )}
-          </div>
-
-          {/* Metric selector */}
-          <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--hover)]">
-            {(['habits', 'tasks', 'goals'] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMetric(m)}
-                className={`flex-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  metric === m ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
-                }`}
-              >
-                {m === 'habits' && (lang === 'ru' ? 'Привычки' : 'Habits')}
-                {m === 'tasks' && (lang === 'ru' ? 'Задачи' : 'Tasks')}
-                {m === 'goals' && (lang === 'ru' ? 'Цели' : 'Goals')}
-              </button>
-            ))}
-          </div>
-
-          {/* Three metric cards */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="p-4 rounded-xl bg-[var(--card-bg)] border border-[var(--border)]">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.habits}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">{lang === 'ru' ? 'Привычки' : 'Habits'}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-[var(--card-bg)] border border-[var(--border)]">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.tasks}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">{lang === 'ru' ? 'Задачи' : 'Tasks'}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-[var(--card-bg)] border border-[var(--border)]">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.goals}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">{lang === 'ru' ? 'Цели' : 'Goals'}</p>
             </div>
           </div>
+        </div>
 
-          {/* Week view (Sunday to Saturday) */}
+        {/* Period selector */}
+        <div className="grid grid-cols-2 gap-2">
+          {([
+            { id: 'week' as Period, label: lang === 'ru' ? 'Неделя' : 'Week' },
+            { id: 'month' as Period, label: lang === 'ru' ? 'Месяц' : 'Month' },
+          ]).map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setPeriod(p.id)}
+              className={`py-2.5 rounded-xl text-xs font-medium transition-all ${
+                period === p.id
+                  ? 'bg-[var(--accent)] text-white shadow-md'
+                  : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Habit stats */}
+        <div className="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+          <p className="text-xs text-[var(--text-muted)] mb-1">
+            {lang === 'ru' ? 'Выполнение' : 'Completion'}
+          </p>
+          <p className="text-5xl font-bold text-[var(--text-primary)]">
+            {habitStats.completionRate}%
+          </p>
+        </div>
+
+        {/* Activity calendar */}
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+            {lang === 'ru' ? 'Активность по дням' : 'Daily Activity'}
+          </h3>
+          
           {period === 'week' && (
-            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-                {lang === 'ru' ? 'Активность по дням' : 'Daily Activity'}
-              </h3>
-              <div className="grid grid-cols-7 gap-2">
-                {weekData.map((day, i) => {
-                  const maxValue = Math.max(...weekData.map(d => d.value), 1);
-                  const intensity = day.value / maxValue;
-                  
-                  return (
-                    <div key={i} className="flex flex-col items-center gap-1">
-                      <div 
-                        className="w-full aspect-square rounded-lg flex items-center justify-center"
-                        style={{
-                          backgroundColor: `var(--accent)`,
-                          opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
-                        }}
-                      >
-                        <span className="text-xs font-bold text-white">{day.value}</span>
-                      </div>
-                      <span className="text-[10px] text-[var(--text-muted)]">{day.dayName}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Month view with calendar */}
-          {period === 'month' && (
-            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-                {lang === 'ru' ? 'Календарь активности' : 'Activity Calendar'}
-              </h3>
-              <div className="grid grid-cols-7 gap-1">
-                {/* Day labels */}
-                {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day, i) => (
-                  <div key={i} className="text-center-center text-[10px] text-[var(--text-muted)] py-1">
-                    {day}
-                  </div>
-                ))}
-                {/* Calendar days */}
-                {calendarData.map((day, i) => {
-                  const maxValue = Math.max(...calendarData.map(d => d.value), 1);
-                  const intensity = day.value / maxValue;
-                  
-                  return (
+            <div className="grid grid-cols-7 gap-2">
+              {Array.from({ length: 7 }).map((_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (6 - i));
+                const dateStr = formatDateLocal(date);
+                const wasCompleted = habitStats.completions.some(c => c.date === dateStr);
+                
+                const isToday = date.toDateString() === new Date().toDateString();
+                return (
+                  <div key={i} className="flex flex-col items-center gap-1">
                     <div 
-                      key={i}
-                      className={`aspect-square rounded flex flex-col items-center justify-center relative ${
-                        day.isToday ? 'ring-2 ring-[var(--accent)]' : ''
+                      className={`w-full aspect-square rounded-lg flex items-center justify-center transition-all ${
+                        wasCompleted
+                          ? 'bg-[var(--accent)] text-white'
+                          : isToday
+                          ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
+                          : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
                       }`}
-                      style={{
-                        backgroundColor: `var(--accent)`,
-                          opacity: day.value === 0 ? 0.3 : Math.max(0.5, intensity),
-                        }}
                     >
-                      <span className="text-xs font-bold text-white">{day.day}</span>
-                      {day.value > 0 && (
-                        <span className="text-[8px] text-white/80">{day.value}</span>
-                      )}
+                      <span className="text-xs font-bold">{date.getDate()}</span>
                     </div>
-                  );
-                })}
-              </div>
+                    <span className="text-[10px] text-[var(--text-muted)]">
+                      {date.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { weekday: 'short' })}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          {/* Year view with two blocks */}
-          {period === 'year' && (
-            <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-                {lang === 'ru' ? 'Обзор по месяцам' : 'Monthly Overview'}
-              </h3>
-              
-              {/* Two blocks layout */}
-              <div className="grid grid-cols-2 gap-3">
-                {monthlyData.map((month, i) => {
-                  const maxValue = Math.max(...monthlyData.map(m => m.value), 1);
-                  const height = (month.value / maxValue) * 60;
-                  
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setSelectedMonth(new Date(new Date().getFullYear(), month.month, 1));
-                        setPeriod('month');
-                      }}
-                      className="flex flex-col items-center p-3 rounded-lg bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
-                    >
-                      <div 
-                        className="w-full rounded-full mb-2"
-                        style={{
-                          height: `${height}px`,
-                          backgroundColor: 'var(--accent)',
-                          minHeight: month.value > 0 ? '4px' : '0px',
-                        }}
-                      />
-                      <span className="text-xs font-medium text-[var(--text-primary)] capitalize">
-                        {month.label}
-                      </span>
-                      <span className="text-xs text-[var(--text-muted)]">
-                        {month.value}
-                      </span>
-                    </button>
-                  );
-                })}
+          {period === 'month' && (
+            <>
+              {/* Month navigation */}
+              <div className="flex items-center justify-between mb-3">
+                <button
+                  onClick={() => {
+                    const newDate = new Date(selectedMonth);
+                    newDate.setMonth(newDate.getMonth() - 1);
+                    setSelectedMonth(newDate);
+                  }}
+                  className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors"
+                >
+                  <ArrowLeft size={20} className="text-[var(--text-primary)]" />
+                </button>
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+                  {selectedMonth.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                  })}
+                </h3>
+                <button
+                  onClick={() => {
+                    const newDate = new Date(selectedMonth);
+                    newDate.setMonth(newDate.getMonth() + 1);
+                    setSelectedMonth(newDate);
+                  }}
+                  className="p-2 rounded-lg hover:bg-[var(--hover)] transition-colors"
+                >
+                  <ArrowLeft size={20} className="text-[var(--text-primary)] rotate-180" />
+                </button>
               </div>
+
+              <div className="grid grid-cols-7 gap-1">
+              {['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((day, i) => (
+                <div key={i} className="text-center text-[10px] text-[var(--text-muted)] py-1">
+                  {day}
+                </div>
+              ))}
+              {(() => {
+                const year = selectedMonth.getFullYear();
+                const month = selectedMonth.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const firstDayOfWeek = firstDay.getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                const days = [];
+                
+                // Empty cells for days before first day
+                for (let i = 0; i < firstDayOfWeek; i++) {
+                  days.push(<div key={`empty-${i}`} className="aspect-square" />);
+                }
+                
+                // Actual days
+                for (let day = 1; day <= daysInMonth; day++) {
+                  const date = new Date(year, month, day);
+                  const dateStr = formatDateLocal(date);
+                  const wasCompleted = habitStats.completions.some(c => c.date === dateStr);
+                  
+                  const isToday = date.toDateString() === new Date().toDateString();
+                  days.push(
+                    <div 
+                      key={day}
+                      className={`aspect-square rounded flex items-center justify-center transition-all ${
+                        wasCompleted
+                          ? 'bg-[var(--accent)] text-white'
+                          : isToday
+                          ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
+                          : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      <span className="text-xs font-bold">{day}</span>
+                    </div>
+                  );
+                }
+                
+                return days;
+              })()}
             </div>
+            </>
           )}
         </div>
       </div>
+    );
+  }
+
+  // Level 1: Overview
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="p-1.5 rounded-full hover:bg-[var(--hover)] transition-colors">
+          <ArrowLeft size={20} className="text-[var(--text-primary)]" />
+        </button>
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+          {lang === 'ru' ? 'Статистика' : 'Statistics'}
+        </h2>
+      </div>
+
+      {/* Period selector */}
+      <div className="grid grid-cols-2 gap-2">
+        {([
+          { id: 'week' as Period, label: lang === 'ru' ? 'Неделя' : 'Week' },
+          { id: 'month' as Period, label: lang === 'ru' ? 'Месяц' : 'Month' },
+        ]).map((p) => (
+          <button
+            key={p.id}
+            onClick={() => setPeriod(p.id)}
+            className={`py-2.5 rounded-xl text-xs font-medium transition-all ${
+              period === p.id
+                ? 'bg-[var(--accent)] text-white shadow-md'
+                : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Productivity card */}
+      <div className="p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+        <p className="text-xs text-[var(--text-muted)] mb-1">
+          {lang === 'ru' ? 'Продуктивность' : 'Productivity'}
+        </p>
+        <p className="text-5xl font-bold text-[var(--text-primary)]">
+          {getMetricValue()}%
+        </p>
+        <div className="flex items-center gap-1 mt-2">
+          {getTrend() > 0 ? (
+            <TrendingUp size={20} className="text-green-500" />
+          ) : getTrend() < 0 ? (
+            <TrendingDown size={20} className="text-red-500" />
+          ) : null}
+          <span className={`text-sm font-medium ${
+            getTrend() > 0 ? 'text-green-500' : getTrend() < 0 ? 'text-red-500' : 'text-[var(--text-muted)]'
+          }`}>
+            {getTrend() > 0 ? '+' : ''}{getTrend()}%
+          </span>
+        </div>
+        {streak > 0 && (
+          <p className="text-sm text-[var(--text-secondary)] mt-2">
+            🔥 {streak} {lang === 'ru' ? 'дней подряд' : 'days in a row'}
+          </p>
+        )}
+      </div>
+
+      {/* Metric selector */}
+      <div className="flex gap-1 p-0.5 rounded-lg bg-[var(--hover)]">
+        {(['habits', 'tasks', 'goals'] as const).map((m) => (
+          <button
+            key={m}
+            onClick={() => setMetric(m)}
+            className={`flex-1 px-2 py-1.5 rounded-md text-xs font-medium transition-all ${
+              metric === m ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)]'
+            }`}
+          >
+            {m === 'habits' && (lang === 'ru' ? 'Привычки' : 'Habits')}
+            {m === 'tasks' && (lang === 'ru' ? 'Задачи' : 'Tasks')}
+            {m === 'goals' && (lang === 'ru' ? 'Цели' : 'Goals')}
+          </button>
+        ))}
+      </div>
+
+      {/* Stats cards */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] text-center">
+          <p className="text-2xl font-bold text-[var(--accent)]">{stats.habits}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">{lang === 'ru' ? 'Привычки' : 'Habits'}</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] text-center">
+          <p className="text-2xl font-bold text-[var(--accent)]">{stats.tasks}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">{lang === 'ru' ? 'Задачи' : 'Tasks'}</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)] text-center">
+          <p className="text-2xl font-bold text-[var(--accent)]">{stats.goals}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">{lang === 'ru' ? 'Цели' : 'Goals'}</p>
+        </div>
+      </div>
+
+      {/* Habits list */}
+      {metric === 'habits' && state.habits.length > 0 && (
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+            {lang === 'ru' ? 'Привычки' : 'Habits'}
+          </h3>
+          <div className="space-y-2">
+            {state.habits.slice(0, 6).map((habit) => {
+              const { start, end } = getDateRange();
+              const startStr = formatDateLocal(start);
+              const endStr = formatDateLocal(end);
+              
+              const completed = state.completionLog?.habits?.filter(h => 
+                h.habitId === habit.id && h.date >= startStr && h.date <= endStr && h.completed
+              ).length || 0;
+              
+              const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              const percentage = totalDays > 0 ? Math.round((completed / totalDays) * 100) : 0;
+              
+              return (
+                <button
+                  key={habit.id}
+                  onClick={() => setSelectedHabit(habit)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center">
+                    {renderIcon(habit.icon, 20, 'var(--accent)')}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{habit.name}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{percentage}%</p>
+                  </div>
+                </button>
+              );
+            })}
+            {state.habits.length > 6 && (
+              <button className="w-full py-2 text-sm text-[var(--accent)] hover:underline">
+                {lang === 'ru' ? `Показать все (${state.habits.length})` : `Show all (${state.habits.length})`}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tasks list */}
+      {metric === 'tasks' && state.tasks.length > 0 && (
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+            {lang === 'ru' ? 'Задачи' : 'Tasks'}
+          </h3>
+          <div className="space-y-2">
+            {state.tasks.slice(0, 6).map((task) => {
+              const { start, end } = getDateRange();
+              const startStr = formatDateLocal(start);
+              const endStr = formatDateLocal(end);
+              
+              const completed = state.completionLog?.tasks?.filter(t => 
+                t.taskId === task.id && t.date >= startStr && t.date <= endStr
+              ).length || 0;
+              
+              const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              const percentage = totalDays > 0 ? Math.round((completed / totalDays) * 100) : 0;
+              
+              return (
+                <button
+                  key={task.id}
+                  onClick={() => onTaskClick?.(task.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center">
+                    <span className="text-[var(--accent)]">✓</span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{task.text}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{percentage}%</p>
+                  </div>
+                </button>
+              );
+            })}
+            {state.tasks.length > 6 && (
+              <button className="w-full py-2 text-sm text-[var(--accent)] hover:underline">
+                {lang === 'ru' ? `Показать все (${state.tasks.length})` : `Show all (${state.tasks.length})`}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Goals list */}
+      {metric === 'goals' && state.goals.length > 0 && (
+        <div className="p-4 rounded-2xl bg-[var(--card-bg)] border border-[var(--border)]">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+            {lang === 'ru' ? 'Цели' : 'Goals'}
+          </h3>
+          <div className="space-y-2">
+            {state.goals.slice(0, 6).map((goal) => {
+              const { start, end } = getDateRange();
+              const startStr = formatDateLocal(start);
+              const endStr = formatDateLocal(end);
+              
+              const completed = state.completionLog?.goals?.filter(g => 
+                g.goalId === goal.id && g.date >= startStr && g.date <= endStr
+              ).reduce((sum, g) => sum + g.progressAdded, 0) || 0;
+              
+              const percentage = goal.target > 0 ? Math.round((completed / goal.target) * 100) : 0;
+              
+              return (
+                <button
+                  key={goal.id}
+                  onClick={() => onGoalClick?.(goal.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] hover:bg-[var(--hover)] transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/20 flex items-center justify-center">
+                    <span className="text-[var(--accent)]">🎯</span>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{goal.name}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{percentage}%</p>
+                  </div>
+                </button>
+              );
+            })}
+            {state.goals.length > 6 && (
+              <button className="w-full py-2 text-sm text-[var(--accent)] hover:underline">
+                {lang === 'ru' ? `Показать все (${state.goals.length})` : `Show all (${state.goals.length})`}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

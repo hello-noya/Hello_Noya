@@ -11,6 +11,9 @@ import { SettingsScreen } from './components/screens/SettingsScreen';
 import { ToolsScreen } from './components/screens/ToolsScreen';
 import { StatisticsScreen } from './components/screens/StatisticsScreen';
 import { StudentTemplates } from './components/screens/StudentTemplates';
+import { ManageAllScreen } from './components/screens/ManageAllScreen';
+import { TaskDetailScreen } from './components/screens/TaskDetailScreen';
+import { GoalDetailScreen } from './components/screens/GoalDetailScreen';
 import { Header } from './components/Header';
 import { TabBar, Tab } from './components/TabBar';
 import { HabitModal } from './components/modals/HabitModal';
@@ -30,35 +33,63 @@ function AppContent() {
   const [eventModal, setEventModal] = useState<{ open: boolean; event: ScheduleEvent | null }>({ open: false, event: null });
   const [goalModal, setGoalModal] = useState<{ open: boolean; goal: Goal | null }>({ open: false, goal: null });
 
+  // Detail screens
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+
   // Apply theme
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute('data-theme', state.settings.theme);
   }, [state.settings.theme]);
 
+  // Auto-redirect to onboarding when profile is deleted (logout)
+  useEffect(() => {
+    if (appPhase === 'main' && !state.profile) {
+      setAppPhase('onboarding');
+    }
+  }, [state.profile, appPhase]);
+
   // Check if profile exists after splash
   const handleSplashComplete = () => {
+    console.log('Splash complete, profile:', state.profile);
     if (state.profile) {
+      console.log('Profile exists, going to main');
       setAppPhase('main');
     } else {
+      console.log('No profile, going to onboarding');
       setAppPhase('onboarding');
     }
   };
 
   const handleOnboardingComplete = () => {
+    console.log('Onboarding complete, going to main');
     setAppPhase('main');
   };
 
   if (appPhase === 'splash') {
+    console.log('Rendering splash screen');
     return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   if (appPhase === 'onboarding') {
+    console.log('Rendering onboarding screen');
     return <OnboardingScreen onComplete={handleOnboardingComplete} />;
   }
 
+  console.log('Rendering main app');
+
   // Main app
   const renderContent = () => {
+    // Detail screens
+    if (selectedTaskId) {
+      return <TaskDetailScreen taskId={selectedTaskId} onBack={() => setSelectedTaskId(null)} />;
+    }
+    
+    if (selectedGoalId) {
+      return <GoalDetailScreen goalId={selectedGoalId} onBack={() => setSelectedGoalId(null)} />;
+    }
+    
     if (menuSection) {
       switch (menuSection) {
         case 'profile':
@@ -68,9 +99,17 @@ function AppContent() {
         case 'tools':
           return <ToolsScreen onBack={() => setMenuSection(null)} />;
         case 'statistics':
-          return <StatisticsScreen onBack={() => setMenuSection(null)} />;
+          return (
+            <StatisticsScreen 
+              onBack={() => setMenuSection(null)} 
+              onTaskClick={(taskId) => setSelectedTaskId(taskId)}
+              onGoalClick={(goalId) => setSelectedGoalId(goalId)}
+            />
+          );
         case 'templates':
           return <StudentTemplates onBack={() => setMenuSection(null)} />;
+        case 'manage-all':
+          return <ManageAllScreen onBack={() => setMenuSection(null)} />;
       }
     }
 

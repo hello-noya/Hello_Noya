@@ -17,15 +17,20 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>(1); // Monday
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const dayLabels = [
-    { key: 'sun', idx: 0 },
-    { key: 'mon', idx: 1 },
-    { key: 'tue', idx: 2 },
-    { key: 'wed', idx: 3 },
-    { key: 'thu', idx: 4 },
-    { key: 'fri', idx: 5 },
-    { key: 'sat', idx: 6 },
-  ];
+  // Get week days (Mon-Sun)
+  const weekDays = useMemo(() => {
+    const days: Date[] = [];
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      days.push(d);
+    }
+    return days;
+  }, []);
 
   // Filter events for selected day
   const dayEvents = useMemo(() => {
@@ -79,22 +84,28 @@ export function ScheduleScreen({ onEditEvent, onAddEvent, onDeleteEvent }: Sched
 
       {/* Day tabs */}
       <div className="flex gap-1">
-        {dayLabels.map(({ key, idx }) => (
-          <button
-            key={idx}
-            onClick={() => setSelectedDay(idx as DayOfWeek)}
-            className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-all ${
-              selectedDay === idx
-                ? 'bg-[var(--accent)] text-white'
-                : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
-            }`}
-          >
-            <span className="text-[10px] font-medium uppercase">{t(key, lang)}</span>
-            <span className="text-xs font-bold mt-0.5">
-              {eventCounts[idx] || '—'}
-            </span>
-          </button>
-        ))}
+        {weekDays.map((day, idx) => {
+          const dayOfWeek = day.getDay();
+          const isToday = day.toDateString() === new Date().toDateString();
+          const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayOfWeek];
+          
+          return (
+            <button
+              key={idx}
+              onClick={() => setSelectedDay(dayOfWeek as DayOfWeek)}
+              className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-all ${
+                selectedDay === dayOfWeek
+                  ? 'bg-[var(--accent)] text-white'
+                  : isToday
+                  ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
+                  : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
+              }`}
+            >
+              <span className="text-[10px] font-medium uppercase">{t(dayKey, lang)}</span>
+              <span className="text-xs font-bold mt-0.5">{day.getDate()}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Events list */}

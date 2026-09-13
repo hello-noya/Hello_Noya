@@ -80,14 +80,13 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               <Sparkles size={18} className="text-[var(--accent)] animate-sparkle" />
               <span className="text-[var(--accent)] text-sm font-medium">{t('appName', 'ru')}</span>
             </div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">{t('welcome', 'ru')}</h1>
-            <p className="text-sm text-[var(--text-muted)] mb-8">{t('appSlogan', 'ru')}</p>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-8">Добро пожаловать</h1>
 
             {/* Social login buttons */}
             <div className="space-y-3 mb-4">
               <button
                 onClick={() => handleSocialLogin('google')}
-                className="w-full py-3 rounded-xl bg-white border border-[var(--border)] text-[var(--text-primary)] font-medium flex items-center justify-center gap-3 hover:bg-[var(--hover)] transition-colors"
+                className="w-full py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] font-medium flex items-center justify-center gap-3 hover:bg-[var(--hover)] transition-colors"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -117,14 +116,8 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
             {/* Other options */}
             <button
-              onClick={handleStartRegistration}
-              className="w-full py-3 rounded-xl bg-[var(--accent)] text-white font-semibold transition-all hover:opacity-90 active:scale-[0.98] mb-3"
-            >
-              Создать аккаунт
-            </button>
-            <button
               onClick={handleGuestLogin}
-              className="w-full py-2.5 text-[var(--text-muted)] text-sm hover:text-[var(--text-secondary)] transition-colors"
+              className="w-full py-3 rounded-xl bg-[var(--accent)] text-white font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
             >
               Войти как гость
             </button>
