@@ -11,6 +11,8 @@ import { SettingsScreen } from './components/screens/SettingsScreen';
 import { ToolsScreen } from './components/screens/ToolsScreen';
 import { StatisticsScreen } from './components/screens/StatisticsScreen';
 import { StudentTemplates } from './components/screens/StudentTemplates';
+import { TaskDetailScreen } from './components/screens/TaskDetailScreen';
+import { GoalDetailScreen } from './components/screens/GoalDetailScreen';
 import { Header } from './components/Header';
 import { TabBar, Tab } from './components/TabBar';
 import { HabitModal } from './components/modals/HabitModal';
@@ -29,6 +31,10 @@ function AppContent() {
   const [habitModal, setHabitModal] = useState<{ open: boolean; habit: Habit | null }>({ open: false, habit: null });
   const [eventModal, setEventModal] = useState<{ open: boolean; event: ScheduleEvent | null }>({ open: false, event: null });
   const [goalModal, setGoalModal] = useState<{ open: boolean; goal: Goal | null }>({ open: false, goal: null });
+
+  // Detail screens
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
 
   // Apply theme
   useEffect(() => {
@@ -74,6 +80,15 @@ function AppContent() {
 
   // Main app
   const renderContent = () => {
+    // Detail screens
+    if (selectedTaskId) {
+      return <TaskDetailScreen taskId={selectedTaskId} onBack={() => setSelectedTaskId(null)} />;
+    }
+    
+    if (selectedGoalId) {
+      return <GoalDetailScreen goalId={selectedGoalId} onBack={() => setSelectedGoalId(null)} />;
+    }
+    
     if (menuSection) {
       switch (menuSection) {
         case 'profile':
@@ -83,7 +98,13 @@ function AppContent() {
         case 'tools':
           return <ToolsScreen onBack={() => setMenuSection(null)} />;
         case 'statistics':
-          return <StatisticsScreen onBack={() => setMenuSection(null)} />;
+          return (
+            <StatisticsScreen 
+              onBack={() => setMenuSection(null)} 
+              onTaskClick={(taskId) => setSelectedTaskId(taskId)}
+              onGoalClick={(goalId) => setSelectedGoalId(goalId)}
+            />
+          );
         case 'templates':
           return <StudentTemplates onBack={() => setMenuSection(null)} />;
       }
