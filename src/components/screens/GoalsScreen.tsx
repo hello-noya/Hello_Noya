@@ -73,11 +73,11 @@ export function GoalsScreen({ onEditGoal, onAddGoal, onDeleteGoal }: GoalsScreen
 
       {/* All completed state */}
       {activeGoals.length === 0 && completedGoals.length > 0 && (
-        <div className="p-6 rounded-2xl border-2 border-dashed border-[var(--accent)]/30 bg-[var(--accent)]/5 text-center mb-2">
-          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--accent)]/20 flex items-center justify-center">
-            <Check size={20} className="text-[var(--accent)]" />
+        <div className="p-6 rounded-2xl border-2 border-dashed border-green-500/30 bg-green-500/5 text-center mb-2">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/20 flex items-center justify-center">
+            <Check size={20} className="text-green-500" />
           </div>
-          <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+          <p className="text-sm font-medium text-green-500 mb-1">
             {lang === 'ru' ? 'Все цели достигнуты!' : 'All goals achieved!'}
           </p>
           <p className="text-xs text-[var(--text-muted)]">

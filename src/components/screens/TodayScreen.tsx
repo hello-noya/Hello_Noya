@@ -177,8 +177,8 @@ export function TodayScreen({ onEditHabit, onAddHabit }: TodayScreenProps) {
                 isSelected
                   ? 'bg-[var(--accent)] text-white'
                   : isToday
-                  ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
-                  : 'text-[var(--text-secondary)]'
+                  ? 'bg-[var(--card-bg)] border-2 border-[var(--accent)] text-[var(--accent)]'
+                  : 'bg-[var(--card-bg)] border border-[var(--border)] text-[var(--text-secondary)]'
               }`}
             >
               <span className="text-[10px] font-medium uppercase">{t(dayKeys[day.getDay()], lang)}</span>
